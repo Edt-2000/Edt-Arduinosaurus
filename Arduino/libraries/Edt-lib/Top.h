@@ -34,8 +34,8 @@ public:
 		case SinglePulse:
 		case SingleSolid:
 
-			_start = (msg->getInt(1) / 127.0) * _nrOfLeds;
-			_end = (msg->getInt(2) / 127.0) * _nrOfLeds;
+			_start = floorf((msg->getInt(1) / 127.0) * _nrOfLeds);
+			_end = ceilf((msg->getInt(2) / 127.0) * _nrOfLeds);
 
 			_color1.h = msg->getInt(3);
 			_color1.s = msg->getInt(4);
@@ -60,11 +60,11 @@ public:
 		case RainbowPulse:
 		case RainbowSolid:
 
-			_start = (msg->getInt(1) / 127.0) * _nrOfLeds;
-			_end = (msg->getInt(2) / 127.0) * _nrOfLeds;
+			_start = floorf((msg->getInt(1) / 127.0) * _nrOfLeds);
+			_end = ceilf((msg->getInt(2) / 127.0) * _nrOfLeds);
 			
 			_hue = msg->getInt(3);
-			_deltahue = (msg->getInt(4) / 127.0) * (255.0 / _nrOfLeds);
+			_deltahue = round((msg->getInt(4) / 127.0) * (255.0 / _nrOfLeds));
 
 			if (_deltahue > 0) {
 				fill_rainbow(&_leds[_start], _end - _start, _hue, _deltahue);
@@ -84,9 +84,9 @@ public:
 
 		case VUMeter:
 
-			_start = (msg->getInt(1) / 127.0) * _nrOfLeds;
-			_center = (msg->getInt(3) / 127.0) * _nrOfLeds;
-			_end = (msg->getInt(2) / 127.0) * _nrOfLeds;
+			_start = floorf((msg->getInt(1) / 127.0) * _nrOfLeds);
+			_center = round((msg->getInt(3) / 127.0) * _nrOfLeds);
+			_end = ceilf((msg->getInt(2) / 127.0) * _nrOfLeds);
 
 			_hue = msg->getInt(4);
 			_deltahue = msg->getInt(5);
@@ -116,8 +116,8 @@ public:
 
 		case Twinkle:
 		
-			_start = (msg->getInt(1) / 127.0) * _nrOfLeds;
-			_end = (msg->getInt(2) / 127.0) * _nrOfLeds;
+			_start = floorf((msg->getInt(1) / 127.0) * _nrOfLeds);
+			_end = ceilf((msg->getInt(2) / 127.0) * _nrOfLeds);
 
 			colorScheduler.disableBlackout(_start, _end);
 

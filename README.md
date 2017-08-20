@@ -29,11 +29,15 @@ delta h == 255 = two full rainbows
 ### VU Meter
 /address 100 [start: int] [end: int] [center: int] [h start: int] [delta h: int] [intensity: int]
 
+### Twinkle
+/address 101 [start: int] [end: int] [h: int] [saturation: int]
+
 ### Strobo
 /address 200 [h: int] [fps: int]
 
 h == 0 yields white strobo
 fps == 0 stops strobo
+
 
 ## License
 

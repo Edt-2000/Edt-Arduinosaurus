@@ -21,6 +21,7 @@ class TOPApplication : public AbstractApplication
 public:
 	EdtTOP top1 = EdtTOP(OSC_TOP1, 29);
 	EdtTOP top2 = EdtTOP(OSC_TOP2, 59);
+	EdtTOP top3 = EdtTOP(OSC_TOP3, 57);
 	EthernetUDP udp;
 	int dot = 0;
 
@@ -37,11 +38,13 @@ public:
 	void setupOsc() {
 		top1.configurePins<2,3>();
 		top2.configurePins<4,3>();
+		top3.configurePins<5,3>();
 
 		osc = OSC::Arduino(1, 0);
 		osc.bindUDP(&udp, IP_BROADCAST, PORT_BROADCAST);
 		osc.addConsumer(&top1);
 		osc.addConsumer(&top2);
+		osc.addConsumer(&top3);
 	}
 
 	void applicationLoop() {
@@ -50,6 +53,7 @@ public:
 			
 			top1.animationLoop();
 			top2.animationLoop();
+			top3.animationLoop();
 		}
 	}
 };

@@ -23,7 +23,7 @@ public:
 		_nrOfLeds = nrOfLeds;
 
 		for (int i = 0; i < nrOfLeds; i++) {
-			_ledState[i].blackoutSpeed = 0;
+			_ledState[i].blackoutSpeed = 255;
 		}
 	}
 
@@ -34,7 +34,7 @@ public:
 	}
 	void disableBlackout(int start, int stop) {
 		for (int i = start; i < stop; i++) {
-			_ledState[i].blackoutSpeed = 0;
+			_ledState[i].blackoutSpeed = 255;
 
 		}
 	}
@@ -73,13 +73,16 @@ public:
 		}
 		else {
 			for (int i = 0; i < _nrOfLeds; i++) {
-				if (_ledState[i].blackoutSpeed > 0) {
-
-					fadeToBlackBy(_leds + i, 1, _ledState[i].blackoutSpeed);
-
-					if (_ledState[i].blackoutSpeed < 255) {
-						_ledState[i].blackoutSpeed += ((_ledState[i].blackoutSpeed / 2) + 1);
+				if (_ledState[i].blackoutSpeed < 255) {
+					long add = ((255 - _ledState[i].blackoutSpeed) / 32) + 1;
+					if((long)_ledState[i].blackoutSpeed + add > 255) {
+						_ledState[i].blackoutSpeed = 255;
 					}
+					else {
+						_ledState[i].blackoutSpeed += add;
+					}
+	
+					fadeToBlackBy(_leds + i, 1, _ledState[i].blackoutSpeed);
 				}
 			}
 		}
@@ -87,6 +90,7 @@ public:
 private:
 	struct LedState {
 	public:
+		// TODO: rename blackout speed
 		uint8_t blackoutSpeed;
 	};
 

@@ -4,12 +4,12 @@
 #include <FastLED.h>
 #include <FastLEDColorScheduler.h>
 
-class EdtTOP : public OSC::IMessageConsumer
+class EdtRGBLED : public OSC::IMessageConsumer
 {
 public:
 	FastLEDColorScheduler colorScheduler;
 	
-	EdtTOP(const char * pattern, uint8_t const nrOfLeds) {
+	EdtRGBLED(const char * pattern, uint8_t const nrOfLeds) {
 		_pattern = pattern;
 
 		_nrOfLeds = nrOfLeds;

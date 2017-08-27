@@ -3,9 +3,9 @@ Edt-TOP
 
 Using PlatformIO
 */
-#include "TOPApplication.h"
+#include "LEDApplication.h"
 
-TOPApplication application = TOPApplication();
+LEDApplication application = LEDApplication();
 
 void setup() {
 	application.setup();

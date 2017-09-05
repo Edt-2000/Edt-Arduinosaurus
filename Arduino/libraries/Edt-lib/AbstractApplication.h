@@ -11,9 +11,11 @@
 class AbstractApplication
 {
 public:
-	AbstractApplication() : status(Status(this)), 
-		statemachine(EdtStatemachine()),
-		time(EdtTime()){};
+	AbstractApplication() {
+		status = Status(this);
+		statemachine = EdtStatemachine();
+		time = EdtTime();
+	}
 
 	void setup() {
 		time.begin();
@@ -63,14 +65,10 @@ public:
 	OSC::Arduino osc;
 
 protected:
-	/*void continueWhen(std::function<bool(void)> isOk) {
-		while (!isOk()) {
-			loop();
-		}
-	};*/
-
 	class Status {
 	public:
+		Status() {};
+		
 		Status(AbstractApplication * parent) : _parent(parent) {};
 
 		void setup(int ledPin, int offState) {
@@ -124,6 +122,8 @@ protected:
 		int _offState = LOW;
 
 		AbstractApplication* _parent;
-	} status;
+	};
+	
+	Status status;
 };
 

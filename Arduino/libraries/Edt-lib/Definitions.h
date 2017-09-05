@@ -59,9 +59,9 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 #define LED2_NR_OF_LEDS 59
 #define LED3_NR_OF_LEDS 57
 
-#define OSC_ONOFFLED1 "/O1"
-#define OSC_ONOFFLED2 "/O2"
-#define OSC_ONOFFLED3 "/O3"
-#define OSC_ONOFFLED4 "/O4"
-#define OSC_ONOFFLED5 "/O5"
-#define OSC_ONOFFLED6 "/O6"
+#define OSC_ONOFFLED1 "/L6"
+#define OSC_ONOFFLED2 "/L7"
+#define OSC_ONOFFLED3 "/L8"
+#define OSC_ONOFFLED4 "/L9"
+#define OSC_ONOFFLED5 "/LA"
+#define OSC_ONOFFLED6 "/LB"

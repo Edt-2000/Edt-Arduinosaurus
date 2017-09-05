@@ -30,23 +30,56 @@ public:
 
 		case SinglePulse:
 		case SingleSolid:
+		case RainbowPulse:
+		case RainbowSolid:
+		case VUMeter:
 
 			colorScheduler.blackout(_duration);
 
-			_l = msg->getInt(1);
+			if(_mode == VUMeter) {
+				_l = msg->getInt(6);
+			}
+			else {
+				_l = msg->getInt(1);
+			}
 
 			if (_l > 0) {
-
 				analogWrite(_pin, _l);
 			}
 
 			if (_mode == SinglePulse || _l == 0) {
-				_duration = msg->getInt(2);
+				if(_mode == SinglePulse || _mode == SingleSolid) {
+					_duration = msg->getInt(6);
+				}
+				else {
+					_duration = msg->getInt(5);
+				}
 
 				colorScheduler.blackout(_duration);
 			}
 			else {
 				colorScheduler.disableBlackout();
+			}
+
+			break;
+
+		case Twinkle:
+		
+			colorScheduler.disableBlackout();
+
+			_intensity = (float)(msg->getInt(4));
+
+			if (_intensity > 0) {
+
+				if (_intensity > random8()) {
+					analogWrite(_pin, 255);
+				}
+				else {
+					analogWrite(_pin, 0);
+				}
+			}
+			else {
+				colorScheduler.blackout(127);
 			}
 
 			break;
@@ -70,6 +103,10 @@ private:
 	enum Mode {
 		SingleSolid = 1,
 		SinglePulse = 2,
+		RainbowSolid = 3,
+		RainbowPulse = 4,
+		VUMeter = 100,
+		Twinkle = 101,
 		Strobo = 200
 	};
 

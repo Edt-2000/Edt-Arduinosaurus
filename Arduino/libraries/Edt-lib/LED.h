@@ -3,6 +3,9 @@
 #include <OSCArduino.h>
 #include <OnOffLEDColorScheduler.h>
 
+// TODO: remove this macro
+#define normalize(x) x
+
 class EdtLED : public OSC::IMessageConsumer
 {
 public:
@@ -14,7 +17,7 @@ public:
 		_pin = outputPin;
 		pinMode(_pin, OUTPUT);
 
-		analogWrite(_pin, 0);
+		analogWrite(_pin, normalize(0));
 		
 		colorScheduler = OnOffLEDColorScheduler(_pin);
 	}
@@ -30,32 +33,48 @@ public:
 
 		case SinglePulse:
 		case SingleSolid:
-		case RainbowPulse:
-		case RainbowSolid:
-		case VUMeter:
 
-			if(_mode == VUMeter) {
-				_l = msg->getInt(6);
-			}
-			else {
-				_l = msg->getInt(1);
-			}
-
+			_l = msg->getInt(5);
+			
 			if (_l > 0) {
-				analogWrite(_pin, _l);
+				analogWrite(_pin, normalize(255 - _l));
 			}
 
 			if (_mode == SinglePulse || _l == 0) {
-				if(_mode == SinglePulse || _mode == SingleSolid) {
-					_duration = msg->getInt(6);
-				}
-				else {
-					_duration = msg->getInt(5);
-				}
-
+				_duration = msg->getInt(6);
+				
 				colorScheduler.blackout(_duration);
 			}
 			else {
+				colorScheduler.disableBlackout();
+			}
+
+			break;
+
+		case RainbowPulse:
+		case RainbowSolid:
+
+			_l = 255;
+
+			analogWrite(_pin, normalize(255 - _l));
+			
+			if(_mode == RainbowPulse) {
+				_duration = msg->getInt(5);
+
+				colorScheduler.blackout(_duration);				
+			}
+			else {
+				colorScheduler.disableBlackout();
+			}
+
+			break;
+
+		case VUMeter:
+
+			_l = msg->getInt(6);
+			
+			if (_l > 0) {
+				analogWrite(_pin, normalize(255 - _l));
 				colorScheduler.disableBlackout();
 			}
 
@@ -70,10 +89,10 @@ public:
 			if (_intensity > 0) {
 
 				if (_intensity > random8()) {
-					analogWrite(_pin, 255);
+					analogWrite(_pin, normalize(0));
 				}
 				else {
-					analogWrite(_pin, 0);
+					analogWrite(_pin, normalize(255));
 				}
 			}
 			else {
@@ -84,8 +103,7 @@ public:
 
 		case Strobo:
 
-			// stobo only has 1 parameters
-			_intensity = msg->getInt(1);
+			_intensity = msg->getInt(2);
 
 			colorScheduler.strobo(_intensity);
 

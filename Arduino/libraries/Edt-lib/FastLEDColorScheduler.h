@@ -74,7 +74,7 @@ public:
 		else {
 			for (int i = 0; i < _nrOfLeds; i++) {
 				if (_ledState[i].blackoutSpeed < 255) {
-					long add = ((255 - _ledState[i].blackoutSpeed) / 32) + 1;
+					long add = ((255 - _ledState[i].blackoutSpeed) / 48) + 1;
 					if((long)_ledState[i].blackoutSpeed + add > 255) {
 						_ledState[i].blackoutSpeed = 255;
 					}

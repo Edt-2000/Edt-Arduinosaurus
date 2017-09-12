@@ -42,7 +42,7 @@ public:
 		}
 		else {
 			if (_blackoutSpeed < 255) {
-				long add = ((255 - _blackoutSpeed) / 8) + 1;
+				long add = ((255 - _blackoutSpeed) / 48) + 1;
 				if((long)_blackoutSpeed + add > 255) {
 					_blackoutSpeed = 255;
 				}

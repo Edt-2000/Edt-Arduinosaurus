@@ -48,7 +48,7 @@ public:
 		rgbLed2.configurePins<A1,A5>();
 		rgbLed3.configurePins<A2,A5>();
 
-		osc = OSC::Arduino(9, 0);
+		osc = OSC::Arduino(3, 0);
 		osc.bindUDP(&udp, IP_BROADCAST, PORT_BROADCAST);
 		osc.addConsumer(&rgbLed1);
 		osc.addConsumer(&rgbLed2);

@@ -34,8 +34,6 @@ public:
 		case RainbowSolid:
 		case VUMeter:
 
-			colorScheduler.blackout(_duration);
-
 			if(_mode == VUMeter) {
 				_l = msg->getInt(6);
 			}

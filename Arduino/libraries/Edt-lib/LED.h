@@ -26,6 +26,11 @@ public:
 		return _pattern;
 	}
 
+	void test() {
+		analogWrite(_pin, normalize(255));
+		colorScheduler.blackout(4);
+	}
+
 	void callback(OSC::Message * msg) {
 		_mode = (Mode)msg->getInt(0);
 
@@ -37,7 +42,7 @@ public:
 			_l = msg->getInt(5);
 			
 			if (_l > 0) {
-				analogWrite(_pin, normalize(255 - _l));
+				analogWrite(_pin, normalize(_l));
 			}
 
 			if (_mode == SinglePulse || _l == 0) {
@@ -56,7 +61,7 @@ public:
 
 			_l = 255;
 
-			analogWrite(_pin, normalize(255 - _l));
+			analogWrite(_pin, normalize(_l));
 			
 			if(_mode == RainbowPulse) {
 				_duration = msg->getInt(5);
@@ -74,7 +79,7 @@ public:
 			_l = msg->getInt(6);
 			
 			if (_l > 0) {
-				analogWrite(_pin, normalize(255 - _l));
+				analogWrite(_pin, normalize(_l));
 				colorScheduler.disableBlackout();
 			}
 
@@ -89,10 +94,10 @@ public:
 			if (_intensity > 0) {
 
 				if (_intensity > random8()) {
-					analogWrite(_pin, normalize(0));
+					analogWrite(_pin, normalize(255));
 				}
 				else {
-					analogWrite(_pin, normalize(255));
+					analogWrite(_pin, normalize(0));
 				}
 			}
 			else {

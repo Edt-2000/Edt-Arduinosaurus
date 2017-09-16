@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // TODO: use this macro to flip the output when needed
-#define normalize(x) 255 - x
+// #define normalize(x) 255 - x
 
 class OnOffLEDColorScheduler
 {

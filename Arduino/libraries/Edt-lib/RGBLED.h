@@ -16,6 +16,11 @@ public:
 		_leds = new CRGB[nrOfLeds];
 
 		colorScheduler = FastLEDColorScheduler(_leds, nrOfLeds);
+
+		_color1.h = 32;
+		_color1.s = 32;
+		_color1.l = 32;
+		fill_solid(_leds, _nrOfLeds, _color1.chsv());
 	}
 
 	template<uint8_t dataPin, uint8_t clockPin>	void configurePins() {
@@ -24,6 +29,14 @@ public:
 
 	const char * address() {
 		return _pattern;
+	}
+
+	void test() {
+		_color1.h = 255;
+		_color1.s = 255;
+		_color1.l = 255;
+		fill_solid(_leds, _nrOfLeds, _color1.chsv());
+		colorScheduler.blackout(0, _nrOfLeds, 2);
 	}
 
 	void callback(OSC::Message * msg) {

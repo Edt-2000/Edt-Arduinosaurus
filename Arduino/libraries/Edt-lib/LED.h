@@ -3,6 +3,9 @@
 #include <OSCArduino.h>
 #include <OnOffLEDColorScheduler.h>
 
+// TODO: remove this macro
+#define normalize(x) x
+
 class EdtLED : public OSC::IMessageConsumer
 {
 public:
@@ -14,13 +17,18 @@ public:
 		_pin = outputPin;
 		pinMode(_pin, OUTPUT);
 
-		analogWrite(_pin, 0);
+		analogWrite(_pin, normalize(0));
 		
 		colorScheduler = OnOffLEDColorScheduler(_pin);
 	}
 
 	const char * address() {
 		return _pattern;
+	}
+
+	void test() {
+		analogWrite(_pin, normalize(255));
+		colorScheduler.blackout(4);
 	}
 
 	void callback(OSC::Message * msg) {
@@ -31,18 +39,15 @@ public:
 		case SinglePulse:
 		case SingleSolid:
 
-			colorScheduler.blackout(_duration);
-
-			_l = msg->getInt(1);
-
+			_l = msg->getInt(5);
+			
 			if (_l > 0) {
-
-				analogWrite(_pin, _l);
+				analogWrite(_pin, normalize(_l));
 			}
 
 			if (_mode == SinglePulse || _l == 0) {
-				_duration = msg->getInt(2);
-
+				_duration = msg->getInt(6);
+				
 				colorScheduler.blackout(_duration);
 			}
 			else {
@@ -51,10 +56,59 @@ public:
 
 			break;
 
+		case RainbowPulse:
+		case RainbowSolid:
+
+			_l = 255;
+
+			analogWrite(_pin, normalize(_l));
+			
+			if(_mode == RainbowPulse) {
+				_duration = msg->getInt(5);
+
+				colorScheduler.blackout(_duration);				
+			}
+			else {
+				colorScheduler.disableBlackout();
+			}
+
+			break;
+
+		case VUMeter:
+
+			_l = msg->getInt(6);
+			
+			if (_l > 0) {
+				analogWrite(_pin, normalize(_l));
+				colorScheduler.disableBlackout();
+			}
+
+			break;
+
+		case Twinkle:
+		
+			colorScheduler.disableBlackout();
+
+			_intensity = (float)(msg->getInt(4));
+
+			if (_intensity > 0) {
+
+				if (_intensity > random8()) {
+					analogWrite(_pin, normalize(255));
+				}
+				else {
+					analogWrite(_pin, normalize(0));
+				}
+			}
+			else {
+				colorScheduler.blackout(127);
+			}
+
+			break;
+
 		case Strobo:
 
-			// stobo only has 1 parameters
-			_intensity = msg->getInt(1);
+			_intensity = msg->getInt(2);
 
 			colorScheduler.strobo(_intensity);
 
@@ -70,6 +124,10 @@ private:
 	enum Mode {
 		SingleSolid = 1,
 		SinglePulse = 2,
+		RainbowSolid = 3,
+		RainbowPulse = 4,
+		VUMeter = 100,
+		Twinkle = 101,
 		Strobo = 200
 	};
 

@@ -1,5 +1,8 @@
 #include <Arduino.h>
 
+// TODO: use this macro to flip the output when needed
+#define normalize(x) 255 - x
+
 class OnOffLEDColorScheduler
 {
 public:
@@ -21,7 +24,7 @@ public:
 	}
 
 	void strobo(int fps) {
-		analogWrite(_pin, 0);
+		analogWrite(_pin, normalize(255));
 		
 		_strobo.active = fps > 0;
 		_strobo.loop = 0;
@@ -31,18 +34,23 @@ public:
 	void loop() {
 		if (_strobo.active) {
 
-			analogWrite(_pin, 0);
+			analogWrite(_pin, normalize(255));
 
 			if((_strobo.loop++) > _strobo.fpl)
 			{
 				_strobo.loop = 0;
 
-				analogWrite(_pin, 255);
+				analogWrite(_pin, normalize(0));
 			}
 		}
 		else {
 			if (_blackoutSpeed < 255) {
-				long add = ((255 - _blackoutSpeed) / 8) + 1;
+				long add = (2 * _blackoutSpeed);
+
+				if(add == 0) {
+					add++;
+				}
+
 				if((long)_blackoutSpeed + add > 255) {
 					_blackoutSpeed = 255;
 				}
@@ -50,13 +58,14 @@ public:
 					_blackoutSpeed += add;
 				}
 
-				analogWrite(_pin, 255 - _blackoutSpeed);
+				analogWrite(_pin, normalize(_blackoutSpeed));
 			}
 		}
 	}
 private:
 	int _pin;
 	// TODO: rename blackout speed
+	// TODO: remember output to blend fadeouts better
 	uint8_t _blackoutSpeed;
 
 	struct Strobo {

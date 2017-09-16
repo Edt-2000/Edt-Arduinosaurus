@@ -59,6 +59,17 @@ public:
 		osc.addConsumer(&led4);
 		osc.addConsumer(&led5);
 		osc.addConsumer(&led6);
+
+		// make a test blink
+		rgbLed1.test();
+		rgbLed2.test();
+		rgbLed3.test();
+		led1.test();
+		led2.test();
+		led3.test();
+		led4.test();
+		led5.test();
+		led6.test();
 	}
 
 	void applicationLoop() {

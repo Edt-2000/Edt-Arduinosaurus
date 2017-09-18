@@ -12,20 +12,8 @@ private:
 	const char * _pattern;
 	CRGB *_leds;
 	int _nrOfLeds;
-	
-	int _start;
-	int _center;
-	int _end;
-	int _length;
 
 	FastLEDColorScheduler _colorScheduler;
-
-	inline int normalizeLedNrDown(int percentage) {
-		return floorf((percentage / 127.0) * _nrOfLeds);
-	}
-	inline int normalizeLedNrUp(int percentage) {
-		return ceilf((percentage / 127.0) * _nrOfLeds);
-	}
 
 public:
 	
@@ -74,19 +62,15 @@ public:
 		case OSC::ColorCommands::SinglePulse:
 		case OSC::ColorCommands::SingleSolid:
 
-			_start = normalizeLedNrDown(singleColor.start);
-			_end = normalizeLedNrUp(singleColor.end);
-			_length = _end - _start;
-
 			if(singleColor.value > 0) {
-				fill_solid(_leds + _start, _length, CHSV(singleColor.hue, singleColor.saturation, singleColor.value));
+				_colorScheduler.solid(singleColor.start, singleColor.end, singleColor.hue, singleColor.saturation, singleColor.value);
 			}
 
 			if(command == OSC::ColorCommands::SinglePulse || singleColor.value == 0) {
-				_colorScheduler.fade(_start, _end, singleColor.duration);
+				_colorScheduler.fade(singleColor.start, singleColor.end, singleColor.duration);
 			}
 			else {
-				_colorScheduler.disableFade(_start, _end);
+				_colorScheduler.disableFade(singleColor.start, singleColor.end);
 			}
 
 			break;
@@ -94,70 +78,34 @@ public:
 		 case OSC::ColorCommands::RainbowPulse:
 		 case OSC::ColorCommands::RainbowSolid:
 
-			_start = normalizeLedNrDown(rainbow.start);
-			_end = normalizeLedNrUp(rainbow.end);
-			_length = _end - _start;
-			
 			if(rainbow.deltaHue > 0) {
-				fill_rainbow(&_leds[_start], _length, rainbow.hue, rainbow.deltaHue);
+				_colorScheduler.rainbow(rainbow.start, rainbow.end, rainbow.hue, rainbow.deltaHue);
 			}
 
 		 	if (command == OSC::ColorCommands::RainbowPulse || rainbow.deltaHue == 0) {
-		 		_colorScheduler.fade(_start, _end, rainbow.duration);
+		 		_colorScheduler.fade(rainbow.start, rainbow.end, rainbow.duration);
 		 	}
 		 	else {
-		 		_colorScheduler.disableFade(_start, _end);
+		 		_colorScheduler.disableFade(rainbow.start, rainbow.end);
 		 	}
 
 		 	break;
 
 		 case OSC::ColorCommands::VuMeter:
 
-		 	_start = normalizeLedNrDown(vuMeter.start);
-		 	_center = normalizeLedNrDown(vuMeter.center);
-		 	_end = normalizeLedNrUp(vuMeter.end);
-
-			if (_start != _center) {
-				
-				int leds = (_center - _start) * (vuMeter.intensity / 255.0);
-
-				_colorScheduler.fade(_start, _center - leds, 127);
-				_colorScheduler.disableFade(_center - leds, _center);
-
-				fill_rainbow_reverse(&_leds[_center - leds - 1], leds, vuMeter.hue, vuMeter.deltaHue / (_center - _start));
-			}
-			if (_center != _end) {
-
-				int leds = (_end - _center) * (vuMeter.intensity / 255.0);
-
-				_colorScheduler.fade(_end - (_end - _center - leds), _end, 127);
-				_colorScheduler.disableFade(_center, _center + leds);
-
-				fill_rainbow(&_leds[_center], leds, vuMeter.hue, vuMeter.deltaHue / (_end - _center));
-			}
-
-			break;
+			 _colorScheduler.rainbow(vuMeter.start, vuMeter.center, vuMeter.end, vuMeter.hue, vuMeter.deltaHue, vuMeter.intensity);
+			 
+		 	break;
 
 		 case OSC::ColorCommands::Twinkle:
 
-			_start = normalizeLedNrDown(twinkle.start);
-			_end = normalizeLedNrDown(twinkle.end);
-
-			_colorScheduler.disableFade(_start, _end);
+			 _colorScheduler.disableFade(twinkle.start, twinkle.end);
 			
 		 	if (twinkle.intensity > 0) {
-
-		 		for (int i = _start; i < _end; i++) {
-		 			if (twinkle.intensity > random8()) {
-		 				_leds[i] = CHSV(twinkle.hue, 240, 255);
-		 			}
-		 			else {
-		 				_leds[i] = CHSV(0,0,0);
-		 			}
-		 		}
+				_colorScheduler.twinkle(twinkle.start, twinkle.end, twinkle.hue, 240, 255, twinkle.intensity);		 		
 		 	}
 		 	else {
-		 		_colorScheduler.fade(_start, _end, 127);
+		 		_colorScheduler.fade(twinkle.start, twinkle.end, 127);
 		 	}
 
 			break;

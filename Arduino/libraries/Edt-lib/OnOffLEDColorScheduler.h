@@ -28,12 +28,14 @@ public:
 		_strobo.active = false;
 	}
 
-	void fade(int speed) {
+	inline void fade(int speed) {
 		_fade = speed;
 	}
-	void disableFade() {
+
+	inline void disableFade() {
 		_fade = 255;
 	}
+	
 	inline void output(int output) {
 		_output = output;
 
@@ -45,7 +47,7 @@ public:
 		}
 	}
 
-	void strobo(int fps) {
+	inline void strobo(int fps) {
 		output(0);
 		
 		_strobo.active = fps > 0;
@@ -53,7 +55,7 @@ public:
 		_strobo.fpl = (255.0 / fps);
 	}
 
-	void loop() {
+	inline void loop() {
 		if (_strobo.active) {
 
 			output(0);

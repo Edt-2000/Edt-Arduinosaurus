@@ -5,10 +5,7 @@
 #include <OSCMessageDefinitions.h>
 #include <OnOffLEDColorScheduler.h>
 
-// TODO: remove this macro
-// #define normalize(x) x
-
-class EdtLED : public OSC::AMessageConsumerUsingStructs<OSC::ColorCommands>
+class EdtLED : public OSC::StructMessageConsumer<OSC::ColorCommands>
 {
 private:
 	const char * _pattern;
@@ -18,117 +15,110 @@ private:
 
 public:
 	
+	OSC::SingleColorCommand singleColor;
+	OSC::RainbowCommand rainbow;
+	OSC::VuMeterCommand vuMeter;
+	OSC::TwinkleCommand twinkle;
+	OSC::StroboCommand strobo;
+
 	EdtLED(const char * pattern, int outputPin) {
 		_pattern = pattern;
 
 		_pin = outputPin;
 		pinMode(_pin, OUTPUT);
 
-		analogWrite(_pin, normalize(0));
-		
-		_colorScheduler = OnOffLEDColorScheduler(_pin);
-	}
+		_colorScheduler = OnOffLEDColorScheduler(_pin, false);
+		_colorScheduler.output(0);
 
-	const char * address() {
+		stageStruct(OSC::ColorCommands::SinglePulse, &singleColor, sizeof(OSC::SingleColorCommand));
+		stageStruct(OSC::ColorCommands::SingleSolid, &singleColor, sizeof(OSC::SingleColorCommand));
+		stageStruct(OSC::ColorCommands::RainbowPulse, &rainbow, sizeof(OSC::RainbowCommand));
+		stageStruct(OSC::ColorCommands::RainbowSolid, &rainbow, sizeof(OSC::RainbowCommand));
+		stageStruct(OSC::ColorCommands::VuMeter, &vuMeter, sizeof(OSC::VuMeterCommand));
+		stageStruct(OSC::ColorCommands::Twinkle, &twinkle, sizeof(OSC::TwinkleCommand));
+		stageStruct(OSC::ColorCommands::Strobo, &strobo, sizeof(OSC::StroboCommand));
+	}
+	
+	const char * pattern() {
 		return _pattern;
 	}
 
 	void test() {
-		analogWrite(_pin, normalize(255));
-		_colorScheduler.blackout(4);
+		_colorScheduler.output(255);
+		_colorScheduler.fade(4);
 	}
 
-	void callbackMode(OSC::ColorCommands command) { // OSC::Message * msg) {
+	void callbackEnum(OSC::ColorCommands command) {
 		switch(command) {
 
-		}
+		case OSC::ColorCommands::SinglePulse:
+		case OSC::ColorCommands::SingleSolid:
 
-		// _mode = (Mode)msg->getInt(0);
-
-		// switch (_mode) {
-
-		// case SinglePulse:
-		// case SingleSolid:
-
-		// 	_l = msg->getInt(5);
+			if(singleColor.value > 0) {
+				_colorScheduler.output(singleColor.value);
+			}
 			
-		// 	if (_l > 0) {
-		// 		analogWrite(_pin, normalize(_l));
-		// 	}
+			if (command == OSC::ColorCommands::SinglePulse || singleColor.value == 0) {
+				_colorScheduler.fade(singleColor.duration);
+			}
+			else {
+				_colorScheduler.disableFade();
+			}
 
-		// 	if (_mode == SinglePulse || _l == 0) {
-		// 		_duration = msg->getInt(6);
-				
-		// 		colorScheduler.blackout(_duration);
-		// 	}
-		// 	else {
-		// 		colorScheduler.disableBlackout();
-		// 	}
+		 	break;
 
-		// 	break;
+		case OSC::ColorCommands::RainbowPulse:
+		case OSC::ColorCommands::RainbowSolid:
 
-		// case RainbowPulse:
-		// case RainbowSolid:
-
-		// 	_l = 255;
-
-		// 	analogWrite(_pin, normalize(_l));
+			_colorScheduler.output(127);
 			
-		// 	if(_mode == RainbowPulse) {
-		// 		_duration = msg->getInt(5);
+			if(command == OSC::ColorCommands::RainbowPulse) {
+				_colorScheduler.fade(rainbow.duration);				
+			}
+			else {
+				_colorScheduler.disableFade();
+			}
 
-		// 		colorScheduler.blackout(_duration);				
-		// 	}
-		// 	else {
-		// 		colorScheduler.disableBlackout();
-		// 	}
+			break;
 
-		// 	break;
+		case OSC::ColorCommands::VuMeter:
 
-		// case VUMeter:
+			if (vuMeter.intensity > 0) {
+				_colorScheduler.output(vuMeter.intensity / 2);
+				_colorScheduler.disableFade();
+			}
 
-		// 	_l = msg->getInt(6);
-			
-		// 	if (_l > 0) {
-		// 		analogWrite(_pin, normalize(_l));
-		// 		colorScheduler.disableBlackout();
-		// 	}
+			break;
 
-		// 	break;
-
-		// case Twinkle:
+		case OSC::ColorCommands::Twinkle:
 		
-		// 	colorScheduler.disableBlackout();
+			_colorScheduler.disableFade();
 
-		// 	_intensity = (float)(msg->getInt(4));
+			if (twinkle.intensity > 0) {
 
-		// 	if (_intensity > 0) {
+				if (twinkle.intensity > random8()) {
+					_colorScheduler.output(255);
+				}
+				else {
+					_colorScheduler.output(0);
+				}
+			}
+			else {
+				_colorScheduler.fade(127);
+			}
 
-		// 		if (_intensity > random8()) {
-		// 			analogWrite(_pin, normalize(255));
-		// 		}
-		// 		else {
-		// 			analogWrite(_pin, normalize(0));
-		// 		}
-		// 	}
-		// 	else {
-		// 		colorScheduler.blackout(127);
-		// 	}
+			break;
 
-		// 	break;
+		case OSC::ColorCommands::Strobo:
 
-		// case Strobo:
+			_colorScheduler.strobo(strobo.intensity);
 
-		// 	_intensity = msg->getInt(2);
-
-		// 	colorScheduler.strobo(_intensity);
-
-		// 	break;
-		// }
+			break;
+		}
 	}
 
 	void animationLoop() {
 		
-		colorScheduler.loop();
+		_colorScheduler.loop();
 	}
 };

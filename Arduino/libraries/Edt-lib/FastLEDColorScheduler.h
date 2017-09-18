@@ -2,7 +2,7 @@
 
 class FastLEDColorScheduler
 {
-public:
+private:
 	struct Color {
 		int h;
 		int s;
@@ -12,7 +12,26 @@ public:
 			return CHSV(h, s, l);
 		}
 	};
+	
+	struct LedState {
+	public:
+		uint8_t fade;
+	};
 
+	struct Strobo {
+		bool active;
+		int loop;
+		float fpl;
+		Color color;
+	};
+
+	CRGB *_leds;
+	LedState *_ledState;
+	int _nrOfLeds;
+
+	Strobo _strobo;
+
+public:
 	FastLEDColorScheduler() {
 
 	}
@@ -23,24 +42,23 @@ public:
 		_nrOfLeds = nrOfLeds;
 
 		for (int i = 0; i < nrOfLeds; i++) {
-			_ledState[i].blackoutSpeed = 255;
+			_ledState[i].fade = 255;
 		}
 	}
 
-	void blackout(int start, int stop, int speed) {
+	void fade(int start, int stop, int speed) {
 		for (int i = start; i < stop; i++) {
-			_ledState[i].blackoutSpeed = speed;
+			_ledState[i].fade = speed;
 		}
 	}
-	void disableBlackout(int start, int stop) {
+	void disableFade(int start, int stop) {
 		for (int i = start; i < stop; i++) {
-			_ledState[i].blackoutSpeed = 255;
-
+			_ledState[i].fade = 255;
 		}
 	}
 
 	void strobo(int hue, int fps) {
-		disableBlackout(0, _nrOfLeds);
+		disableFade(0, _nrOfLeds);
 
 		fill_solid(_leds, _nrOfLeds, 0);
 
@@ -67,43 +85,24 @@ public:
 			if((_strobo.loop++) > _strobo.fpl)
 			{
 				_strobo.loop = 0;
-
+				
 				fill_solid(_leds, _nrOfLeds, _strobo.color.chsv());
 			}
 		}
 		else {
 			for (int i = 0; i < _nrOfLeds; i++) {
-				if (_ledState[i].blackoutSpeed < 255) {
-					long add = ((255 - _ledState[i].blackoutSpeed) / 48) + 1;
-					if((long)_ledState[i].blackoutSpeed + add > 255) {
-						_ledState[i].blackoutSpeed = 255;
+				if (_ledState[i].fade < 255) {
+					long add = ((255 - _ledState[i].fade) / 48) + 1;
+					if((long)_ledState[i].fade + add > 255) {
+						_ledState[i].fade = 255;
 					}
 					else {
-						_ledState[i].blackoutSpeed += add;
+						_ledState[i].fade += add;
 					}
 	
-					fadeToBlackBy(_leds + i, 1, _ledState[i].blackoutSpeed);
+					fadeToBlackBy(_leds + i, 1, _ledState[i].fade);
 				}
 			}
 		}
 	}
-private:
-	struct LedState {
-	public:
-		// TODO: rename blackout speed
-		uint8_t blackoutSpeed;
-	};
-
-	struct Strobo {
-		bool active;
-		int loop;
-		float fpl;
-		Color color;
-	};
-
-	CRGB *_leds;
-	LedState *_ledState;
-	int _nrOfLeds;
-
-	Strobo _strobo;
 };

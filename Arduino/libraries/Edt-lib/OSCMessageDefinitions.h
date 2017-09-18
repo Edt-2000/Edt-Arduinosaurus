@@ -1,64 +1,64 @@
 #pragma once
 
 namespace OSC {
-    enum class ColorCommands {
+    enum ColorCommands {
         SingleSolid = 0,
 		SinglePulse = 1,
 		RainbowSolid = 2,
 		RainbowPulse = 3,
-		VUMeter = 4,
+		VuMeter = 4,
 		Twinkle = 5,
 		Strobo = 6
 	};
 	
-	struct Color {
+	struct SingleColorCommand {
+		// 0 - 127
+		int start;
+		int end;
+
+		// 0 - 255
 		int hue;
 		int saturation;
 		int value;
-	};
-
-	struct SingleColorCommand {
-		int start;
-		int end;
-
-		Color color;
-
 		int duration;
-
-		inline int getRealStart(int nr) {
-			return floorf((start / 127.0) * nr);
-		}
-		inline int getRealEnd(int nr) {
-			return ceilf((end / 127.0) * nr);
-		}
 	};
 
 	struct RainbowCommand {
+		// 0 - 127
 		int start;
 		int end;
 
+		// 0 - 255
 		int hue;
 		int deltaHue;
-
 		int duration;
 	};
 
-// 	_start = floorf((msg->getInt(1) / 127.0) * _nrOfLeds);
-		// 	_end = ceilf((msg->getInt(2) / 127.0) * _nrOfLeds);
-			
-		// 	_hue = msg->getInt(3);
-		// 	_deltahue = round((msg->getInt(4) / 127.0) * (255.0 / _nrOfLeds));
+	struct VuMeterCommand {
+		// 0 - 127
+		int start;
+		int end;
+		int center;
 
-		// 	if (_deltahue > 0) {
-		// 		fill_rainbow(&_leds[_start], _end - _start, _hue, _deltahue);
-		// 	}
+		// 0 - 255
+		int hue;
+		int deltaHue;
+		int intensity;
+	};
 
-		// 	if (_mode == RainbowPulse || _deltahue == 0) {
-		// 		_duration = msg->getInt(5);
+	struct TwinkleCommand {
+		// 0 - 127
+		int start;
+		int end;
 
-		// 		colorScheduler.blackout(_start, _end, _duration);
-		// 	}
-		// 	else {
-		// 		colorScheduler.disableBlackout(_start, _end);
-		// 	}
+		// 0 - 255
+		int hue;
+		int intensity;
+	};
+
+	struct StroboCommand {
+		// 0 - 255
+		int hue;
+		int intensity;
+	};
 }

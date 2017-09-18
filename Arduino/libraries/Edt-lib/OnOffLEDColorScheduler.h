@@ -1,30 +1,52 @@
 #include <Arduino.h>
 
-// TODO: use this macro to flip the output when needed
-// #define normalize(x) 255 - x
-
 class OnOffLEDColorScheduler
 {
+private:
+	int _pin;
+	uint8_t _output;
+	uint8_t _fade;
+	bool _reversed;
+
+	struct Strobo {
+		bool active;
+		int loop;
+		float fpl;
+	};
+
+	Strobo _strobo;
 public:
+	
 	OnOffLEDColorScheduler() {
 	}
 
-	OnOffLEDColorScheduler(int pin) {
+	OnOffLEDColorScheduler(int pin, bool reversed) {
 		_pin = pin;
-		_blackoutSpeed = 255;
-		
+		_fade = 255;
+		_reversed = reversed;
+
 		_strobo.active = false;
 	}
 
-	void blackout(int speed) {
-		_blackoutSpeed = speed;
+	void fade(int speed) {
+		_fade = speed;
 	}
-	void disableBlackout() {
-		_blackoutSpeed = 255;
+	void disableFade() {
+		_fade = 255;
+	}
+	inline void output(int output) {
+		_output = output;
+
+		if(_reversed) {
+			analogWrite(_pin, 255 - output);
+		}
+		else {
+			analogWrite(_pin, output);
+		}
 	}
 
 	void strobo(int fps) {
-		analogWrite(_pin, normalize(255));
+		output(0);
 		
 		_strobo.active = fps > 0;
 		_strobo.loop = 0;
@@ -34,45 +56,40 @@ public:
 	void loop() {
 		if (_strobo.active) {
 
-			analogWrite(_pin, normalize(255));
+			output(0);
 
 			if((_strobo.loop++) > _strobo.fpl)
 			{
 				_strobo.loop = 0;
 
-				analogWrite(_pin, normalize(0));
+				output(255);
 			}
 		}
 		else {
-			if (_blackoutSpeed < 255) {
-				long add = (2 * _blackoutSpeed);
+			if (_fade < 255) {
+				// prevent overflowing of uint8_t's
 
+				// TODO: see if progressive fading is best method
+				int add = (2 * _fade);
 				if(add == 0) {
 					add++;
 				}
 
-				if((long)_blackoutSpeed + add > 255) {
-					_blackoutSpeed = 255;
+				if(255 - add < _fade) {
+					_fade = 255;
+					output(0);
 				}
 				else {
-					_blackoutSpeed += add;
-				}
+					_fade += add;
 
-				analogWrite(_pin, normalize(_blackoutSpeed));
+					if(_output < _fade) {
+						output(0);
+					}
+					else {
+						output(_output - _fade);
+					}
+				}
 			}
 		}
 	}
-private:
-	int _pin;
-	// TODO: rename blackout speed
-	// TODO: remember output to blend fadeouts better
-	uint8_t _blackoutSpeed;
-
-	struct Strobo {
-		bool active;
-		int loop;
-		float fpl;
-	};
-
-	Strobo _strobo;
 };

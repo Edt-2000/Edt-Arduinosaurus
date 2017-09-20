@@ -14,29 +14,64 @@
 unsigned long startTime;
 unsigned long endTime;
 
-class OSCProducerConsumer : public OSC::MessageConsumer, public OSC::MessageProducer
+struct MessageData { 
+	uint32_t int0; uint32_t int1; uint32_t int2; uint32_t int3; uint32_t int4; uint32_t int5; uint32_t int6; uint32_t int7; uint32_t int8; uint32_t int9;
+	float float10; float float11; float float12; float float13; float float14; float float15; float float16; float float17; float float18; float float19;
+};
+
+struct Simple {
+	uint32_t int0;
+};
+
+enum DummyEnum {
+	def = 0
+};
+
+class OSCProducerConsumer : public OSC::StructMessageConsumer<DummyEnum>, public OSC::MessageProducer
 {
 public:
+	MessageData messageData = MessageData();
+	Simple simple = Simple();
+
 	OSC::Message message = OSC::Message();
 
 	OSCProducerConsumer() {
 		message.empty();
 		message.setAddress("/T");
-		message.reserveAtLeast(20);
-		
-		for(int i = 0; i < 10; ++i) {
-			message.add(i);
-		}
 
-		for(int f = 10; f < 20; ++f) {
-			message.add((float)f);
-		}
+		messageData.int0 = 0;
+		messageData.int1 = 1;
+		messageData.int2 = 2;
+		messageData.int3 = 3;
+		messageData.int4 = 4;
+		messageData.int5 = 5;
+		messageData.int6 = 6;
+		messageData.int7 = 7;
+		messageData.int8 = 8;
+		messageData.int9 = 9;
+		messageData.float10 = 10.10f;
+		messageData.float11 = 11.11f;
+		messageData.float12 = 12.12f;
+		messageData.float13 = 13.13f;
+		messageData.float14 = 14.14f;
+		messageData.float15 = 15.15f;
+		messageData.float16 = 16.16f;
+		messageData.float17 = 17.17f;
+		messageData.float18 = 18.18f;
+		messageData.float19 = 19.19f;
+
+		message.reserveAtLeast(22);
+		message.addInt(0);
+		message.add<MessageData>(&messageData);
+		message.addInt(12345);
 
 		message.setValidData(true);
+
+		reserveAtLeast(1);
+		stageStruct<MessageData>(DummyEnum::def, &messageData);
 	}
 
 	void loop() {
-
 	}
 
 	OSC::Message * generateMessage() {
@@ -47,15 +82,9 @@ public:
 		return message.address;
 	}
 
-	void callbackMessage(OSC::Message * msg) {
-		for(int i = 0; i < 10; ++i) {
-			message.set<int>(i, msg->getInt(i));
-		}
-
-		for(int f = 10; f < 20; ++f) {
-			message.set<float>(f, msg->getInt(f));
-		}
-
+	void callbackEnum(DummyEnum dummyEum) {
+		int data = messageData.int0;
+		message.setInt(1, data);
 		message.setValidData(true);
 	}
 };
@@ -87,6 +116,5 @@ public:
 	}
 
 	void applicationLoop() {
-		
 	}
 };

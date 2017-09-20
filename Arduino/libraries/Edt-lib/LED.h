@@ -21,7 +21,7 @@ public:
 	OSC::TwinkleCommand twinkle;
 	OSC::StroboCommand strobo;
 
-	EdtLED(const char * pattern, int outputPin) {
+	EdtLED(const char * pattern, int outputPin) : StructMessageConsumer(7) {
 		_pattern = pattern;
 
 		_pin = outputPin;
@@ -30,13 +30,13 @@ public:
 		_colorScheduler = OnOffLEDColorScheduler(_pin, false);
 		_colorScheduler.output(0);
 
-		stageStruct(OSC::ColorCommands::SinglePulse, &singleColor, sizeof(OSC::SingleColorCommand));
-		stageStruct(OSC::ColorCommands::SingleSolid, &singleColor, sizeof(OSC::SingleColorCommand));
-		stageStruct(OSC::ColorCommands::RainbowPulse, &rainbow, sizeof(OSC::RainbowCommand));
-		stageStruct(OSC::ColorCommands::RainbowSolid, &rainbow, sizeof(OSC::RainbowCommand));
-		stageStruct(OSC::ColorCommands::VuMeter, &vuMeter, sizeof(OSC::VuMeterCommand));
-		stageStruct(OSC::ColorCommands::Twinkle, &twinkle, sizeof(OSC::TwinkleCommand));
-		stageStruct(OSC::ColorCommands::Strobo, &strobo, sizeof(OSC::StroboCommand));
+		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &singleColor);
+		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSolid, &singleColor);
+		addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowPulse, &rainbow);
+		addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowSolid, &rainbow);
+		addEnumToStructMapping<OSC::VuMeterCommand>(OSC::ColorCommands::VuMeter, &vuMeter);
+		addEnumToStructMapping<OSC::TwinkleCommand>(OSC::ColorCommands::Twinkle, &twinkle);
+		addEnumToStructMapping<OSC::StroboCommand>(OSC::ColorCommands::Strobo, &strobo);
 	}
 	
 	const char * pattern() {

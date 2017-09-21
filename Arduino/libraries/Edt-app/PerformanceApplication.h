@@ -35,7 +35,7 @@ public:
 
 	OSC::Message message = OSC::Message();
 
-	OSCProducerConsumer() {
+	OSCProducerConsumer() : StructMessageConsumer(1) {
 		message.empty();
 		message.setAddress("/T");
 
@@ -67,8 +67,7 @@ public:
 
 		message.setValidData(true);
 
-		reserveAtLeast(1);
-		stageStruct<MessageData>(DummyEnum::def, &messageData);
+		addEnumToStructMapping<MessageData>(DummyEnum::def, &messageData);
 	}
 
 	void loop() {

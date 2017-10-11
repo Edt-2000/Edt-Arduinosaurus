@@ -2,34 +2,9 @@
 
 #include <Arduino.h>
 #include <OSCArduino.h>
+#include <OSCMessageProducer.h>
 
-class EdtOSCPedal : public OSC::IMessageConsumer{
-public:
-	bool left = false;
-	bool middle = false;
-	bool right = false;
-
-	EdtOSCPedal(const char * pattern) {
-		_pattern = pattern;
-	}
-
-	const char * address() {
-		return _pattern;
-	}
-
-	void callback(OSC::Message * msg) {
-		int value = msg->getInt(0);
-
-		left = value == 1;
-		middle = value == 2;
-		right = value == 3;
-	}
-
-private:
-	const char * _pattern;
-};
-
-class EdtDIPedal : public OSC::IMessageProducer {
+class EdtDIPedal : public OSC::MessageProducer {
 public:
 	EdtDIPedal(int ground, int ring, int tip, const char * oscAddress) {
 		_ring = ring;
@@ -50,21 +25,28 @@ public:
 		if (millis() > _disableUntil) {
 			_value = 0;
 
-			_value |= (digitalRead(_tip) == LOW) ? 1 : 0;
-			_value |= (digitalRead(_ring) == LOW) ? 2 : 0;
+			if(digitalRead(_tip) == LOW) {
+				_value += 1;
+			} 
+			if(digitalRead(_ring) == LOW) {
+				_value += 2;
+			}
 
-			if (_value > 0) {
+			if (_value > 0 && _previousValue == _value) {
 				_disableUntil = millis() + 300UL;
 			}
+
+			_previousValue = _value;
 		}
 	}
 
 	OSC::Message * generateMessage() {
 		if (_value > 0) {
 			_message.setValidData(true);
-			_message.add<int>(_value);
+			_message.setInt(0, _value);
 
 			_value = 0;
+			_previousValue = 0;
 		}
 		else {
 			_message.setValidData(false);
@@ -78,5 +60,6 @@ private:
 	int _ground;
 
 	int _value = 0;
+	int _previousValue = 0;
 	unsigned long _disableUntil = 0;
 };

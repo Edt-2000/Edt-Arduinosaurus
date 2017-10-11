@@ -34,7 +34,7 @@ public:
 	}
 
 	void setupNetwork() {
-		Ethernet.begin(MAC_PING);
+		Ethernet.begin(MAC_LED);
 
 		udp.begin(PORT_BROADCAST);
 	}

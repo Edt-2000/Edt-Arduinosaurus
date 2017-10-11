@@ -38,9 +38,8 @@ public:
 
 		switch (statemachine.current()) {
 		case State::run:
-
-			// TODO: change back 
-			osc.loop(true); //time.tOSC);
+ 
+			osc.loop(time.tOSC);
 			applicationLoop();
 
 			break;

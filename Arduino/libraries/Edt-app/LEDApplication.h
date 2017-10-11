@@ -1,7 +1,5 @@
 #pragma once
 
-//#include <functional>
-
 #include "AbstractApplication.h"
 
 #include "Definitions.h"
@@ -14,8 +12,6 @@
 #include "Time.h"
 #include "RGBLED.h"
 #include "LED.h"
-
-//#include "FastLED.h"
 
 class LEDApplication : public AbstractApplication
 {

@@ -10,15 +10,15 @@ class EdtStatemachine {
 public:
 	EdtStatemachine() : _state(State::begin) {};
 
-	State current() {
+	inline State current() {
 		return _state;
 	}
 
-	void begin() {
+	inline void begin() {
 		_state = State::begin;
 	}
 
-	void step() {
+	inline void step() {
 		State newState;
 
 		switch (_state) {

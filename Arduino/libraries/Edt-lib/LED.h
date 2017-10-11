@@ -1,62 +1,117 @@
 #pragma once
 
 #include <OSCArduino.h>
+#include <OSCMessageConsumer.h>
+#include <OSCMessageDefinitions.h>
 #include <OnOffLEDColorScheduler.h>
 
-class EdtLED : public OSC::IMessageConsumer
+class EdtLED : public OSC::StructMessageConsumer<OSC::ColorCommands>
 {
+private:
+	const char * _pattern;
+	int _pin;
+
+	OnOffLEDColorScheduler _colorScheduler;
+
 public:
-	OnOffLEDColorScheduler colorScheduler;
 	
-	EdtLED(const char * pattern, int outputPin) {
+	OSC::SingleColorCommand singleColor;
+	OSC::RainbowCommand rainbow;
+	OSC::VuMeterCommand vuMeter;
+	OSC::TwinkleCommand twinkle;
+	OSC::StroboCommand strobo;
+
+	EdtLED(const char * pattern, int outputPin) : StructMessageConsumer(7) {
 		_pattern = pattern;
 
 		_pin = outputPin;
 		pinMode(_pin, OUTPUT);
 
-		analogWrite(_pin, 0);
-		
-		colorScheduler = OnOffLEDColorScheduler(_pin);
-	}
+		_colorScheduler = OnOffLEDColorScheduler(_pin, false);
+		_colorScheduler.output(0);
 
-	const char * address() {
+		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &singleColor);
+		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSolid, &singleColor);
+		addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowPulse, &rainbow);
+		addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowSolid, &rainbow);
+		addEnumToStructMapping<OSC::VuMeterCommand>(OSC::ColorCommands::VuMeter, &vuMeter);
+		addEnumToStructMapping<OSC::TwinkleCommand>(OSC::ColorCommands::Twinkle, &twinkle);
+		addEnumToStructMapping<OSC::StroboCommand>(OSC::ColorCommands::Strobo, &strobo);
+	}
+	
+	const char * pattern() {
 		return _pattern;
 	}
 
-	void callback(OSC::Message * msg) {
-		_mode = (Mode)msg->getInt(0);
+	void test() {
+		_colorScheduler.output(255);
+		_colorScheduler.fade(4);
+	}
 
-		switch (_mode) {
+	void callbackEnum(OSC::ColorCommands command) {
+		switch(command) {
 
-		case SinglePulse:
-		case SingleSolid:
+		case OSC::ColorCommands::SinglePulse:
+		case OSC::ColorCommands::SingleSolid:
 
-			colorScheduler.blackout(_duration);
-
-			_l = msg->getInt(1);
-
-			if (_l > 0) {
-
-				analogWrite(_pin, _l);
+			if(singleColor.value > 0) {
+				_colorScheduler.output(singleColor.value);
 			}
-
-			if (_mode == SinglePulse || _l == 0) {
-				_duration = msg->getInt(2);
-
-				colorScheduler.blackout(_duration);
+			
+			if (command == OSC::ColorCommands::SinglePulse || singleColor.value == 0) {
+				_colorScheduler.fade(singleColor.duration);
 			}
 			else {
-				colorScheduler.disableBlackout();
+				_colorScheduler.disableFade();
+			}
+
+		 	break;
+
+		case OSC::ColorCommands::RainbowPulse:
+		case OSC::ColorCommands::RainbowSolid:
+
+			_colorScheduler.output(127);
+			
+			if(command == OSC::ColorCommands::RainbowPulse) {
+				_colorScheduler.fade(rainbow.duration);				
+			}
+			else {
+				_colorScheduler.disableFade();
 			}
 
 			break;
 
-		case Strobo:
+		case OSC::ColorCommands::VuMeter:
 
-			// stobo only has 1 parameters
-			_intensity = msg->getInt(1);
+			if (vuMeter.intensity > 0) {
+				_colorScheduler.output(vuMeter.intensity / 2);
+				_colorScheduler.disableFade();
+			}
 
-			colorScheduler.strobo(_intensity);
+			break;
+
+		case OSC::ColorCommands::Twinkle:
+		
+			_colorScheduler.disableFade();
+
+			if (twinkle.intensity > 0) {
+
+				if (twinkle.intensity > random8()) {
+					_colorScheduler.output(255);
+				}
+				else {
+					_colorScheduler.output(0);
+				}
+			}
+			else {
+				_colorScheduler.fade(127);
+			}
+
+			break;
+
+		case OSC::ColorCommands::Strobo:
+
+			_colorScheduler.strobo(strobo.intensity);
 
 			break;
 		}
@@ -64,21 +119,6 @@ public:
 
 	void animationLoop() {
 		
-		colorScheduler.loop();
+		_colorScheduler.loop();
 	}
-private:
-	enum Mode {
-		SingleSolid = 1,
-		SinglePulse = 2,
-		Strobo = 200
-	};
-
-	const char * _pattern;
-
-	int _mode;
-	int _duration;
-	int _intensity;
-
-	int _pin;
-	int _l;
 };

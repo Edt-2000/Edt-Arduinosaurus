@@ -39,7 +39,8 @@ public:
 		switch (statemachine.current()) {
 		case State::run:
 
-			osc.loop(time.tOSC);
+			// TODO: change back 
+			osc.loop(true); //time.tOSC);
 			applicationLoop();
 
 			break;
@@ -71,14 +72,14 @@ protected:
 		
 		Status(AbstractApplication * parent) : _parent(parent) {};
 
-		void setup(int ledPin, int offState) {
+		inline void setup(int ledPin, int offState) {
 			_ledPin = ledPin;
 			_offState = offState;
 
 			pinMode(_ledPin, OUTPUT);
 		}
 
-		void blink() {
+		inline void blink() {
 			auto now = _parent->time.now();
 
 			if (now - _previousTime > 100) {
@@ -90,7 +91,7 @@ protected:
 			led();
 		}
 
-		bool start() {
+		inline bool start() {
 			auto now = _parent->time.now();
 
 			if (now - _previousTime > (1000 / _startLoops)) {
@@ -111,7 +112,7 @@ protected:
 			return false;
 		}
 
-		void led() {
+		inline void led() {
 			digitalWrite(_ledPin, _currentState ? !_offState : _offState);
 		}
 	private:

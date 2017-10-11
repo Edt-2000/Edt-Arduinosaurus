@@ -2,62 +2,11 @@
 
 class OnOffLEDColorScheduler
 {
-public:
-	OnOffLEDColorScheduler() {
-	}
-
-	OnOffLEDColorScheduler(int pin) {
-		_pin = pin;
-		_blackoutSpeed = 255;
-		
-		_strobo.active = false;
-	}
-
-	void blackout(int speed) {
-		_blackoutSpeed = speed;
-	}
-	void disableBlackout() {
-		_blackoutSpeed = 255;
-	}
-
-	void strobo(int fps) {
-		analogWrite(_pin, 0);
-		
-		_strobo.active = fps > 0;
-		_strobo.loop = 0;
-		_strobo.fpl = (255.0 / fps);
-	}
-
-	void loop() {
-		if (_strobo.active) {
-
-			analogWrite(_pin, 0);
-
-			if((_strobo.loop++) > _strobo.fpl)
-			{
-				_strobo.loop = 0;
-
-				analogWrite(_pin, 255);
-			}
-		}
-		else {
-			if (_blackoutSpeed < 255) {
-				long add = ((255 - _blackoutSpeed) / 8) + 1;
-				if((long)_blackoutSpeed + add > 255) {
-					_blackoutSpeed = 255;
-				}
-				else {
-					_blackoutSpeed += add;
-				}
-
-				analogWrite(_pin, 255 - _blackoutSpeed);
-			}
-		}
-	}
 private:
 	int _pin;
-	// TODO: rename blackout speed
-	uint8_t _blackoutSpeed;
+	uint8_t _output;
+	uint8_t _fade;
+	bool _reversed;
 
 	struct Strobo {
 		bool active;
@@ -66,4 +15,83 @@ private:
 	};
 
 	Strobo _strobo;
+public:
+	
+	OnOffLEDColorScheduler() {
+	}
+
+	OnOffLEDColorScheduler(int pin, bool reversed) {
+		_pin = pin;
+		_fade = 255;
+		_reversed = reversed;
+
+		_strobo.active = false;
+	}
+
+	inline void fade(int speed) {
+		_fade = speed;
+	}
+
+	inline void disableFade() {
+		_fade = 255;
+	}
+	
+	inline void output(int output) {
+		_output = output;
+
+		if(_reversed) {
+			analogWrite(_pin, 255 - output);
+		}
+		else {
+			analogWrite(_pin, output);
+		}
+	}
+
+	inline void strobo(int fps) {
+		output(0);
+		
+		_strobo.active = fps > 0;
+		_strobo.loop = 0;
+		_strobo.fpl = (255.0 / fps);
+	}
+
+	inline void loop() {
+		if (_strobo.active) {
+
+			output(0);
+
+			if((_strobo.loop++) > _strobo.fpl)
+			{
+				_strobo.loop = 0;
+
+				output(255);
+			}
+		}
+		else {
+			if (_fade < 255) {
+				// prevent overflowing of uint8_t's
+
+				// TODO: see if progressive fading is best method
+				int add = (2 * _fade);
+				if(add == 0) {
+					add++;
+				}
+
+				if(255 - add < _fade) {
+					_fade = 255;
+					output(0);
+				}
+				else {
+					_fade += add;
+
+					if(_output < _fade) {
+						output(0);
+					}
+					else {
+						output(_output - _fade);
+					}
+				}
+			}
+		}
+	}
 };

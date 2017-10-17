@@ -1,24 +1,29 @@
 #include "FastLED.h"
+#include "FadeMode.h"
 
 class FastLEDColorScheduler
 {
-private:
-	struct Color {
+  private:
+	struct Color
+	{
 		int h;
 		int s;
 		int l;
 
-		CHSV chsv() {
+		CHSV chsv()
+		{
 			return CHSV(h, s, l);
 		}
 	};
 
-	struct LedState {
-	public:
+	struct LedState
+	{
+	  public:
 		uint8_t fade;
 	};
 
-	struct Strobo {
+	struct Strobo
+	{
 		bool active;
 		int loop;
 		float fpl;
@@ -27,6 +32,7 @@ private:
 
 	CRGB *_leds;
 	LedState *_ledState;
+	FadeMode _fadeMode;
 
 	int _start;
 	int _center;
@@ -34,48 +40,60 @@ private:
 	int _length;
 	int _nrOfLeds;
 
-	inline int normalizeLedNrDown(int percentage) {
+	inline int normalizeLedNrDown(int percentage)
+	{
 		return floorf((percentage / 127.0) * _nrOfLeds);
 	}
-	inline int normalizeLedNrUp(int percentage) {
+	inline int normalizeLedNrUp(int percentage)
+	{
 		return ceilf((percentage / 127.0) * _nrOfLeds);
 	}
 
 	Strobo _strobo;
 
-public:
-	FastLEDColorScheduler() {
+  public:
+	FastLEDColorScheduler()
+	{
 	}
 
-	FastLEDColorScheduler(CRGB* leds, int nrOfLeds) {
+	FastLEDColorScheduler(CRGB *leds, int nrOfLeds)
+	{
 		_leds = leds;
 		_ledState = new LedState[nrOfLeds];
 		_nrOfLeds = nrOfLeds;
 
-		for (int i = 0; i < nrOfLeds; i++) {
+		for (int i = 0; i < nrOfLeds; i++)
+		{
 			_ledState[i].fade = 255;
 		}
 	}
 
-	inline void fade(int start, int end, int speed) {
+	inline void fade(int start, int end, int speed, FadeMode fadeMode = FadeMode::FadeToBlack)
+	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrUp(end);
 
-		for (int i = _start; i < _end; i++) {
+		_fadeMode = fadeMode;
+
+		for (int i = _start; i < _end; i++)
+		{
 			_ledState[i].fade = speed;
 		}
 	}
 
-	inline void disableFade(int start, int end) {
+	inline void disableFade(int start, int end)
+	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrUp(end);
 
-		for (int i = _start; i < _end; i++) {
+		for (int i = _start; i < _end; i++)
+		{
 			_ledState[i].fade = 255;
 		}
 	}
 
-	inline void solid(int start, int end, int hue, int saturation, int value) {
+	inline void solid(int start, int end, int hue, int saturation, int value)
+	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrUp(end);
 		_length = _end - _start;
@@ -83,54 +101,91 @@ public:
 		fill_solid(_leds + _start, _length, CHSV(hue, saturation, value));
 	}
 
-	inline void rainbow(int start, int end, int hue, int deltaHue) {
+	inline void rainbow(int start, int end, int hue, int deltaHue)
+	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrUp(end);
 		_length = _end - _start;
-		
-		fill_rainbow(_leds + _start, _length, hue, deltaHue);
+
+		fill_rainbow(_leds + _start, _length, hue, (deltaHue / 127.0) * (255.0 / _length));
 	}
 
-	inline void rainbow(int start, int center, int end, int hue, int deltaHue, int intensity) {
+	inline void rainbow(int start, int center, int end, int hue, int deltaHue, int intensity)
+	{
 		_start = normalizeLedNrDown(start);
 		_center = normalizeLedNrDown(center);
 		_end = normalizeLedNrUp(end);
 
-		if (_start != _center) {
-			
+		if (_start != _center)
+		{
+
 			int leds = (_center - _start) * (intensity / 255.0);
 
-			fade(_start, _center - leds, 127);
-			disableFade(_center - leds, _center);
+			for (int i = _start; i < _center - leds; i++)
+			{
+				_ledState[i].fade = 127;
+			}
+			for (int i = _center - leds; i < _center; i++)
+			{
+				_ledState[i].fade = 255;
+			}
 
 			fill_rainbow_reverse(&_leds[_center - leds - 1], leds, hue, deltaHue / (_center - _start));
 		}
-		if (_center != _end) {
+		if (_center != _end)
+		{
 
 			int leds = (_end - _center) * (intensity / 255.0);
 
-			fade(_end - (_end - _center - leds), _end, 127);
-			disableFade(_center, _center + leds);
+			for (int i = _center + leds; i < _end; i++)
+			{
+				_ledState[i].fade = 127;
+			}
+			for (int i = _center; i < _center + leds; i++)
+			{
+				_ledState[i].fade = 255;
+			}
 
 			fill_rainbow(&_leds[_center], leds, hue, deltaHue / (_end - _center));
 		}
 	}
 
-	inline void twinkle(int start, int end, int hue, int saturation, int value, int intensity) {
+	inline void twinkle(int start, int end, int hue, int saturation, int value, int intensity, bool blackOut = true)
+	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrDown(end);
 
-		for (int i = _start; i < _end; i++) {
-			if (intensity > random8()) {
+		for (int i = _start; i < _end; i++)
+		{
+			if (intensity > random8())
+			{
 				_leds[i] = CHSV(hue, saturation, value);
 			}
-			else {
-				_leds[i] = CHSV(0,0,0);
+			else if (blackOut)
+			{
+				_leds[i] = CHSV(0, 0, 0);
 			}
 		}
 	}
 
-	inline void strobo(int hue, int fps) {
+	inline void kitt(int position, int length, int hue)
+	{
+		_start = normalizeLedNrDown(min(position, 127 - length));
+		_length = normalizeLedNrDown(length);
+
+		for (int i = 0; i < _start; i++)
+		{
+			_ledState[i].fade = 63;
+		}
+		fill_solid(_leds + _start, _length, CHSV(hue, 240, 255));
+		for (int i = _start + _length; i < _nrOfLeds; i++)
+		{
+			_ledState[i].fade = 63;
+		}
+	}
+
+	inline void strobo(int hue, int fps)
+	{
 		disableFade(0, _nrOfLeds);
 
 		fill_solid(_leds, _nrOfLeds, 0);
@@ -138,43 +193,81 @@ public:
 		_strobo.active = fps > 0;
 		_strobo.loop = 0;
 		_strobo.fpl = (255.0 / fps);
-		if (hue == 0) {
+		if (hue == 0)
+		{
 			_strobo.color.h = 0;
 			_strobo.color.s = 0;
 			_strobo.color.l = 255;
 		}
-		else {
+		else
+		{
 			_strobo.color.h = hue;
 			_strobo.color.s = 255;
 			_strobo.color.l = 255;
 		}
 	}
 
-	inline void loop() {
-		if (_strobo.active) {
+	inline void loop()
+	{
+		if (_strobo.active)
+		{
 
 			fill_solid(_leds, _nrOfLeds, 0);
 
-			if((_strobo.loop++) > _strobo.fpl)
+			if ((_strobo.loop++) > _strobo.fpl)
 			{
 				_strobo.loop = 0;
-				
+
 				fill_solid(_leds, _nrOfLeds, _strobo.color.chsv());
 			}
 		}
-		else {
-			for (int i = 0; i < _nrOfLeds; i++) {
-				if (_ledState[i].fade < 255) {
-					long add = ((255 - _ledState[i].fade) / 48) + 1;
-					if((long)_ledState[i].fade + add > 255) {
-						_ledState[i].fade = 255;
+		else
+		{
+			switch (_fadeMode)
+			{
+			case FadeMode::FadeToBlack:
+				for (int i = 0; i < _nrOfLeds; i++)
+				{
+					if (_ledState[i].fade < 255)
+					{
+						if (_ledState[i].fade > 255 - 62)
+						{
+							_ledState[i].fade = 255;
+						}
+						else
+						{
+							_ledState[i].fade += ((_ledState[i].fade) / 4) + 1;
+						}
+						//long add = ((_ledState[i].fade) / 4) + 1;
+						//if((long)_ledState[i].fade + add > 255) {
+						//	_ledState[i].fade = 255;
+						//}
+						//else {
+						//	_ledState[i].fade += add;
+						//}
+
+						fadeToBlackBy(_leds + i, 1, _ledState[i].fade);
 					}
-					else {
-						_ledState[i].fade += add;
-					}
-	
-					fadeToBlackBy(_leds + i, 1, _ledState[i].fade);
 				}
+				break;
+			case FadeMode::FadeOneByOne:
+				for (int i = 0; i < _nrOfLeds; i++)
+				{
+					if (_ledState[i].fade < 255)
+					{
+						if (_ledState[i].fade > random8())
+						{
+							_ledState[i].fade = 255;
+
+							fadeToBlackBy(_leds + i, 1, 255);
+						}
+						else
+						{
+							fadeToBlackBy(_leds + i, 1, 8);
+						}
+					}
+				}
+				break;
 			}
 		}
 	}

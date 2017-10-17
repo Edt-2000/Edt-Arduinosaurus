@@ -7,10 +7,12 @@ Using PlatformIO
 
 LEDApplication application = LEDApplication();
 
-void setup() {
+void setup()
+{
 	application.setup();
 }
 
-void loop() {
+void loop()
+{
 	application.loop();
 }

@@ -1,64 +1,100 @@
 #pragma once
 
-namespace OSC {
-    enum ColorCommands {
-        SingleSolid = 0,
-		SinglePulse = 1,
-		RainbowSolid = 2,
-		RainbowPulse = 3,
-		VuMeter = 4,
-		Twinkle = 5,
-		Strobo = 6
-	};
-	
-	struct SingleColorCommand {
-		// 0 - 127
-		int start;
-		int end;
+namespace OSC
+{
+enum ColorCommands
+{
+	SingleSolid = 0,
+	SinglePulse = 1,
+	SingleSpark = 7,
+	RainbowSolid = 2,
+	RainbowPulse = 3,
+	RainbowSpark = 8,
+	VuMeter = 4,
+	Twinkle = 5,
+	Strobo = 6,
+	DualSolid = 9,
+	DualPulse = 10,
+	DualSparkle = 11,
+	Kitt = 12
+};
 
-		// 0 - 255
-		int hue;
-		int saturation;
-		int value;
-		int duration;
-	};
+struct SingleColorCommand
+{
+	// 0 - 127
+	uint32_t start;
+	uint32_t end;
 
-	struct RainbowCommand {
-		// 0 - 127
-		int start;
-		int end;
+	// 0 - 255
+	uint32_t hue;
+	uint32_t saturation;
+	uint32_t value;
+	uint32_t duration;
+};
 
-		// 0 - 255
-		int hue;
-		int deltaHue;
-		int duration;
-	};
+struct DualColorCommand
+{
+	// 0 - 127
+	uint32_t start;
+	uint32_t end;
 
-	struct VuMeterCommand {
-		// 0 - 127
-		int start;
-		int end;
-		int center;
+	// 0 - 255
+	uint32_t hue1;
+	uint32_t hue2;
+	uint32_t percentage;
+	uint32_t duration;
+};
 
-		// 0 - 255
-		int hue;
-		int deltaHue;
-		int intensity;
-	};
+struct RainbowCommand
+{
+	// 0 - 127
+	uint32_t start;
+	uint32_t end;
 
-	struct TwinkleCommand {
-		// 0 - 127
-		int start;
-		int end;
+	// 0 - 255
+	uint32_t hue;
+	uint32_t deltaHue;
+	uint32_t duration;
+};
 
-		// 0 - 255
-		int hue;
-		int intensity;
-	};
+struct VuMeterCommand
+{
+	// 0 - 127
+	uint32_t start;
+	uint32_t end;
+	uint32_t center;
 
-	struct StroboCommand {
-		// 0 - 255
-		int hue;
-		int intensity;
-	};
+	// 0 - 255
+	uint32_t hue;
+	uint32_t deltaHue;
+	uint32_t intensity;
+};
+
+struct TwinkleCommand
+{
+	// 0 - 127
+	uint32_t start;
+	uint32_t end;
+
+	// 0 - 255
+	uint32_t hue;
+	uint32_t intensity;
+};
+
+struct KittCommand
+{
+	// 0 - 127
+	uint32_t position;
+	uint32_t length;
+
+	// 0 - 255
+	uint32_t hue;
+};
+
+struct StroboCommand
+{
+	// 0 - 255
+	uint32_t hue;
+	uint32_t intensity;
+};
 }

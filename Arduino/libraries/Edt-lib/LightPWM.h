@@ -13,6 +13,7 @@ public:
 	void start(int pin) {
 		_pin = pin;
 		_cycle = 0;
+		_level = 0;
 
 		pinMode(pin, OUTPUT);
 	}

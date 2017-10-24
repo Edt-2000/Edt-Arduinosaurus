@@ -1,8 +1,8 @@
 #pragma once
 
-#define ENVEDT
+//#define ENVEDT
 //#define ENVTEST
-//#define ENVDEV
+#define ENVDEV
 
 #include "Arduino.h"
 
@@ -50,6 +50,7 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 #define OSC_DMX "/DX"
 #define OSC_SUIT "/ST"
 #define OSC_SUIT_CHUK "/ST/CK"
+#define OSC_GUITAR "/GT"
 #define OSC_LED1 "/L/1"
 #define OSC_LED2 "/L/2"
 #define OSC_LED3 "/L/3"

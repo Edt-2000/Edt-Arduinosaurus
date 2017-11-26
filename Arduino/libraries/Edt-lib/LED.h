@@ -14,13 +14,6 @@ private:
 	OnOffLEDColorScheduler _colorScheduler;
 
 public:
-	
-	OSC::SingleColorCommand singleColor;
-	OSC::RainbowCommand rainbow;
-	OSC::VuMeterCommand vuMeter;
-	OSC::TwinkleCommand twinkle;
-	OSC::StroboCommand strobo;
-
 	EdtLED(const char * pattern, int outputPin) : StructMessageConsumer(7) {
 		_pattern = pattern;
 
@@ -30,13 +23,13 @@ public:
 		_colorScheduler = OnOffLEDColorScheduler(_pin, false);
 		_colorScheduler.output(0);
 
-		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &singleColor);
-		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSolid, &singleColor);
-		addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowPulse, &rainbow);
-		addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowSolid, &rainbow);
-		addEnumToStructMapping<OSC::VuMeterCommand>(OSC::ColorCommands::VuMeter, &vuMeter);
-		addEnumToStructMapping<OSC::TwinkleCommand>(OSC::ColorCommands::Twinkle, &twinkle);
-		addEnumToStructMapping<OSC::StroboCommand>(OSC::ColorCommands::Strobo, &strobo);
+		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SinglePulse, &EdtLEDMessageBuffer::buffer);
+		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SingleSolid, &EdtLEDMessageBuffer::buffer);
+		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowPulse, &EdtLEDMessageBuffer::buffer);
+		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowSolid, &EdtLEDMessageBuffer::buffer);
+		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::VuMeter, &EdtLEDMessageBuffer::buffer);
+		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Twinkle, &EdtLEDMessageBuffer::buffer);
+		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Strobo, &EdtLEDMessageBuffer::buffer);
 	}
 	
 	const char * pattern() {
@@ -54,12 +47,12 @@ public:
 		case OSC::ColorCommands::SinglePulse:
 		case OSC::ColorCommands::SingleSolid:
 
-			if(singleColor.value > 0) {
-				_colorScheduler.output(singleColor.value);
+			if(EdtLEDMessageBuffer::buffer.singleColor.value > 0) {
+				_colorScheduler.output(EdtLEDMessageBuffer::buffer.singleColor.value);
 			}
 			
-			if (command == OSC::ColorCommands::SinglePulse || singleColor.value == 0) {
-				_colorScheduler.fade(singleColor.duration);
+			if (command == OSC::ColorCommands::SinglePulse || EdtLEDMessageBuffer::buffer.singleColor.value == 0) {
+				_colorScheduler.fade(EdtLEDMessageBuffer::buffer.singleColor.duration);
 			}
 			else {
 				_colorScheduler.disableFade();
@@ -73,7 +66,7 @@ public:
 			_colorScheduler.output(127);
 			
 			if(command == OSC::ColorCommands::RainbowPulse) {
-				_colorScheduler.fade(rainbow.duration);				
+				_colorScheduler.fade(EdtLEDMessageBuffer::buffer.rainbow.duration);				
 			}
 			else {
 				_colorScheduler.disableFade();
@@ -83,8 +76,8 @@ public:
 
 		case OSC::ColorCommands::VuMeter:
 
-			if (vuMeter.intensity > 0) {
-				_colorScheduler.output(vuMeter.intensity / 2);
+			if (EdtLEDMessageBuffer::buffer.vuMeter.intensity > 0) {
+				_colorScheduler.output(EdtLEDMessageBuffer::buffer.vuMeter.intensity / 2);
 				_colorScheduler.disableFade();
 			}
 
@@ -94,9 +87,9 @@ public:
 		
 			_colorScheduler.disableFade();
 
-			if (twinkle.intensity > 0) {
+			if (EdtLEDMessageBuffer::buffer.twinkle.intensity > 0) {
 
-				if (twinkle.intensity > random8()) {
+				if (EdtLEDMessageBuffer::buffer.twinkle.intensity > random8()) {
 					_colorScheduler.output(255);
 				}
 				else {
@@ -111,7 +104,7 @@ public:
 
 		case OSC::ColorCommands::Strobo:
 
-			_colorScheduler.strobo(strobo.intensity);
+			_colorScheduler.strobo(EdtLEDMessageBuffer::buffer.strobo.intensity);
 
 			break;
 		}

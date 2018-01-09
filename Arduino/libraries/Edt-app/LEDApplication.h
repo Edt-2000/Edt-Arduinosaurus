@@ -53,23 +53,23 @@ class LEDApplication : public AbstractApplication
 		osc.addConsumer(&rgbLed1);
 		osc.addConsumer(&rgbLed2);
 		osc.addConsumer(&rgbLed3);
-		//osc.addConsumer(&led1);
-		//osc.addConsumer(&led2);
-		//osc.addConsumer(&led3);
-		//osc.addConsumer(&led4);
-		//osc.addConsumer(&led5);
-		//osc.addConsumer(&led6);
+		// osc.addConsumer(&led1);
+		// osc.addConsumer(&led2);
+		// osc.addConsumer(&led3);
+		// osc.addConsumer(&led4);
+		// osc.addConsumer(&led5);
+		// osc.addConsumer(&led6);
 
 		// make a test blink
 		rgbLed1.test();
 		rgbLed2.test();
 		rgbLed3.test();
-		//led1.test();
-		//led2.test();
-		//led3.test();
-		//led4.test();
-		//led5.test();
-		//led6.test();
+		// led1.test();
+		// led2.test();
+		// led3.test();
+		// led4.test();
+		// led5.test();
+		// led6.test();
 	}
 
 	void applicationLoop()
@@ -81,12 +81,12 @@ class LEDApplication : public AbstractApplication
 			rgbLed1.animationLoop();
 			rgbLed2.animationLoop();
 			rgbLed3.animationLoop();
-			//led1.animationLoop();
-			//led2.animationLoop();
-			//led3.animationLoop();
-			//led4.animationLoop();
-			//led5.animationLoop();
-			//led6.animationLoop();
+			// led1.animationLoop();
+			// led2.animationLoop();
+			// led3.animationLoop();
+			// led4.animationLoop();
+			// led5.animationLoop();
+			// led6.animationLoop();
 		}
 	}
 };

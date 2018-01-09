@@ -1,6 +1,6 @@
 #pragma once
 
-//#define USB
+#define USB
 
 #include "AbstractApplication.h"
 
@@ -37,30 +37,33 @@ class LEDApplication : public AbstractApplication
 
 	void setupStatus()
 	{
-		
-
 		status.setup(13, HIGH);
-	}
-
-	void setupNetwork()
-	{
+		
 #ifdef USB
 
 		Serial.begin(9600);
 
+		bool b = false;
+
 		while(!Serial) {
-			;
+			status.setup(13, b);
+			b = !b;
 		}
 
 		Serial.println("Hi");
 
-#else
+#endif
+
+	}
+
+	void setupNetwork()
+	{
+#ifndef USB
 
 		Ethernet.begin(MAC_LED);
 
 		udp.begin(PORT_BROADCAST);
-
-#endif;
+#endif
 	}
 
 	void setupOsc()
@@ -76,8 +79,8 @@ class LEDApplication : public AbstractApplication
 		osc.bindUDP(&udp, IP_BROADCAST, PORT_BROADCAST);
 #endif;
 		osc.addConsumer(&rgbLed1);
-		//osc.addConsumer(&rgbLed2);
-		//osc.addConsumer(&rgbLed3);
+		osc.addConsumer(&rgbLed2);
+		osc.addConsumer(&rgbLed3);
 		// osc.addConsumer(&led1);
 		// osc.addConsumer(&led2);
 		// osc.addConsumer(&led3);

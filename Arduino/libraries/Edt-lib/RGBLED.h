@@ -34,19 +34,19 @@ class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands>
 
 		_colorScheduler = FastLEDColorScheduler(_leds, _nrOfLeds);
 
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SinglePulse, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SingleSolid, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SingleSpark, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowPulse, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowSolid, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowSpark, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::VuMeter, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Twinkle, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Strobo, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::DualPulse, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::DualSolid, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::DualSparkle, &EdtLEDMessageBuffer::buffer);
-		addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Kitt, &EdtLEDMessageBuffer::buffer);
+		//addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SinglePulse, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SingleSolid, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SingleSpark, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowPulse, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowSolid, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowSpark, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::VuMeter, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Twinkle, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Strobo, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::DualPulse, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::DualSolid, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::DualSparkle, &EdtLEDMessageBuffer::buffer);
+		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Kitt, &EdtLEDMessageBuffer::buffer);
 	}
 
 	const char *pattern()

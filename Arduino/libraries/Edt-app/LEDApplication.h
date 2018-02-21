@@ -1,6 +1,6 @@
 #pragma once
 
-//#define USB
+#define USB
 
 #include "AbstractApplication.h"
 
@@ -60,7 +60,7 @@ class LEDApplication : public AbstractApplication
 
 		udp.begin(PORT_BROADCAST);
 
-#endif;
+#endif
 	}
 
 	void setupOsc()
@@ -74,10 +74,10 @@ class LEDApplication : public AbstractApplication
 		osc.bindStream(&Serial);
 #else
 		osc.bindUDP(&udp, IP_BROADCAST, PORT_BROADCAST);
-#endif;
+#endif
 		osc.addConsumer(&rgbLed1);
-		//osc.addConsumer(&rgbLed2);
-		//osc.addConsumer(&rgbLed3);
+		osc.addConsumer(&rgbLed2);
+		osc.addConsumer(&rgbLed3);
 		// osc.addConsumer(&led1);
 		// osc.addConsumer(&led2);
 		// osc.addConsumer(&led3);

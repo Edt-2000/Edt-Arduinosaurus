@@ -5,7 +5,7 @@
 #include <OSCMessageDefinitions.h>
 #include <OnOffLEDColorScheduler.h>
 
-class EdtLED : public OSC::StructMessageConsumer<OSC::ColorCommands>
+class EdtLED : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 {
 private:
 	const char * _pattern;

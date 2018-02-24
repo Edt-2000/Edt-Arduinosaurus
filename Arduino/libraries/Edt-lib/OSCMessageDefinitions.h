@@ -22,79 +22,79 @@ enum ColorCommands
 struct SingleColorCommand
 {
 	// 0 - 127
-	uint8_t start;
-	uint8_t end;
+	uint8_t start : 8;
+	uint8_t end : 8;
 
 	// 0 - 255
-	uint8_t hue;
-	uint8_t saturation;
-	uint8_t value;
-	uint8_t duration;
+	uint8_t hue : 8;
+	uint8_t saturation : 8;
+	uint8_t value : 8;
+	uint8_t duration : 8;
 };
 
 struct DualColorCommand
 {
 	// 0 - 127
-	uint8_t start;
-	uint8_t end;
+	uint8_t start : 8;
+	uint8_t end : 8;
 
 	// 0 - 255
-	uint8_t hue1;
-	uint8_t hue2;
-	uint8_t percentage;
-	uint8_t duration;
+	uint8_t hue1 : 8;
+	uint8_t hue2 : 8;
+	uint8_t percentage : 8;
+	uint8_t duration : 8;
 };
 
 struct RainbowCommand
 {
 	// 0 - 127
-	uint8_t start;
-	uint8_t end;
+	uint8_t start : 8;
+	uint8_t end : 8;
 
 	// 0 - 255
-	uint8_t hue;
-	uint8_t deltaHue;
-	uint8_t duration;
+	uint8_t hue : 8;
+	uint8_t deltaHue : 8;
+	uint8_t duration : 8;
 };
 
 struct VuMeterCommand
 {
 	// 0 - 127
-	uint8_t start;
-	uint8_t end;
-	uint8_t center;
+	uint8_t start : 8;
+	uint8_t end : 8;
+	uint8_t center : 8;
 
 	// 0 - 255
-	uint8_t hue;
-	uint8_t deltaHue;
-	uint8_t intensity;
+	uint8_t hue : 8;
+	uint8_t deltaHue : 8;
+	uint8_t intensity : 8;
 };
 
 struct TwinkleCommand
 {
 	// 0 - 127
-	uint8_t start;
-	uint8_t end;
+	uint8_t start : 8;
+	uint8_t end : 8;
 
 	// 0 - 255
-	uint8_t hue;
-	uint8_t intensity;
+	uint8_t hue : 8;
+	uint8_t intensity : 8;
 };
 
 struct KittCommand
 {
 	// 0 - 127
-	uint8_t position;
-	uint8_t length;
+	uint8_t position : 8;
+	uint8_t length : 8;
 
 	// 0 - 255
-	uint8_t hue;
+	uint8_t hue : 8;
 };
 
 struct StroboCommand
 {
 	// 0 - 255
-	uint8_t hue;
-	uint8_t intensity;
+	uint8_t hue : 8;
+	uint8_t intensity : 8;
 };
 }

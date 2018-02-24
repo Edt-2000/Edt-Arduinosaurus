@@ -28,7 +28,7 @@ class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 
   public:
 
-	EdtRGBLED(const char *pattern, uint8_t const nrOfLeds) : StructMessageConsumer(12)
+	EdtRGBLED(const char *pattern, uint8_t const nrOfLeds) : StructMessageConsumer(13)
 	{
 		_pattern = pattern;
 

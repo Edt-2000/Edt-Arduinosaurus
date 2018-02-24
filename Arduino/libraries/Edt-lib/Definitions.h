@@ -66,3 +66,10 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 #define OSC_ONOFFLED4 "/O/4"
 #define OSC_ONOFFLED5 "/O/5"
 #define OSC_ONOFFLED6 "/O/6"
+
+#define OSC_RGB1 "/L/1"
+#define OSC_RGB2 "/L/2"
+#define OSC_RGB3 "/L/3"
+#define OSC_RGB4 "/L/4"
+#define OSC_RGB5 "/L/5"
+#define OSC_RGB6 "/L/6"

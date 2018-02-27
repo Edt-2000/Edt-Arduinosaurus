@@ -4,23 +4,17 @@
 #include <OSCMessageConsumer.h>
 #include <OSCMessageDefinitions.h>
 #include <FastLED.h>
-//#include <FastLEDColorScheduler.h>
-#include <OnOffLEDColorScheduler.h>
+#include <RGBLEDColorScheduler.h>
 #include <FadeMode.h>
 
 class EdtRGB : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 {
   private:
 	const char *_pattern;
-	int _pinRed;
-	int _pinGreen;
-	int _pinBlue;
 
-	OnOffLEDColorScheduler _colorSchedulerRed;
-	OnOffLEDColorScheduler _colorSchedulerGreen;
-	OnOffLEDColorScheduler _colorSchedulerBlue;
+	RGBLEDColorScheduler _colorScheduler;
 
-    union OSCBuffer {
+	union OSCBuffer {
 		OSC::SingleColorCommand singleColor;
 		OSC::DualColorCommand dualColor;
 		OSC::RainbowCommand rainbow;
@@ -33,21 +27,11 @@ class EdtRGB : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 	//FastLEDColorScheduler _colorScheduler;
 
   public:
-
 	EdtRGB(const char *pattern, uint8_t const pinRed, uint8_t const pinGreen, uint8_t const pinBlue) : StructMessageConsumer(13)
 	{
 		_pattern = pattern;
 
-		_pinRed = pinRed;
-		_pinGreen = pinGreen;
-		_pinBlue = pinBlue;
-		pinMode(_pinRed, OUTPUT);
-		pinMode(_pinGreen, OUTPUT);
-		pinMode(_pinBlue, OUTPUT);
-
-		_colorSchedulerRed = OnOffLEDColorScheduler(_pinRed, false);
-		_colorSchedulerGreen = OnOffLEDColorScheduler(_pinGreen, false);
-		_colorSchedulerBlue = OnOffLEDColorScheduler(_pinBlue, false);
+		_colorScheduler = RGBLEDColorScheduler(pinRed, pinGreen, pinBlue, false, 1);
 
 		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &buffer.singleColor);
 		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSolid, &buffer.singleColor);
@@ -71,114 +55,117 @@ class EdtRGB : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 
 	void test()
 	{
-		digitalWrite(_pinRed, 255);
-		digitalWrite(_pinGreen, 220);
-		digitalWrite(_pinBlue, 245);
-
-		//_colorSchedulerRed.output(255);
-		//_colorSchedulerRed.fade(4);
-		//_colorSchedulerGreen.output(255);
-		//_colorSchedulerGreen.fade(4);
-		//_colorSchedulerBlue.output(255);
-		//_colorSchedulerBlue.fade(4);
+		_colorScheduler.solid(0, 255, 240);
+		_colorScheduler.fade(2);
 	}
 
 	void callbackEnum(OSC::ColorCommands command)
 	{
 
-		switch(command) {
+		switch (command)
+		{
 
 		case OSC::ColorCommands::SinglePulse:
 		case OSC::ColorCommands::SingleSolid:
+		case OSC::ColorCommands::SingleSpark:
 
-			if(buffer.singleColor.value > 0) {
-				_colorSchedulerRed.output(buffer.singleColor.value);
-				_colorSchedulerGreen.output(buffer.singleColor.value);
-				_colorSchedulerBlue.output(buffer.singleColor.value);
-			}
-			
-			if (command == OSC::ColorCommands::SinglePulse || buffer.singleColor.value == 0) {
-				_colorSchedulerRed.fade(buffer.singleColor.duration);
-				_colorSchedulerGreen.fade(buffer.singleColor.duration);
-				_colorSchedulerBlue.fade(buffer.singleColor.duration);
-			}
-			else {
-				_colorSchedulerRed.disableFade();
-				_colorSchedulerGreen.disableFade();
-				_colorSchedulerBlue.disableFade();
+			if (buffer.singleColor.value > 0)
+			{
+				_colorScheduler.solid(buffer.singleColor.hue, buffer.singleColor.saturation, buffer.singleColor.value);
 			}
 
-		 	break;
-
-		case OSC::ColorCommands::RainbowPulse:
-		case OSC::ColorCommands::RainbowSolid:
-
-			_colorSchedulerRed.output(127);
-			_colorSchedulerGreen.output(127);
-			_colorSchedulerBlue.output(127);
-			
-			if(command == OSC::ColorCommands::RainbowPulse) {
-				_colorSchedulerRed.fade(buffer.rainbow.duration);				
-				_colorSchedulerGreen.fade(buffer.rainbow.duration);				
-				_colorSchedulerBlue.fade(buffer.rainbow.duration);				
+			if (command == OSC::ColorCommands::SinglePulse || buffer.singleColor.value == 0)
+			{
+				_colorScheduler.fade(buffer.singleColor.duration, FadeMode::FadeToBlack);
 			}
-			else {
-				_colorSchedulerRed.disableFade();
-				_colorSchedulerGreen.disableFade();
-				_colorSchedulerBlue.disableFade();
+			else if (command == OSC::ColorCommands::SingleSpark)
+			{
+				_colorScheduler.fade(buffer.singleColor.duration, FadeMode::FadeOneByOne);
+			}
+			else
+			{
+				_colorScheduler.disableFade();
 			}
 
 			break;
 
+		case OSC::ColorCommands::DualPulse:
+		case OSC::ColorCommands::DualSolid:
+		case OSC::ColorCommands::DualSparkle:
+
+			if (buffer.dualColor.hue1 > 0)
+			{
+				_colorScheduler.solid(buffer.dualColor.hue1, buffer.dualColor.hue2, 240, 254);
+			}
+
+			if (command == OSC::ColorCommands::DualPulse || buffer.dualColor.hue1 == 0)
+			{
+				_colorScheduler.fade(buffer.dualColor.duration, FadeMode::FadeToBlack);
+			}
+			else if (command == OSC::ColorCommands::DualSparkle)
+			{
+				_colorScheduler.fade(buffer.dualColor.duration, FadeMode::FadeOneByOne);
+			}
+			else
+			{
+				_colorScheduler.disableFade();
+			}
+
+			break;
+
+		case OSC::ColorCommands::RainbowPulse:
+		case OSC::ColorCommands::RainbowSolid:
+		case OSC::ColorCommands::RainbowSpark:
+
+			if (buffer.rainbow.deltaHue > 0)
+			{
+				_colorScheduler.rainbow(buffer.rainbow.hue, buffer.rainbow.deltaHue);
+			}
+
+			if (command == OSC::ColorCommands::RainbowPulse || buffer.rainbow.deltaHue == 0)
+			{
+				_colorScheduler.fade(buffer.rainbow.duration, FadeMode::FadeToBlack);
+			}
+			else if (command == OSC::ColorCommands::RainbowSpark)
+			{
+				_colorScheduler.fade(buffer.rainbow.duration, FadeMode::FadeOneByOne);
+			}
+			else
+			{
+				_colorScheduler.disableFade();
+			}
+
 		case OSC::ColorCommands::VuMeter:
 
-			if (buffer.vuMeter.intensity > 0) {
-				_colorSchedulerRed.output(buffer.vuMeter.intensity / 2);
-				_colorSchedulerGreen.output(buffer.vuMeter.intensity / 2);
-				_colorSchedulerBlue.output(buffer.vuMeter.intensity / 2);
-				_colorSchedulerRed.disableFade();
-				_colorSchedulerGreen.disableFade();
-				_colorSchedulerBlue.disableFade();
+			if (buffer.vuMeter.intensity > 0)
+			{
+				_colorScheduler.intensity(buffer.vuMeter.intensity);
+			}
+			else
+			{
+				_colorScheduler.fade(127);
 			}
 
 			break;
 
 		case OSC::ColorCommands::Twinkle:
-		
-			_colorSchedulerRed.disableFade();
-			_colorSchedulerGreen.disableFade();
-			_colorSchedulerBlue.disableFade();
 
-			if (buffer.twinkle.intensity > 0) {
+			_colorScheduler.disableFade();
 
-				if (buffer.twinkle.intensity > random8()) {
-					_colorSchedulerRed.output(255);
-				}
-				else if (buffer.twinkle.intensity > random8()) {
-					_colorSchedulerGreen.output(255);
-				}
-				else if (buffer.twinkle.intensity > random8()) {
-					_colorSchedulerBlue.output(255);
-				}
-				else {
-					_colorSchedulerRed.output(0);
-					_colorSchedulerGreen.output(0);
-					_colorSchedulerBlue.output(0);
-				}
+			if (buffer.twinkle.intensity > 0)
+			{
+				_colorScheduler.solid(buffer.twinkle.hue, 240, buffer.twinkle.intensity - 1);
 			}
-			else {
-				_colorSchedulerRed.fade(127);
-				_colorSchedulerGreen.fade(127);
-				_colorSchedulerBlue.fade(127);
+			else
+			{
+				_colorScheduler.fade(127);
 			}
 
 			break;
 
 		case OSC::ColorCommands::Strobo:
 
-			_colorSchedulerRed.strobo(buffer.strobo.intensity);
-			_colorSchedulerGreen.strobo(buffer.strobo.intensity);
-			_colorSchedulerBlue.strobo(buffer.strobo.intensity);
+			_colorScheduler.strobo(buffer.strobo.intensity);
 
 			break;
 		}
@@ -186,8 +173,6 @@ class EdtRGB : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 
 	void animationLoop()
 	{
-		_colorSchedulerRed.loop();
-		_colorSchedulerGreen.loop();
-		_colorSchedulerBlue.loop();
+		_colorScheduler.loop();
 	}
 };

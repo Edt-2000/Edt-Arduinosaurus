@@ -25,6 +25,8 @@ public:
 		_fade = 255;
 		_reversed = reversed;
 
+// TODO: own the pins
+
 		_strobo.active = false;
 	}
 
@@ -71,7 +73,7 @@ public:
 			if (_fade < 255) {
 				// prevent overflowing of uint8_t's
 
-				// TODO: see if progressive fading is best method
+				// TODO: sync with fastled
 				int add = (2 * _fade);
 				if(add == 0) {
 					add++;

@@ -14,6 +14,7 @@
 #include "Statemachine.h"
 #include "Time.h"
 #include "RGBLED.h"
+#include "RGB.h"
 #include "LED.h"
 #include "FadeMode.h"
 
@@ -30,6 +31,8 @@ class LEDApplication : public AbstractApplication
 	// EdtLED led4 = EdtLED(OSC_ONOFFLED4, 9);
 	// EdtLED led5 = EdtLED(OSC_ONOFFLED5, 11);
 	// EdtLED led6 = EdtLED(OSC_ONOFFLED6, 13);
+	
+	EdtRGB rgb1 = EdtRGB(OSC_RGB1, 3, 5, 6);
 
 #ifndef USB
 	EthernetUDP udp;
@@ -69,7 +72,7 @@ class LEDApplication : public AbstractApplication
 		rgbLed2.configurePins<A1, A5>();
 		rgbLed3.configurePins<A2, A5>();
 
-		osc = OSC::Arduino(3, 0);
+		osc = OSC::Arduino(4, 0);
 #ifdef USB
 		osc.bindStream(&Serial);
 #else
@@ -84,6 +87,7 @@ class LEDApplication : public AbstractApplication
 		// osc.addConsumer(&led4);
 		// osc.addConsumer(&led5);
 		// osc.addConsumer(&led6);
+		osc.addConsumer(&rgb1);
 
 		// make a test blink
 		rgbLed1.test();
@@ -95,6 +99,7 @@ class LEDApplication : public AbstractApplication
 		// led4.test();
 		// led5.test();
 		// led6.test();
+		rgb1.test();
 	}
 
 	void applicationLoop()
@@ -112,6 +117,7 @@ class LEDApplication : public AbstractApplication
 			// led4.animationLoop();
 			// led5.animationLoop();
 			// led6.animationLoop();
+			rgb1.animationLoop();
 		}
 	}
 };

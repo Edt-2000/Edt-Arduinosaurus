@@ -9,6 +9,20 @@ Arduino &amp; GameTrak based expressive midi controller
 - Naming: Rename RGBLED, RGB, LED
 - LED: implement new effects
 
+## Pinout
+
+FastLED:
+VCC = BR = 1
+CI = GR = 2
+DI = OR = 3
+GR = GL = 4
+
+RGBLED:
++ = BL = 1
+B = BR = 2
+R = OR = 3
+G = GR = 4
+
 ## OSC lighting commands
 
 start = 0 - 127 (0 = begin, 127 = end)

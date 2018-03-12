@@ -43,6 +43,8 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 #define PORT_SEND uint16_t(8888)
 
 // instrument / input OSC names
+#define OSC_GREETER "/HELLO"
+
 #define OSC_TRAK "/TK"
 #define OSC_PEDAL "/PD/1"
 #define OSC_MIDICONTROL "/MC"

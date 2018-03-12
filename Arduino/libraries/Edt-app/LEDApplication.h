@@ -13,6 +13,7 @@
 #include "OSCArduino.h"
 #include "Statemachine.h"
 #include "Time.h"
+#include "Greeter.h"
 #include "RGBLED.h"
 #include "RGB.h"
 #include "LED.h"
@@ -33,6 +34,8 @@ class LEDApplication : public AbstractApplication
 	// EdtLED led6 = EdtLED(OSC_ONOFFLED6, 13);
 	
 	EdtRGB rgb1 = EdtRGB(OSC_RGB1, 3, 5, 6);
+
+	EdtGreeter greeter = EdtGreeter(OSC_GREETER);
 
 #ifndef USB
 	EthernetUDP udp;
@@ -72,7 +75,7 @@ class LEDApplication : public AbstractApplication
 		rgbLed2.configurePins<A1, A5>();
 		rgbLed3.configurePins<A2, A5>();
 
-		osc = OSC::Arduino(4, 0);
+		osc = OSC::Arduino(5, 1);
 #ifdef USB
 		osc.bindStream(&Serial);
 #else
@@ -88,6 +91,8 @@ class LEDApplication : public AbstractApplication
 		// osc.addConsumer(&led5);
 		// osc.addConsumer(&led6);
 		osc.addConsumer(&rgb1);
+		osc.addConsumer(&greeter);
+		osc.addProducer(&greeter);
 
 		// make a test blink
 		rgbLed1.test();

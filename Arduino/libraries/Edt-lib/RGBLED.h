@@ -194,10 +194,8 @@ class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 		}
 	}
 
-	void
-	animationLoop()
+	void animationLoop()
 	{
-
 		_colorScheduler.loop();
 	}
 };

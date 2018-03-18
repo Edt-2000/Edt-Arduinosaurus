@@ -8,8 +8,8 @@
 
 #include "Arduino.h"
 #include "HardwareSerial.h"
-#include "Ethernet.h"
-#include "EthernetUdp.h"
+//#include "Ethernet.h"
+//#include "EthernetUdp.h"
 #include "OSCArduino.h"
 #include "Statemachine.h"
 #include "Time.h"
@@ -22,6 +22,7 @@
 class LEDApplication : public AbstractApplication
 {
   public:
+	Tlc5940 tlc = Tlc5940();
 	EdtRGBLED rgbLed1 = EdtRGBLED(OSC_LED1, LED1_NR_OF_LEDS);
 	EdtRGBLED rgbLed2 = EdtRGBLED(OSC_LED2, LED2_NR_OF_LEDS);
 	EdtRGBLED rgbLed3 = EdtRGBLED(OSC_LED3, LED3_NR_OF_LEDS);
@@ -33,9 +34,10 @@ class LEDApplication : public AbstractApplication
 	// EdtLED led5 = EdtLED(OSC_ONOFFLED5, 11);
 	// EdtLED led6 = EdtLED(OSC_ONOFFLED6, 13);
 	
-	EdtRGB rgb1 = EdtRGB(OSC_RGB1, 3, 5, 6);
 
-	EdtGreeter greeter = EdtGreeter(OSC_GREETER);
+	EdtRGB rgb1 = EdtRGB(OSC_RGB1, 1, 2, 3, &tlc);
+
+	//EdtGreeter greeter = EdtGreeter(OSC_GREETER);
 
 #ifndef USB
 	EthernetUDP udp;
@@ -43,7 +45,7 @@ class LEDApplication : public AbstractApplication
 
 	void setupStatus()
 	{
-		
+		tlc.init();
 
 		status.setup(13, HIGH);
 	}
@@ -75,7 +77,7 @@ class LEDApplication : public AbstractApplication
 		rgbLed2.configurePins<A1, A5>();
 		rgbLed3.configurePins<A2, A5>();
 
-		osc = OSC::Arduino(5, 1);
+		osc = OSC::Arduino(4, 0);
 #ifdef USB
 		osc.bindStream(&Serial);
 #else
@@ -91,8 +93,8 @@ class LEDApplication : public AbstractApplication
 		// osc.addConsumer(&led5);
 		// osc.addConsumer(&led6);
 		osc.addConsumer(&rgb1);
-		osc.addConsumer(&greeter);
-		osc.addProducer(&greeter);
+		//osc.addConsumer(&greeter);
+		//osc.addProducer(&greeter);
 
 		// make a test blink
 		rgbLed1.test();
@@ -105,13 +107,27 @@ class LEDApplication : public AbstractApplication
 		// led5.test();
 		// led6.test();
 		rgb1.test();
+
+		//Tlc.clear();
 	}
+
+int i = 0;
 
 	void applicationLoop()
 	{
+// TODO: restart when Serial fails
+
 		if (time.tVISUAL)
 		{
+			rgb1.animationLoop();
+
+			//tlc.set(1, ++i);
+			//tlc.set(2, i * 2);
+			//tlc.set(3, i * 3);
+
 			FastLED.show();
+
+			tlc.update();
 
 			rgbLed1.animationLoop();
 			rgbLed2.animationLoop();
@@ -122,7 +138,6 @@ class LEDApplication : public AbstractApplication
 			// led4.animationLoop();
 			// led5.animationLoop();
 			// led6.animationLoop();
-			rgb1.animationLoop();
 		}
 	}
 };

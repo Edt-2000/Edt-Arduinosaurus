@@ -64,7 +64,7 @@
     or works intermittently, make sure this pin is set correctly.  This pin
     will not be used by the library other than setting its direction to
     output. */
-#define TLC_SS_PIN       PB4
+#define TLC_SS_PIN       PB2
 #define TLC_SS_DDR       DDRB
 
 /** OC1A (Arduino digital pin 9) -> XLAT (TLC pin 24) */
@@ -73,7 +73,7 @@
 #define XLAT_DDR     DDRB
 
 /** OC1B (Arduino digital pin 10) -> BLANK (TLC pin 23) */
-#define BLANK_PIN    PB4
+#define BLANK_PIN    PB2
 #define BLANK_PORT   PORTB
 #define BLANK_DDR    DDRB
 

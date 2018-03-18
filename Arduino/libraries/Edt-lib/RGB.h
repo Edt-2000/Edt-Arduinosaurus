@@ -24,14 +24,12 @@ class EdtRGB : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 		OSC::KittCommand kitt;
 	} buffer;
 
-	//FastLEDColorScheduler _colorScheduler;
-
   public:
-	EdtRGB(const char *pattern, uint8_t const pinRed, uint8_t const pinGreen, uint8_t const pinBlue) : StructMessageConsumer(13)
+	EdtRGB(const char *pattern, uint8_t const redChannel, uint8_t const greenChannel, uint8_t const blueChannel, Tlc5940 * tlc) : StructMessageConsumer(13)
 	{
 		_pattern = pattern;
 
-		_colorScheduler = RGBLEDColorScheduler(pinRed, pinGreen, pinBlue, false, 1);
+		_colorScheduler = RGBLEDColorScheduler(redChannel, greenChannel, blueChannel, 1, tlc);
 
 		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &buffer.singleColor);
 		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSolid, &buffer.singleColor);
@@ -61,7 +59,6 @@ class EdtRGB : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 
 	void callbackEnum(OSC::ColorCommands command)
 	{
-
 		switch (command)
 		{
 

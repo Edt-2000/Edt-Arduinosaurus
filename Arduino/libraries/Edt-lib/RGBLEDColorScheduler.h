@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "FastLED.h"
 #include "FadeMode.h"
+#include "SparkFun_Tlc5940.h"
 
 #define COLOR_INVERSE 255
 #define COLOR_CORRECTION 98
@@ -12,7 +13,7 @@
 class RGBLEDColorScheduler
 {
   private:
-	int _pins[3];
+	int _channels[3];
 
 	CRGB _color;
 
@@ -21,7 +22,8 @@ class RGBLEDColorScheduler
 
 	FadeMode _fadeMode;
 	CRGB _fadeBackup;
-	bool _reversed;
+
+	Tlc5940 * _tlc;
 
 	struct Strobo
 	{
@@ -29,7 +31,6 @@ class RGBLEDColorScheduler
 		int loop;
 		float fpl;
 	};
-
 	Strobo _strobo;
 
   public:
@@ -37,21 +38,12 @@ class RGBLEDColorScheduler
 	{
 	}
 
-	RGBLEDColorScheduler(int redPin, int greenPin, int bluePin, bool reversed, int rainbowPos)
+	RGBLEDColorScheduler(int redChannel, int greenChannel, int blueChannel, int rainbowPos, Tlc5940 * tlc)
 	{
-		pinMode(redPin, OUTPUT);
-		pinMode(greenPin, OUTPUT);
-		pinMode(bluePin, OUTPUT);
+		_channels[0] = redChannel;
+		_channels[1] = greenChannel;
+		_channels[2] = blueChannel;
 
-		_pins[0] = redPin;
-		_pins[1] = greenPin;
-		_pins[2] = bluePin;
-
-		digitalWrite(redPin, 0);
-		digitalWrite(greenPin, 0);
-		digitalWrite(bluePin, 0);
-
-		_reversed = reversed;
 		_rainbowPos = rainbowPos * (255 / RAINBOW_POSITIONS);
 
 		_color.setColorCode(CRGB::HTMLColorCode::Black);
@@ -59,6 +51,8 @@ class RGBLEDColorScheduler
 		_fade = 255;
 
 		_strobo.active = false;
+
+		_tlc = tlc;
 	}
 
 	void fade(int speed, FadeMode fadeMode = FadeMode::FadeToBlack)
@@ -79,25 +73,28 @@ class RGBLEDColorScheduler
 	
 	void solid(int hue, int saturation, int value)
 	{
-		fill_solid(&_color, 1, CHSV((COLOR_INVERSE - (hue - COLOR_CORRECTION)), saturation, value + ((255 - value) * INTENSITY_BOOST)));
+
+		_color.red = ++i;
+		_color.green = i * 2;
+		_color.blue = i * 3;
+
+		//_color.red = 128;
+		//_color.green = 255;
+		//_color.blue = 64;
+
+		//_color = CRGB(CHSV(hue, saturation, value));
+
+		//fill_solid(&_color, 1, .);
 	}
 
 	void solid(int hue1, int hue2, int saturation, int value)
 	{
 		fill_solid(&_color, 1, CHSV(((COLOR_INVERSE - (hue1 - COLOR_CORRECTION)) / 2) + ((COLOR_INVERSE - (hue2 - COLOR_CORRECTION)) / 2), saturation, value + ((255 - value) * INTENSITY_BOOST)));
-
-		// _color.hue = ((COLOR_INVERSE - (hue1 - COLOR_CORRECTION)) / 2) + ((COLOR_INVERSE - (hue2 - COLOR_CORRECTION)) / 2);
-		// _color.saturation = saturation;
-		// _color.value = value + ((255 - value) * INTENSITY_BOOST);
 	}
 
 	void rainbow(int hue, int deltaHue)
 	{
 		fill_solid(&_color, 1, CHSV((COLOR_INVERSE - (hue - COLOR_CORRECTION)) + ((deltaHue / 127.0) * _rainbowPos), 255, 255));
-
-		// _color.hue = (COLOR_INVERSE - (hue - COLOR_CORRECTION)) + ((deltaHue / 127.0) * _rainbowPos);
-		// _color.saturation = 255;
-		// _color.value = 240;
 	}
 
 	void intensity(int intensity) {
@@ -105,10 +102,6 @@ class RGBLEDColorScheduler
 			_color.setColorCode(CRGB::HTMLColorCode::Black);
 		}
 		else {
-			// _color.hue = (COLOR_INVERSE - (0 - COLOR_CORRECTION)) - (intensity / 2.5);
-			// _color.saturation = 255;
-			// _color.value = intensity - 1;
-
 			fill_solid(&_color, 1, CHSV( (COLOR_INVERSE - (0 - COLOR_CORRECTION)) - (intensity / 2.5), 255, intensity + ((255 - intensity) * INTENSITY_BOOST)));
 		}
 	}
@@ -116,10 +109,6 @@ class RGBLEDColorScheduler
 	void twinkle(int hue, int saturation, int value, int intensity, bool blackOut = true)
 	{
 		fill_solid(&_color, 1, CHSV((COLOR_INVERSE - (hue - COLOR_CORRECTION)), saturation, intensity > random8() ? (value + ((255 - value) * INTENSITY_BOOST)) : 0));
-
-		// _color.hue = (COLOR_INVERSE - (hue - COLOR_CORRECTION));
-		// _color.saturation = saturation;
-		// _color.value = intensity > random8() ? (value + ((255 - value) * INTENSITY_BOOST)) : 0;
 	}
 
 	void strobo(int fps)
@@ -133,79 +122,71 @@ class RGBLEDColorScheduler
 
 	void loop()
 	{
-		if (_strobo.active)
-		{
-			_color.setColorCode(CRGB::HTMLColorCode::Black);
+		// if (_strobo.active)
+		// {
+		// 	_color.setColorCode(CRGB::HTMLColorCode::Black);
 
-			if ((_strobo.loop++) > _strobo.fpl)
-			{
-				_strobo.loop = 0;
+		// 	if ((_strobo.loop++) > _strobo.fpl)
+		// 	{
+		// 		_strobo.loop = 0;
 
-				_color.setColorCode(CRGB::HTMLColorCode::White);
-			}
-		}
-		else
-		{
-			switch (_fadeMode)
-			{
-			case FadeMode::FadeToBlack:
-				if (_fade < 255)
-				{
-					if (_fade > 255 - 62)
-					{
-						_fade = 255;
-					}
-					else
-					{
-						_fade += ((_fade) / 4) + 1;
-					}
+		// 		_color.setColorCode(CRGB::HTMLColorCode::White);
+		// 	}
+		// }
+		// else
+		// {
+		// 	switch (_fadeMode)
+		// 	{
+		// 	case FadeMode::FadeToBlack:
+		// 		if (_fade < 255)
+		// 		{
+		// 			if (_fade > 255 - 62)
+		// 			{
+		// 				_fade = 255;
+		// 			}
+		// 			else
+		// 			{
+		// 				_fade += ((_fade) / 4) + 1;
+		// 			}
 
-					fadeToBlackBy(&_color, 1, _fade);
+		// 			fadeToBlackBy(&_color, 1, _fade);
+		// 		}
+		// 		break;
+		// 	case FadeMode::FadeOneByOne:
+		// 		if (_fade < 255)
+		// 		{
+		// 			if (_fade > random8())
+		// 			{
+		// 				_fadeBackup = _color;
+		// 				_color.setColorCode(CRGB::HTMLColorCode::Black);
+		// 			}
+		// 			else
+		// 			{
+		// 				if (_fade > 255 - 17)
+		// 				{
+		// 					_fade = 255;
 
-					// if (_color.value > _fade)
-					// {
-					// 	_color.value -= _fade;
-					// }
-					// else
-					// {
-					// 	_color.value = 0;
-					// }
-				}
-				break;
-			case FadeMode::FadeOneByOne:
-				if (_fade < 255)
-				{
-					if (_fade > random8())
-					{
-						_fadeBackup = _color;
-						_color.setColorCode(CRGB::HTMLColorCode::Black);
-					}
-					else
-					{
-						if (_fade > 255 - 17)
-						{
-							_fade = 255;
+		// 					_color.setColorCode(CRGB::HTMLColorCode::Black);
+		// 				}
+		// 				else
+		// 				{
+		// 					_fade += ((_fade) / 16) + 1;
 
-							_color.setColorCode(CRGB::HTMLColorCode::Black);
-						}
-						else
-						{
-							_fade += ((_fade) / 16) + 1;
+		// 					_color = _fadeBackup;
+		// 					fadeToBlackBy(&_color, 1, _fade);
+		// 				}
+		// 			}
+		// 		}
 
-							_color = _fadeBackup;
-							fadeToBlackBy(&_color, 1, _fade);
-							
-							//_color.value = _fadeBackup - _fade;
-						}
-					}
-				}
+		// 		break;
+		// 	}
+		// }
 
-				break;
-			}
-		}
 
-		analogWrite(_pins[0], _color.red);
-		analogWrite(_pins[1], _color.green);
-		analogWrite(_pins[2], _color.blue);
+		_tlc->set(_channels[0], (int)((((double)_color.red) / 255.0) * 4095));
+		_tlc->set(_channels[1], (int)((((double)_color.green) / 255.0) * 4095));
+		_tlc->set(_channels[2], (int)((((double)_color.blue) / 255.0) * 4095));
 	}
+
+	int i = 0;
 };

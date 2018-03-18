@@ -67,9 +67,9 @@
 #define XLAT_DDR     DDRB
 
 /** OC1B (Arduino digital pin 10 -> moved to pin 5 (10 is reserved on Leonardo ETH)) -> BLANK (TLC pin 23) */
-#define BLANK_PIN    PD5
-#define BLANK_PORT   PORTD
-#define BLANK_DDR    DDRD
+#define BLANK_PIN    PB2
+#define BLANK_PORT   PORTB
+#define BLANK_DDR    DDRB
 
 /** OC2B (Arduino digital pin 3) -> GSCLK (TLC pin 18) */
 #define GSCLK_PIN    PD3

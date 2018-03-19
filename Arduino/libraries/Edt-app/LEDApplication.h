@@ -33,7 +33,7 @@ class LEDApplication : public AbstractApplication
 	// EdtLED led5 = EdtLED(OSC_ONOFFLED5, 11);
 	// EdtLED led6 = EdtLED(OSC_ONOFFLED6, 13);
 	
-	//EdtRGB rgb1 = EdtRGB(OSC_RGB1, 3, 5, 6);
+	EdtRGB rgb1 = EdtRGB(OSC_RGB1, 3, 5, 6);
 
 #ifndef USB
 	EthernetUDP udp;
@@ -60,7 +60,7 @@ class LEDApplication : public AbstractApplication
 
 #else
 
-		Ethernet.begin(MAC_LED);
+		Ethernet.begin(MAC_LED, IPAddress(10,0,0,2));
 
 		udp.begin(PORT_BROADCAST);
 
@@ -69,9 +69,13 @@ class LEDApplication : public AbstractApplication
 
 	void setupOsc()
 	{
-		rgbLed1.configurePins<A0, A5>();
-		rgbLed2.configurePins<A1, A5>();
-		rgbLed3.configurePins<A2, A5>();
+		rgbLed1.configurePins<A0, A3>();
+		rgbLed2.configurePins<A1, A3>();
+		rgbLed3.configurePins<A2, A3>();
+
+		// rgbLed1.configurePins<2, 6>();
+		// rgbLed2.configurePins<3, 6>();
+		// rgbLed3.configurePins<5, 6>();
 
 		osc = OSC::Arduino(3, 0);
 #ifdef USB

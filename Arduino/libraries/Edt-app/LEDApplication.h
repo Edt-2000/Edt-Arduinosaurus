@@ -73,9 +73,9 @@ class LEDApplication : public AbstractApplication
 
 	void setupOsc()
 	{
-		rgbLed1.configurePins<A0, A5>();
-		rgbLed2.configurePins<A1, A5>();
-		rgbLed3.configurePins<A2, A5>();
+    	rgbLed1.configurePins<A0, A3>(); 
+    	rgbLed2.configurePins<A1, A3>(); 
+    	rgbLed3.configurePins<A2, A3>(); 
 
 		osc = OSC::Arduino(4, 0);
 #ifdef USB

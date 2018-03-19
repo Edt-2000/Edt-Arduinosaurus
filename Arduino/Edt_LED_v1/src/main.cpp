@@ -12,6 +12,11 @@ void setup()
 	application.setup();
 }
 
+// TODO: arduino pro on bread board
+// transfer everything to bread board
+// make work
+// done
+
 void loop()
 {
 	application.loop();

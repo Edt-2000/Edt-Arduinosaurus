@@ -3,6 +3,26 @@ Arduino &amp; GameTrak based expressive midi controller
 
 >This is our playground for all our code and experiments, we are in the progress of making separate git repositories for released code. Have a look at the [Edt-2000 organisation](https://github.com/Edt-2000) for all the repositories.
 
+## TODO:
+
+- Optimization: Producers take a OSCMessage they modify instead of yield a message
+- Naming: Rename RGBLED, RGB, LED
+- LED: implement new effects
+
+## Pinout
+
+FastLED:
+VCC = BR = 1
+CI = GR = 2
+DI = OR = 3
+GR = GL = 4
+
+RGBLED:
++ = BL = 1
+B = BR = 2
+R = OR = 3
+G = GR = 4
+
 ## OSC lighting commands
 
 start = 0 - 127 (0 = begin, 127 = end)

@@ -21,9 +21,10 @@
 #endif
 
 #define IP_TRAK IPAddress(10, 0, 0, 12)
+#define IP_SLEDT IPAddress(10, 0, 0, 200)
 
 uint8_t MAC_TRAK[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xA0 };
-uint8_t MAC_PING[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xB0 };
+uint8_t MAC_LED[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xB0 };
 uint8_t MAC_PONG[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xC0 };
 uint8_t MAC_MOSCIDI[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xA1 };
 uint8_t MAC_DOSMCX[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xA2 };
@@ -42,6 +43,8 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 #define PORT_SEND uint16_t(8888)
 
 // instrument / input OSC names
+#define OSC_GREETER "/HELLO"
+
 #define OSC_TRAK "/TK"
 #define OSC_PEDAL "/PD/1"
 #define OSC_MIDICONTROL "/MC"
@@ -65,3 +68,10 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 #define OSC_ONOFFLED4 "/O/4"
 #define OSC_ONOFFLED5 "/O/5"
 #define OSC_ONOFFLED6 "/O/6"
+
+#define OSC_RGB1 "/L/1"
+#define OSC_RGB2 "/L/2"
+#define OSC_RGB3 "/L/3"
+#define OSC_RGB4 "/L/4"
+#define OSC_RGB5 "/L/5"
+#define OSC_RGB6 "/L/6"

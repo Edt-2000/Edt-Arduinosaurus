@@ -1,6 +1,7 @@
 #pragma once
 
 #include <OSCArduino.h>
+#include <OSCMessageProducer.h>
 
 union EdtTrakData
 {
@@ -45,28 +46,7 @@ union EdtAITrakConfig
 	};
 };
 
-class EdtOSCTrak : public OSC::IMessageConsumer {
-public:
-	EdtTrakData data = EdtTrakData();
-
-	EdtOSCTrak(const char * pattern) {
-		_pattern = pattern;
-	}
-
-	const char * address() {
-		return _pattern;
-	}
-
-	void callback(OSC::Message * msg) {
-		for (int i = 0; i < 6; i++) {
-			data.buffer[i] = msg->getInt(i);
-		}
-	}
-private:
-	const char * _pattern;
-};
-
-class EdtAITrak : public OSC::IMessageProducer {
+class EdtAITrak : public OSC::MessageProducer {
 public:
 	EdtTrakData data = EdtTrakData();
 
@@ -87,20 +67,20 @@ public:
 	OSC::Message * generateMessage() {
 		for (int i = 0; i < 6; i++) {
 			data.buffer[i] = analogRead(_config.buffer[i]) / 8;
-			_message.add<int>(data.buffer[i]);
+			_message.setInt(i, data.buffer[i]);
 		}
 
 		_currentEmpty = data.lowLeft() && data.lowRight();
 
 		if (data.lowLeft()) {
-			_message.set(0, 0);
-			_message.set(1, 0);
-			_message.set(2, 0);
+			_message.setInt(0, 0);
+			_message.setInt(1, 0);
+			_message.setInt(2, 0);
 		}
 		if(data.lowRight()) {
-			_message.set(3, 0);
-			_message.set(4, 0);
-			_message.set(5, 0);
+			_message.setInt(3, 0);
+			_message.setInt(4, 0);
+			_message.setInt(5, 0);
 		}
 
 		_message.setValidData(!(_currentEmpty && _previousEmpty));

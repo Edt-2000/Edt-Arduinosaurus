@@ -10,14 +10,16 @@
 
 class AbstractApplication
 {
-public:
-	AbstractApplication() {
+  public:
+	AbstractApplication()
+	{
 		status = Status(this);
 		statemachine = EdtStatemachine();
 		time = EdtTime();
 	}
 
-	void setup() {
+	void setup()
+	{
 		time.begin();
 		statemachine.begin();
 
@@ -33,20 +35,22 @@ public:
 	virtual void setupOsc() = 0;
 	virtual void applicationLoop() = 0;
 
-	void loop() {
+	void loop()
+	{
 		time.loop();
 
-		switch (statemachine.current()) {
+		switch (statemachine.current())
+		{
 		case State::run:
 
-			// TODO: change back 
-			osc.loop(true); //time.tOSC);
+			osc.loop(time.tOSC);
 			applicationLoop();
 
 			break;
 		case State::starting:
 
-			if (status.start()) {
+			if (status.start())
+			{
 				statemachine.step();
 			}
 			delay(100);
@@ -65,24 +69,28 @@ public:
 	EdtTime time;
 	OSC::Arduino osc;
 
-protected:
-	class Status {
-	public:
-		Status() {};
-		
-		Status(AbstractApplication * parent) : _parent(parent) {};
+  protected:
+	class Status
+	{
+	  public:
+		Status(){};
 
-		inline void setup(int ledPin, int offState) {
+		Status(AbstractApplication *parent) : _parent(parent){};
+
+		inline void setup(int ledPin, int offState)
+		{
 			_ledPin = ledPin;
 			_offState = offState;
 
 			pinMode(_ledPin, OUTPUT);
 		}
 
-		inline void blink() {
+		inline void blink()
+		{
 			auto now = _parent->time.now();
 
-			if (now - _previousTime > 100) {
+			if (now - _previousTime > 100)
+			{
 				_currentState = !_currentState;
 
 				_previousTime = now;
@@ -91,10 +99,12 @@ protected:
 			led();
 		}
 
-		inline bool start() {
+		inline bool start()
+		{
 			auto now = _parent->time.now();
 
-			if (now - _previousTime > (1000 / _startLoops)) {
+			if (now - _previousTime > (1000 / _startLoops))
+			{
 				_currentState = !_currentState;
 
 				_startLoops++;
@@ -103,7 +113,8 @@ protected:
 
 			led();
 
-			if (_startLoops >= 16) {
+			if (_startLoops >= 16)
+			{
 				_startLoops = 1;
 
 				return true;
@@ -112,19 +123,20 @@ protected:
 			return false;
 		}
 
-		inline void led() {
+		inline void led()
+		{
 			digitalWrite(_ledPin, _currentState ? !_offState : _offState);
 		}
-	private:
+
+	  private:
 		bool _currentState = false;
 		unsigned long _previousTime = 0;
 		unsigned long _startLoops = 1;
 		int _ledPin = 0;
 		int _offState = LOW;
 
-		AbstractApplication* _parent;
+		AbstractApplication *_parent;
 	};
-	
+
 	Status status;
 };
-

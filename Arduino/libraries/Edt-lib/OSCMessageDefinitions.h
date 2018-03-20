@@ -19,91 +19,84 @@ enum ColorCommands
 	Kitt = 12
 };
 
-union CommandBuffer {
-	struct SingleColorCommand
-	{
-		// 0 - 127
-		uint32_t start;
-		uint32_t end;
+struct SingleColorCommand
+{
+	// 0 - 127
+	uint8_t start : 8;
+	uint8_t end : 8;
 
-		// 0 - 255
-		uint32_t hue;
-		uint32_t saturation;
-		uint32_t value;
-		uint32_t duration;
-	} singleColor;
+	// 0 - 255
+	uint8_t hue : 8;
+	uint8_t saturation : 8;
+	uint8_t value : 8;
+	uint8_t duration : 8;
+};
 
-	struct DualColorCommand
-	{
-		// 0 - 127
-		uint32_t start;
-		uint32_t end;
+struct DualColorCommand
+{
+	// 0 - 127
+	uint8_t start : 8;
+	uint8_t end : 8;
 
-		// 0 - 255
-		uint32_t hue1;
-		uint32_t hue2;
-		uint32_t percentage;
-		uint32_t duration;
-	} dualColor;
+	// 0 - 255
+	uint8_t hue1 : 8;
+	uint8_t hue2 : 8;
+	uint8_t percentage : 8;
+	uint8_t duration : 8;
+};
 
-	struct RainbowCommand
-	{
-		// 0 - 127
-		uint32_t start;
-		uint32_t end;
+struct RainbowCommand
+{
+	// 0 - 127
+	uint8_t start : 8;
+	uint8_t end : 8;
 
-		// 0 - 255
-		uint32_t hue;
-		uint32_t deltaHue;
-		uint32_t duration;
-	} rainbow;
+	// 0 - 255
+	uint8_t hue : 8;
+	uint8_t deltaHue : 8;
+	uint8_t duration : 8;
+};
 
-	struct VuMeterCommand
-	{
-		// 0 - 127
-		uint32_t start;
-		uint32_t end;
-		uint32_t center;
+struct VuMeterCommand
+{
+	// 0 - 127
+	uint8_t start : 8;
+	uint8_t end : 8;
+	uint8_t center : 8;
 
-		// 0 - 255
-		uint32_t hue;
-		uint32_t deltaHue;
-		uint32_t intensity;
-	} vuMeter;
+	// 0 - 255
+	uint8_t hue : 8;
+	uint8_t deltaHue : 8;
+	uint8_t intensity : 8;
+};
 
-	struct TwinkleCommand
-	{
-		// 0 - 127
-		uint32_t start;
-		uint32_t end;
+struct TwinkleCommand
+{
+	// 0 - 127
+	uint8_t start : 8;
+	uint8_t end : 8;
 
-		// 0 - 255
-		uint32_t hue;
-		uint32_t intensity;
-	} twinkle;
+	// 0 - 255
+	uint8_t hue : 8;
+	uint8_t intensity : 8;
+};
 
-	struct KittCommand
-	{
-		// 0 - 127
-		uint32_t position;
-		uint32_t length;
+struct KittCommand
+{
+	// 0 - 127
+	uint8_t position : 8;
+	uint8_t length : 8;
 
-		// 0 - 255
-		uint32_t hue;
-	} kitt;
-
-	struct StroboCommand
-	{
-		// 0 - 255
-		uint32_t hue;
-		uint32_t intensity;
-	} strobo;
+	// 0 - 255
+	uint8_t hue : 8;
 };
 }
 
-class EdtLEDMessageBuffer {
-public:	
-	static OSC::CommandBuffer buffer;
+struct StroboCommand
+{
+	// 0 - 255
+	uint8_t hue : 8;
+	uint8_t intensity : 8;
 };
 
 OSC::CommandBuffer EdtLEDMessageBuffer::buffer;

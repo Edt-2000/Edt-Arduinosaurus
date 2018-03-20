@@ -7,25 +7,26 @@
 #include <FastLEDColorScheduler.h>
 #include <FadeMode.h>
 
-class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands>
+class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 {
   private:
 	const char *_pattern;
 	CRGB *_leds;
 	int _nrOfLeds;
 
+	OSC::SingleColorCommand singleColor;
+	OSC::DualColorCommand dualColor;
+	OSC::RainbowCommand rainbow;
+	OSC::VuMeterCommand vuMeter;
+	OSC::TwinkleCommand twinkle;
+	OSC::StroboCommand strobo;
+	OSC::KittCommand kitt;
+
 	FastLEDColorScheduler _colorScheduler;
 
   public:
-	// OSC::SingleColorCommand singleColor;
-	// OSC::DualColorCommand dualColor;
-	// OSC::RainbowCommand rainbow;
-	// OSC::VuMeterCommand vuMeter;
-	// OSC::TwinkleCommand twinkle;
-	// OSC::StroboCommand strobo;
-	// OSC::KittCommand kitt;
 
-	EdtRGBLED(const char *pattern, uint8_t const nrOfLeds) : StructMessageConsumer(12)
+	EdtRGBLED(const char *pattern, uint8_t const nrOfLeds) : StructMessageConsumer(13)
 	{
 		_pattern = pattern;
 
@@ -59,19 +60,17 @@ class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands>
 	{
 		FastLED.addLeds<APA102, dataPin, clockPin, BRG>(_leds, _nrOfLeds);
 
-		fill_solid(_leds, _nrOfLeds, CHSV(32, 240, 32));
+		_colorScheduler.solid(0, 127, 32, 240, 32);
 	}
 
 	void test()
 	{
-		fill_solid(_leds, _nrOfLeds, CHSV(0, 240, 255));
-
+		_colorScheduler.solid(0, 127, 0, 240, 255);
 		_colorScheduler.fade(0, 127, 2);
 	}
 
 	void callbackEnum(OSC::ColorCommands command)
 	{
-
 		switch (command)
 		{
 
@@ -209,10 +208,8 @@ class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands>
 		}
 	}
 
-	void
-	animationLoop()
+	void animationLoop()
 	{
-
 		_colorScheduler.loop();
 	}
 };

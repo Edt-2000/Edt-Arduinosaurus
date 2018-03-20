@@ -40,11 +40,11 @@ class FastLEDColorScheduler
 	int _length;
 	int _nrOfLeds;
 
-	inline int normalizeLedNrDown(int percentage)
+	int normalizeLedNrDown(int percentage)
 	{
 		return floorf((percentage / 127.0) * _nrOfLeds);
 	}
-	inline int normalizeLedNrUp(int percentage)
+	int normalizeLedNrUp(int percentage)
 	{
 		return ceilf((percentage / 127.0) * _nrOfLeds);
 	}
@@ -68,7 +68,7 @@ class FastLEDColorScheduler
 		}
 	}
 
-	inline void fade(int start, int end, int speed, FadeMode fadeMode = FadeMode::FadeToBlack)
+	void fade(int start, int end, int speed, FadeMode fadeMode = FadeMode::FadeToBlack)
 	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrUp(end);
@@ -81,7 +81,7 @@ class FastLEDColorScheduler
 		}
 	}
 
-	inline void disableFade(int start, int end)
+	void disableFade(int start, int end)
 	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrUp(end);
@@ -92,7 +92,7 @@ class FastLEDColorScheduler
 		}
 	}
 
-	inline void solid(int start, int end, int hue, int saturation, int value)
+	void solid(int start, int end, int hue, int saturation, int value)
 	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrUp(end);
@@ -101,7 +101,7 @@ class FastLEDColorScheduler
 		fill_solid(_leds + _start, _length, CHSV(hue, saturation, value));
 	}
 
-	inline void rainbow(int start, int end, int hue, int deltaHue)
+	void rainbow(int start, int end, int hue, int deltaHue)
 	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrUp(end);
@@ -110,7 +110,7 @@ class FastLEDColorScheduler
 		fill_rainbow(_leds + _start, _length, hue, (deltaHue / 127.0) * (255.0 / _length));
 	}
 
-	inline void rainbow(int start, int center, int end, int hue, int deltaHue, int intensity)
+	void rainbow(int start, int center, int end, int hue, int deltaHue, int intensity)
 	{
 		_start = normalizeLedNrDown(start);
 		_center = normalizeLedNrDown(center);
@@ -150,7 +150,7 @@ class FastLEDColorScheduler
 		}
 	}
 
-	inline void twinkle(int start, int end, int hue, int saturation, int value, int intensity, bool blackOut = true)
+	void twinkle(int start, int end, int hue, int saturation, int value, int intensity, bool blackOut = true)
 	{
 		_start = normalizeLedNrDown(start);
 		_end = normalizeLedNrDown(end);
@@ -168,7 +168,7 @@ class FastLEDColorScheduler
 		}
 	}
 
-	inline void kitt(uint32_t position, int length, int hue)
+	void kitt(int position, int length, int hue)
 	{
 		if(position > 255) {
 			length = max(0, length - (position - 255));
@@ -188,7 +188,7 @@ class FastLEDColorScheduler
 		}
 	}
 
-	inline void strobo(int hue, int fps)
+	void strobo(int hue, int fps)
 	{
 		disableFade(0, _nrOfLeds);
 
@@ -211,7 +211,7 @@ class FastLEDColorScheduler
 		}
 	}
 
-	inline void loop()
+	void loop()
 	{
 		if (_strobo.active)
 		{

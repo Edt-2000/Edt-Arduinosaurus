@@ -13,7 +13,7 @@
 #include "OSCArduino.h"
 #include "Statemachine.h"
 #include "Time.h"
-#include "Greeter.h"
+//#include "Greeter.h"
 #include "RGBLED.h"
 #include "RGB.h"
 //#include "LED.h"

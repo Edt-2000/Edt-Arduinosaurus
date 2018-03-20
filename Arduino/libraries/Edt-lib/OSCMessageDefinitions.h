@@ -90,7 +90,6 @@ struct KittCommand
 	// 0 - 255
 	uint8_t hue : 8;
 };
-}
 
 struct StroboCommand
 {
@@ -98,5 +97,4 @@ struct StroboCommand
 	uint8_t hue : 8;
 	uint8_t intensity : 8;
 };
-
-OSC::CommandBuffer EdtLEDMessageBuffer::buffer;
+}

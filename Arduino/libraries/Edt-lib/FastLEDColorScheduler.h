@@ -170,11 +170,7 @@ class FastLEDColorScheduler
 
 	void kitt(int position, int length, int hue)
 	{
-		if(position > 255) {
-			length = max(0, length - (position - 255));
-		}
-
-		_start = normalizeLedNrDown(min((int)position, 127 - length));
+		_start = normalizeLedNrDown(min(position, 127 - length));
 		_length = normalizeLedNrDown(length);
 
 		for (int i = 0; i < _start; i++)

@@ -165,6 +165,12 @@ class EdtRGB : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 			_colorScheduler.strobo(buffer.strobo.intensity);
 
 			break;
+
+		case OSC::ColorCommands::Kitt:
+
+			// No implementation
+
+			break;
 		}
 	}
 

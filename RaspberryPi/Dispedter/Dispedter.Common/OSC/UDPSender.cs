@@ -5,49 +5,43 @@ using System.Net.Sockets;
 namespace Dispedter.Common.OSC
 {
     public class UdpSender
-	{
-		public int Port
-		{
-			get { return _port; }
-		}
-		int _port;
+    {
+        private IPEndPoint _remoteIpEndPoint;
+        private Socket _sock;
 
-		public string Address
-		{
-			get { return _address; }
-		}
-		string _address;
+        public int Port { get; }
+        public string Address { get; }
 
-		IPEndPoint RemoteIpEndPoint;
-		Socket sock;
+        public UdpSender(string address, int port)
+        {
+            Port = port;
+            Address = address;
 
-		public UdpSender(string address, int port)
-		{
-			_port = port;
-			_address = address;
+            _sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-			sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            var addresses = Dns.GetHostAddresses(address);
+            if (addresses.Length == 0)
+            {
+                throw new Exception("Unable to find IP address for " + address);
+            }
 
-			var addresses = System.Net.Dns.GetHostAddresses(address);
-			if (addresses.Length == 0) throw new Exception("Unable to find IP address for " + address);
+            _remoteIpEndPoint = new IPEndPoint(addresses[0], port);
+        }
 
-			RemoteIpEndPoint = new IPEndPoint(addresses[0], port);
-		}
+        public void Send(byte[] message)
+        {
+            _sock.SendTo(message, _remoteIpEndPoint);
+        }
 
-		public void Send(byte[] message)
-		{
-			sock.SendTo(message, RemoteIpEndPoint);
-		}
+        public void Send(OscPacket packet)
+        {
+            var data = packet.GetBytes();
+            Send(data);
+        }
 
-		public void Send(OscPacket packet)
-		{
-			byte[] data = packet.GetBytes();
-			Send(data);
-		}
-
-		public void Close()
-		{
-			sock.Close();
-		}
-	}
+        public void Close()
+        {
+            _sock.Close();
+        }
+    }
 }

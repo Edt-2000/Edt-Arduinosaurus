@@ -8,10 +8,10 @@ namespace Dispedter.Common.OSC
 {
     public class OscBundle : OscPacket
 	{
-		Timetag _timetag;
-		public IPEndPoint OriginEP;
+		private Timetag _timetag;
 
-		public UInt64 Timetag
+		public List<OscMessage> Messages;
+		public ulong Timetag
 		{
 			get { return _timetag.Tag; }
 			set { _timetag.Tag = value; }
@@ -22,13 +22,10 @@ namespace Dispedter.Common.OSC
 			get { return _timetag.Timestamp; }
 			set { _timetag.Timestamp = value; }
 		}
-
-		public List<OscMessage> Messages;
-
-		public OscBundle(UInt64 timetag, IPEndPoint originEP, params OscMessage[] args)
+        
+		public OscBundle(ulong timetag, params OscMessage[] args)
 		{
 			_timetag = new Timetag(timetag);
-			this.OriginEP = originEP;
 
 			Messages = new List<OscMessage>();
 			Messages.AddRange(args);
@@ -36,26 +33,26 @@ namespace Dispedter.Common.OSC
 
 		public override byte[] GetBytes()
 		{
-			string bundle = "#bundle";
-			int bundleTagLen = Utils.AlignedStringLength(bundle);
-			byte[] tag = setULong(_timetag.Tag);
+			var bundle = "#bundle";
+			var bundleTagLen = Utils.AlignedStringLength(bundle);
+			var tag = setULong(_timetag.Tag);
 
-			List<byte[]> outMessages = new List<byte[]>();
-			foreach (OscMessage msg in Messages)
+			var outMessages = new List<byte[]>();
+			foreach (var msg in Messages)
 			{
 				outMessages.Add(msg.GetBytes());
 			}
 
-			int len = bundleTagLen + tag.Length + outMessages.Sum(x => x.Length + 4);
+			var len = bundleTagLen + tag.Length + outMessages.Sum(x => x.Length + 4);
 
-			int i = 0;
-			byte[] output = new byte[len];
+			var i = 0;
+			var output = new byte[len];
 			Encoding.ASCII.GetBytes(bundle).CopyTo(output, i);
 			i += bundleTagLen;
 			tag.CopyTo(output, i);
 			i += tag.Length;
 
-			foreach (byte[] msg in outMessages)
+			foreach (var msg in outMessages)
 			{
 				var size = setInt(msg.Length);
 				size.CopyTo(output, i);

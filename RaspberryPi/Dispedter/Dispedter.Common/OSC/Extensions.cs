@@ -4,19 +4,34 @@ using System.Linq;
 
 namespace Dispedter.Common.OSC
 {
-    internal static class Extensions
+    public static class Extensions
 	{
 		public static int FirstIndexAfter<T>(this IEnumerable<T> items, int start, Func<T, bool> predicate)
 		{
-			if (items == null) throw new ArgumentNullException("items");
-			if (predicate == null) throw new ArgumentNullException("predicate");
-			if (start >= items.Count()) throw new ArgumentOutOfRangeException("start");
+			if (items == null)
+            {
+                throw new ArgumentNullException("items");
+            }
 
-			int retVal = 0;
+            if (predicate == null)
+            {
+                throw new ArgumentNullException("predicate");
+            }
+
+            if (start >= items.Count())
+            {
+                throw new ArgumentOutOfRangeException("start");
+            }
+
+            var retVal = 0;
 			foreach (var item in items)
 			{
-				if (retVal >= start && predicate(item)) return retVal;
-				retVal++;
+				if (retVal >= start && predicate(item))
+                {
+                    return retVal;
+                }
+
+                retVal++;
 			}
 			return -1;
 		}
@@ -34,8 +49,10 @@ namespace Dispedter.Common.OSC
 					output.Add(curr);
 				}
 				else
-					curr.Add(x);
-			}
+                {
+                    curr.Add(x);
+                }
+            }
 
 			return output;
 		}
@@ -44,7 +61,7 @@ namespace Dispedter.Common.OSC
 
 		public static T[] SubArray<T>(this T[] data, int index, int length)
 		{
-			T[] result = new T[length];
+			var result = new T[length];
 			Array.Copy(data, index, result, 0, length);
 			return result;
 		}

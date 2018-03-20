@@ -35,19 +35,19 @@ class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 
 		_colorScheduler = FastLEDColorScheduler(_leds, _nrOfLeds);
 
-		//addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SinglePulse, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SingleSolid, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::SingleSpark, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowPulse, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowSolid, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::RainbowSpark, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::VuMeter, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Twinkle, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Strobo, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::DualPulse, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::DualSolid, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::DualSparkle, &EdtLEDMessageBuffer::buffer);
-		// addEnumToStructMapping<OSC::CommandBuffer>(OSC::ColorCommands::Kitt, &EdtLEDMessageBuffer::buffer);
+		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &singleColor);
+		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSolid, &singleColor);
+		addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSpark, &singleColor);
+		addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowPulse, &rainbow);
+		addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowSolid, &rainbow);
+		addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowSpark, &rainbow);
+		addEnumToStructMapping<OSC::VuMeterCommand>(OSC::ColorCommands::VuMeter, &vuMeter);
+		addEnumToStructMapping<OSC::TwinkleCommand>(OSC::ColorCommands::Twinkle, &twinkle);
+		addEnumToStructMapping<OSC::StroboCommand>(OSC::ColorCommands::Strobo, &strobo);
+		addEnumToStructMapping<OSC::DualColorCommand>(OSC::ColorCommands::DualPulse, &dualColor);
+		addEnumToStructMapping<OSC::DualColorCommand>(OSC::ColorCommands::DualSolid, &dualColor);
+		addEnumToStructMapping<OSC::DualColorCommand>(OSC::ColorCommands::DualSparkle, &dualColor);
+		addEnumToStructMapping<OSC::KittCommand>(OSC::ColorCommands::Kitt, &kitt);
 	}
 
 	const char *pattern()
@@ -78,32 +78,22 @@ class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 		case OSC::ColorCommands::SingleSolid:
 		case OSC::ColorCommands::SingleSpark:
 
-			if (EdtLEDMessageBuffer::buffer.singleColor.value > 0)
+			if (singleColor.value > 0)
 			{
-				_colorScheduler.solid(EdtLEDMessageBuffer::buffer.singleColor.start, 
-					EdtLEDMessageBuffer::buffer.singleColor.end, 
-					EdtLEDMessageBuffer::buffer.singleColor.hue, 
-					EdtLEDMessageBuffer::buffer.singleColor.saturation, 
-					EdtLEDMessageBuffer::buffer.singleColor.value);
+				_colorScheduler.solid(singleColor.start, singleColor.end, singleColor.hue, singleColor.saturation, singleColor.value);
 			}
 
-			if (command == OSC::ColorCommands::SinglePulse || EdtLEDMessageBuffer::buffer.singleColor.value == 0)
+			if (command == OSC::ColorCommands::SinglePulse || singleColor.value == 0)
 			{
-				_colorScheduler.fade(EdtLEDMessageBuffer::buffer.singleColor.start, 
-					EdtLEDMessageBuffer::buffer.singleColor.end, 
-					EdtLEDMessageBuffer::buffer.singleColor.duration, 
-					FadeMode::FadeToBlack);
+				_colorScheduler.fade(singleColor.start, singleColor.end, singleColor.duration, FadeMode::FadeToBlack);
 			}
 			else if (command == OSC::ColorCommands::SingleSpark)
 			{
-				_colorScheduler.fade(EdtLEDMessageBuffer::buffer.singleColor.start, 
-					EdtLEDMessageBuffer::buffer.singleColor.end, 
-					EdtLEDMessageBuffer::buffer.singleColor.duration, FadeMode::FadeOneByOne);
+				_colorScheduler.fade(singleColor.start, singleColor.end, singleColor.duration, FadeMode::FadeOneByOne);
 			}
 			else
 			{
-				_colorScheduler.disableFade(EdtLEDMessageBuffer::buffer.singleColor.start, 
-					EdtLEDMessageBuffer::buffer.singleColor.end);
+				_colorScheduler.disableFade(singleColor.start, singleColor.end);
 			}
 
 			break;
@@ -112,28 +102,27 @@ class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 		case OSC::ColorCommands::DualSolid:
 		case OSC::ColorCommands::DualSparkle:
 
-			if (EdtLEDMessageBuffer::buffer.dualColor.hue1 > 0)
+			if (dualColor.hue1 > 0)
 			{
-				_colorScheduler.solid(EdtLEDMessageBuffer::buffer.dualColor.start, EdtLEDMessageBuffer::buffer.dualColor.end, EdtLEDMessageBuffer::buffer.dualColor.hue1, 240, 255);
+				_colorScheduler.solid(dualColor.start, dualColor.end, dualColor.hue1, 240, 255);
 
-				if (EdtLEDMessageBuffer::buffer.dualColor.hue2 > 0 && EdtLEDMessageBuffer::buffer.dualColor.percentage > 0)
+				if (dualColor.hue2 > 0 && dualColor.percentage > 0)
 				{
-					_colorScheduler.twinkle(EdtLEDMessageBuffer::buffer.dualColor.start, 
-						EdtLEDMessageBuffer::buffer.dualColor.end, EdtLEDMessageBuffer::buffer.dualColor.hue2, 240, 255, EdtLEDMessageBuffer::buffer.dualColor.percentage, false);
+					_colorScheduler.twinkle(dualColor.start, dualColor.end, dualColor.hue2, 240, 255, dualColor.percentage, false);
 				}
 			}
 
-			if (command == OSC::ColorCommands::DualPulse || EdtLEDMessageBuffer::buffer.dualColor.hue1 == 0)
+			if (command == OSC::ColorCommands::DualPulse || dualColor.hue1 == 0)
 			{
-				_colorScheduler.fade(EdtLEDMessageBuffer::buffer.dualColor.start, EdtLEDMessageBuffer::buffer.dualColor.end, EdtLEDMessageBuffer::buffer.dualColor.duration, FadeMode::FadeToBlack);
+				_colorScheduler.fade(dualColor.start, dualColor.end, dualColor.duration, FadeMode::FadeToBlack);
 			}
 			else if (command == OSC::ColorCommands::DualSparkle)
 			{
-				_colorScheduler.fade(EdtLEDMessageBuffer::buffer.dualColor.start, EdtLEDMessageBuffer::buffer.dualColor.end, EdtLEDMessageBuffer::buffer.dualColor.duration, FadeMode::FadeOneByOne);
+				_colorScheduler.fade(dualColor.start, dualColor.end, dualColor.duration, FadeMode::FadeOneByOne);
 			}
 			else
 			{
-				_colorScheduler.disableFade(EdtLEDMessageBuffer::buffer.dualColor.start, EdtLEDMessageBuffer::buffer.dualColor.end);
+				_colorScheduler.disableFade(dualColor.start, dualColor.end);
 			}
 
 			break;
@@ -142,63 +131,57 @@ class EdtRGBLED : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
 		case OSC::ColorCommands::RainbowSolid:
 		case OSC::ColorCommands::RainbowSpark:
 
-			if (EdtLEDMessageBuffer::buffer.rainbow.deltaHue > 0)
+			if (rainbow.deltaHue > 0)
 			{
-				_colorScheduler.rainbow(EdtLEDMessageBuffer::buffer.rainbow.start, EdtLEDMessageBuffer::buffer.rainbow.end, EdtLEDMessageBuffer::buffer.rainbow.hue, EdtLEDMessageBuffer::buffer.rainbow.deltaHue);
+				_colorScheduler.rainbow(rainbow.start, rainbow.end, rainbow.hue, rainbow.deltaHue);
 			}
 
-			if (command == OSC::ColorCommands::RainbowPulse || EdtLEDMessageBuffer::buffer.rainbow.deltaHue == 0)
+			if (command == OSC::ColorCommands::RainbowPulse || rainbow.deltaHue == 0)
 			{
-				_colorScheduler.fade(EdtLEDMessageBuffer::buffer.rainbow.start, EdtLEDMessageBuffer::buffer.rainbow.end, EdtLEDMessageBuffer::buffer.rainbow.duration, FadeMode::FadeToBlack);
+				_colorScheduler.fade(rainbow.start, rainbow.end, rainbow.duration, FadeMode::FadeToBlack);
 			}
 			else if (command == OSC::ColorCommands::RainbowSpark)
 			{
-				_colorScheduler.fade(EdtLEDMessageBuffer::buffer.rainbow.start, EdtLEDMessageBuffer::buffer.rainbow.end, EdtLEDMessageBuffer::buffer.rainbow.duration, FadeMode::FadeOneByOne);
+				_colorScheduler.fade(rainbow.start, rainbow.end, rainbow.duration, FadeMode::FadeOneByOne);
 			}
 			else
 			{
-				_colorScheduler.disableFade(EdtLEDMessageBuffer::buffer.rainbow.start, EdtLEDMessageBuffer::buffer.rainbow.end);
+				_colorScheduler.disableFade(rainbow.start, rainbow.end);
 			}
 
 			break;
 
 		case OSC::ColorCommands::VuMeter:
 
-			_colorScheduler.rainbow(EdtLEDMessageBuffer::buffer.vuMeter.start, 
-				EdtLEDMessageBuffer::buffer.vuMeter.center, 
-				EdtLEDMessageBuffer::buffer.vuMeter.end, 
-				EdtLEDMessageBuffer::buffer.vuMeter.hue, 
-				EdtLEDMessageBuffer::buffer.vuMeter.deltaHue, 
-				EdtLEDMessageBuffer::buffer.vuMeter.intensity);
+			_colorScheduler.rainbow(vuMeter.start, vuMeter.center, vuMeter.end, vuMeter.hue, vuMeter.deltaHue, vuMeter.intensity);
 
 			break;
 
 		case OSC::ColorCommands::Twinkle:
 
-			_colorScheduler.disableFade(EdtLEDMessageBuffer::buffer.twinkle.start, 
-				EdtLEDMessageBuffer::buffer.twinkle.end);
+			_colorScheduler.disableFade(twinkle.start, twinkle.end);
 
-			if (EdtLEDMessageBuffer::buffer.twinkle.intensity > 0)
+			if (twinkle.intensity > 0)
 			{
-				_colorScheduler.twinkle(EdtLEDMessageBuffer::buffer.twinkle.start, EdtLEDMessageBuffer::buffer.twinkle.end, EdtLEDMessageBuffer::buffer.twinkle.hue, 240, 255, EdtLEDMessageBuffer::buffer.twinkle.intensity);
+				_colorScheduler.twinkle(twinkle.start, twinkle.end, twinkle.hue, 240, 255, twinkle.intensity);
 			}
 			else
 			{
-				_colorScheduler.fade(EdtLEDMessageBuffer::buffer.twinkle.start, EdtLEDMessageBuffer::buffer.twinkle.end, 127);
+				_colorScheduler.fade(twinkle.start, twinkle.end, 127);
 			}
 
 			break;
 
 		case OSC::ColorCommands::Strobo:
 
-			_colorScheduler.strobo(EdtLEDMessageBuffer::buffer.strobo.hue, EdtLEDMessageBuffer::buffer.strobo.intensity);
+			_colorScheduler.strobo(strobo.hue, strobo.intensity);
 
 			break;
 
 		case OSC::ColorCommands::Kitt:
 			
-			if(EdtLEDMessageBuffer::buffer.kitt.position > 0) {
-				_colorScheduler.kitt(EdtLEDMessageBuffer::buffer.kitt.position, EdtLEDMessageBuffer::buffer.kitt.length, EdtLEDMessageBuffer::buffer.kitt.hue);
+			if(kitt.position > 0) {
+				_colorScheduler.kitt(kitt.position, kitt.length, kitt.hue);
 			}
 			else {
 				_colorScheduler.fade(0, 127, 127);

@@ -2,13 +2,18 @@
 
 namespace Dispedter.Common.OSC
 {
-    public class OscEventArgs : EventArgs
+    public sealed class OscEventArgs
     {
+        private readonly OscPacket _oscPacket;
+
         public OscEventArgs(OscPacket oscPacket)
         {
-            OscPacket = oscPacket;
+            _oscPacket = oscPacket;
         }
 
-        public OscPacket OscPacket { get; }
+        public OscPacket GetOscPacket()
+        {
+            return _oscPacket;
+        }
     }
 }

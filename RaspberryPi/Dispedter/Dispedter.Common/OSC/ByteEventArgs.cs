@@ -2,16 +2,18 @@
 
 namespace Dispedter.Common.OSC
 {
-    //   public delegate void HandleOscPacket(OscPacket packet);
-    //public delegate void HandleBytePacket(byte[] packet);
-
-    public class ByteEventArgs : EventArgs
+    public sealed class ByteEventArgs
     {
+        private readonly byte[] _bytes;
+
         public ByteEventArgs(byte[] bytes)
         {
-            Bytes = bytes;
+            _bytes = bytes;
         }
-
-        public byte[] Bytes { get; }
+        
+        public byte[] GetBytes()
+        {
+            return _bytes;
+        }
     }
 }

@@ -27,10 +27,10 @@ void loop()
     ------------                                  ---u----
     ARDUINO   13|-> SCLK (pin 25)           OUT1 |1     28| OUT channel 0
               12|                           OUT2 |2     27|-> GND (VPRG)
-              11|-> SIN (pin 26)            OUT3 |3     26|-> SIN (pin 11)
-              10|-> BLANK (pin 23)          OUT4 |4     25|-> SCLK (pin 13)
-               9|-> XLAT (pin 24)             .  |5     24|-> XLAT (pin 9)
-               8|                             .  |6     23|-> BLANK (pin 10)
+              11|-> SIN (pin 26)            OUT3 |3     26|-> SIN (pin 11) PM: 5
+              10|-> BLANK (pin 23)          OUT4 |4     25|-> SCLK (pin 13) PM: 6
+               9|-> XLAT (pin 24)             .  |5     24|-> XLAT (pin 9) PM: 9
+               8|                             .  |6     23|-> BLANK (pin 10) PM: 10
                7|                             .  |7     22|-> GND
                6|                             .  |8     21|-> VCC (+5V)
                5|                             .  |9     20|-> 2K Resistor -> GND
@@ -103,7 +103,7 @@ void loop()
 // 	Tlc.update();
 //     Serial.println("YO");
 
-// 	delay(8);
+// 	delay(16);
 // }
 
 //   int direction = 1;

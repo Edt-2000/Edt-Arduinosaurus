@@ -16,7 +16,7 @@
 #include "Greeter.h"
 #include "RGBLED.h"
 #include "RGB.h"
-#include "LED.h"
+//#include "LED.h"
 #include "FadeMode.h"
 
 class LEDApplication : public AbstractApplication
@@ -34,7 +34,6 @@ class LEDApplication : public AbstractApplication
 	// EdtLED led5 = EdtLED(OSC_ONOFFLED5, 11);
 	// EdtLED led6 = EdtLED(OSC_ONOFFLED6, 13);
 	
-
 	EdtRGB rgb1 = EdtRGB(OSC_RGB1, 1, 2, 3, &tlc);
 
 	//EdtGreeter greeter = EdtGreeter(OSC_GREETER);
@@ -108,26 +107,19 @@ class LEDApplication : public AbstractApplication
 		// led6.test();
 		rgb1.test();
 
-		//Tlc.clear();
+		Tlc.clear();
 	}
 
-int i = 0;
 
 	void applicationLoop()
 	{
-// TODO: restart when Serial fails
-
 		if (time.tVISUAL)
 		{
-			rgb1.animationLoop();
-
+			
 			//tlc.set(1, ++i);
 			//tlc.set(2, i * 2);
 			//tlc.set(3, i * 3);
 
-			FastLED.show();
-
-			tlc.update();
 
 			rgbLed1.animationLoop();
 			rgbLed2.animationLoop();
@@ -138,6 +130,12 @@ int i = 0;
 			// led4.animationLoop();
 			// led5.animationLoop();
 			// led6.animationLoop();
+
+			rgb1.animationLoop();
+
+			FastLED.show();
+
+			tlc.update();
 		}
 	}
 };

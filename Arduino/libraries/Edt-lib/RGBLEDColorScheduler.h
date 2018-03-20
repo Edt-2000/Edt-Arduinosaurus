@@ -73,18 +73,7 @@ class RGBLEDColorScheduler
 	
 	void solid(int hue, int saturation, int value)
 	{
-
-		_color.red = ++i;
-		_color.green = i * 2;
-		_color.blue = i * 3;
-
-		//_color.red = 128;
-		//_color.green = 255;
-		//_color.blue = 64;
-
-		//_color = CRGB(CHSV(hue, saturation, value));
-
-		//fill_solid(&_color, 1, .);
+		fill_solid(&_color, 1, CHSV((COLOR_INVERSE - (hue - COLOR_CORRECTION)), saturation, value + ((255 - value) * INTENSITY_BOOST)));
 	}
 
 	void solid(int hue1, int hue2, int saturation, int value)
@@ -122,70 +111,69 @@ class RGBLEDColorScheduler
 
 	void loop()
 	{
-		// if (_strobo.active)
-		// {
-		// 	_color.setColorCode(CRGB::HTMLColorCode::Black);
+		if (_strobo.active)
+		{
+			_color.setColorCode(CRGB::HTMLColorCode::Black);
 
-		// 	if ((_strobo.loop++) > _strobo.fpl)
-		// 	{
-		// 		_strobo.loop = 0;
+			if ((_strobo.loop++) > _strobo.fpl)
+			{
+				_strobo.loop = 0;
 
-		// 		_color.setColorCode(CRGB::HTMLColorCode::White);
-		// 	}
-		// }
-		// else
-		// {
-		// 	switch (_fadeMode)
-		// 	{
-		// 	case FadeMode::FadeToBlack:
-		// 		if (_fade < 255)
-		// 		{
-		// 			if (_fade > 255 - 62)
-		// 			{
-		// 				_fade = 255;
-		// 			}
-		// 			else
-		// 			{
-		// 				_fade += ((_fade) / 4) + 1;
-		// 			}
+				_color.setColorCode(CRGB::HTMLColorCode::White);
+			}
+		}
+		else
+		{
+			switch (_fadeMode)
+			{
+			case FadeMode::FadeToBlack:
+				if (_fade < 255)
+				{
+					if (_fade > 255 - 62)
+					{
+						_fade = 255;
+					}
+					else
+					{
+						_fade += ((_fade) / 4) + 1;
+					}
 
-		// 			fadeToBlackBy(&_color, 1, _fade);
-		// 		}
-		// 		break;
-		// 	case FadeMode::FadeOneByOne:
-		// 		if (_fade < 255)
-		// 		{
-		// 			if (_fade > random8())
-		// 			{
-		// 				_fadeBackup = _color;
-		// 				_color.setColorCode(CRGB::HTMLColorCode::Black);
-		// 			}
-		// 			else
-		// 			{
-		// 				if (_fade > 255 - 17)
-		// 				{
-		// 					_fade = 255;
+					fadeToBlackBy(&_color, 1, _fade);
+				}
+				break;
+			case FadeMode::FadeOneByOne:
+				if (_fade < 255)
+				{
+					if (_fade > random8())
+					{
+						_fadeBackup = _color;
+						_color.setColorCode(CRGB::HTMLColorCode::Black);
+					}
+					else
+					{
+						if (_fade > 255 - 17)
+						{
+							_fade = 255;
 
-		// 					_color.setColorCode(CRGB::HTMLColorCode::Black);
-		// 				}
-		// 				else
-		// 				{
-		// 					_fade += ((_fade) / 16) + 1;
+							_color.setColorCode(CRGB::HTMLColorCode::Black);
+						}
+						else
+						{
+							_fade += ((_fade) / 16) + 1;
 
-		// 					_color = _fadeBackup;
-		// 					fadeToBlackBy(&_color, 1, _fade);
-		// 				}
-		// 			}
-		// 		}
+							_color = _fadeBackup;
+							fadeToBlackBy(&_color, 1, _fade);
+						}
+					}
+				}
 
-		// 		break;
-		// 	}
-		// }
+				break;
+			}
+		}
 
-
-		_tlc->set(_channels[0], (int)((((double)_color.red) / 255.0) * 4095));
-		_tlc->set(_channels[1], (int)((((double)_color.green) / 255.0) * 4095));
-		_tlc->set(_channels[2], (int)((((double)_color.blue) / 255.0) * 4095));
+		_tlc->set(_channels[0], 4095 - (int)((((double)_color.red) / 255.0) * 4095));
+		_tlc->set(_channels[1], 4095 - (int)((((double)_color.green) / 255.0) * 4095));
+		_tlc->set(_channels[2], 4095 - (int)((((double)_color.blue) / 255.0) * 4095));
 	}
 
 	int i = 0;

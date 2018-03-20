@@ -61,15 +61,15 @@
 #define DEFAULT_BB_SCLK_PORT    PORTD
 #define DEFAULT_BB_SCLK_DDR     DDRD
 
-/** MOSI (Arduino digital pin 11) -> SIN (TLC pin 26) */
-#define TLC_MOSI_PIN     PB3
-#define TLC_MOSI_PORT    PORTB
-#define TLC_MOSI_DDR     DDRB
+/** MOSI (Arduino digital pin 11 (5)) -> SIN (TLC pin 26) */
+#define TLC_MOSI_PIN     PD5 //PB3
+#define TLC_MOSI_PORT    PORTD //PORTB
+#define TLC_MOSI_DDR     DDRD //DDRB
 
-/** SCK (Arduino digital pin 13) -> SCLK (TLC pin 25) */
-#define TLC_SCK_PIN      PB5
-#define TLC_SCK_PORT     PORTB
-#define TLC_SCK_DDR      DDRB
+/** SCK (Arduino digital pin 13 (6)) -> SCLK (TLC pin 25) */
+#define TLC_SCK_PIN      PD6 //PB5
+#define TLC_SCK_PORT     PORTD //PORTB
+#define TLC_SCK_DDR      DDRD //DDRB
 
 /** SS will be set to output as to not interfere with SPI master operation.
     If you have changed the pin-outs and the library doesn't seem to work

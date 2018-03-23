@@ -26,9 +26,7 @@ namespace Dispedter.Tester
         public MainPage()
         {
             InitializeComponent();
-
-            new UsbSender(); 
-
+            
             Window.Current.CoreWindow.KeyDown += (s, e) =>
             {
                 var key = e.VirtualKey;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Dispedter.Common.OSC
 {
-    public class UsbSender
+    public class UsbSender : ISender
     {
         private SerialPort _serialPort;
 
@@ -67,6 +67,14 @@ namespace Dispedter.Common.OSC
         {
             var data = packet.GetBytes();
             Send(data);
+        }
+
+        public void Send(IEnumerable<OscPacket> packets)
+        {
+            foreach(var packet in packets)
+            {
+                Send(packet);
+            }
         }
     }
 }

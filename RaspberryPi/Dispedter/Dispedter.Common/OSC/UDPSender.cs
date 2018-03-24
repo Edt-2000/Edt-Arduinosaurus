@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
 namespace Dispedter.Common.OSC
 {
-    public class UdpSender
+    public class UdpSender : ISender
     {
         private IPEndPoint _remoteIpEndPoint;
         private Socket _sock;
@@ -37,6 +38,14 @@ namespace Dispedter.Common.OSC
         {
             var data = packet.GetBytes();
             Send(data);
+        }
+
+        public void Send(IEnumerable<OscPacket> packets)
+        {
+            foreach(var packet in packets)
+            {
+                Send(packet);
+            }
         }
 
         public void Close()

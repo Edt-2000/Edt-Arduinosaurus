@@ -106,9 +106,12 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="OSCArduino\CommandsEnum.cs" />
+    <Compile Include="OSCArduino\Command.cs" />
+    <Compile Include="OSCArduino\CommandFactory.cs" />
+    <Compile Include="OSCArduino\PulseLength.cs" />
     <Compile Include="OSC\ByteEventArgs.cs" />
     <Compile Include="OSC\Extensions.cs" />
+    <Compile Include="OSC\ISender.cs" />
     <Compile Include="OSC\OscBundle.cs" />
     <Compile Include="OSC\OscEventArgs.cs" />
     <Compile Include="OSC\OscMessage.cs" />

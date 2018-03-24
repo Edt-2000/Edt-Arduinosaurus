@@ -3,53 +3,53 @@
 namespace Dispedter.Common.OSC
 {
     public struct Timetag
-	{
-		public ulong Tag;
+    {
+        public ulong Tag;
 
-		public DateTime Timestamp
-		{
-			get
-			{
-				return Utils.TimetagToDateTime(Tag);
-			}
-			set
-			{
-				Tag = Utils.DateTimeToTimetag(value);
-			}
-		}
+        public DateTime Timestamp
+        {
+            get
+            {
+                return Utils.TimetagToDateTime(Tag);
+            }
+            set
+            {
+                Tag = Utils.DateTimeToTimetag(value);
+            }
+        }
 
-		/// <summary>
-		/// Gets or sets the fraction of a second in the timestamp. the double precision number is multiplied by 2^32
-		/// giving an accuracy down to about 230 picoseconds ( 1/(2^32) of a second)
-		/// </summary>
-		public double Fraction
-		{
-			get
-			{
-				return Utils.TimetagToFraction(Tag);
-			}
-			set
-			{
-				Tag = (Tag & 0xFFFFFFFF00000000) + (uint)(value * 0xFFFFFFFF);
-			}
-		}
+        /// <summary>
+        /// Gets or sets the fraction of a second in the timestamp. the double precision number is multiplied by 2^32
+        /// giving an accuracy down to about 230 picoseconds ( 1/(2^32) of a second)
+        /// </summary>
+        public double Fraction
+        {
+            get
+            {
+                return Utils.TimetagToFraction(Tag);
+            }
+            set
+            {
+                Tag = (Tag & 0xFFFFFFFF00000000) + (uint)(value * 0xFFFFFFFF);
+            }
+        }
 
-		public Timetag(ulong value)
-		{
+        public Timetag(ulong value)
+        {
             Tag = value;
-		}
+        }
 
-		public Timetag(DateTime value)
-		{
-			Tag = 0;
+        public Timetag(DateTime value)
+        {
+            Tag = 0;
             Timestamp = value;
-		}
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (obj.GetType() == typeof(Timetag))
-			{
-				if (Tag == ((Timetag)obj).Tag)
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() == typeof(Timetag))
+            {
+                if (Tag == ((Timetag)obj).Tag)
                 {
                     return true;
                 }
@@ -58,9 +58,9 @@ namespace Dispedter.Common.OSC
                     return false;
                 }
             }
-			else if (obj.GetType() == typeof(ulong))
-			{
-				if (Tag == ((ulong)obj))
+            else if (obj.GetType() == typeof(ulong))
+            {
+                if (Tag == ((ulong)obj))
                 {
                     return true;
                 }
@@ -69,15 +69,15 @@ namespace Dispedter.Common.OSC
                     return false;
                 }
             }
-			else
+            else
             {
                 return false;
             }
         }
 
-		public static bool operator ==(Timetag a, Timetag b)
-		{
-			if (a.Equals(b))
+        public static bool operator ==(Timetag a, Timetag b)
+        {
+            if (a.Equals(b))
             {
                 return true;
             }
@@ -87,9 +87,9 @@ namespace Dispedter.Common.OSC
             }
         }
 
-		public static bool operator !=(Timetag a, Timetag b)
-		{
-			if (a.Equals(b))
+        public static bool operator !=(Timetag a, Timetag b)
+        {
+            if (a.Equals(b))
             {
                 return true;
             }
@@ -99,9 +99,9 @@ namespace Dispedter.Common.OSC
             }
         }
 
-		public override int GetHashCode()
-		{
-			return (int)( ((uint)(Tag >> 32) + (uint)(Tag & 0x00000000FFFFFFFF)) / 2);
-		}
-	}
+        public override int GetHashCode()
+        {
+            return (int)( ((uint)(Tag >> 32) + (uint)(Tag & 0x00000000FFFFFFFF)) / 2);
+        }
+    }
 }

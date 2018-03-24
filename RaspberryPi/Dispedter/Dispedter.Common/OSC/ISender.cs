@@ -9,9 +9,7 @@ namespace Dispedter.Common.OSC
     public interface ISender
     {
         void Send(byte[] message);
-
         void Send(OscPacket packet);
-        
         void Send(IEnumerable<OscPacket> packets);
     }
 }

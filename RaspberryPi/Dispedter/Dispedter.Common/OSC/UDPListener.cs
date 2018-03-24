@@ -39,7 +39,7 @@ namespace Dispedter.Common.OSC
                     var packet = OscPacket.GetPacket(data);
                     OscPacketReceived?.Invoke(this, new OscEventArgs(packet));
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     //  do not care
                 }

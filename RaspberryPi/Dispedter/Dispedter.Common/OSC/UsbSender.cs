@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dispedter.Common.OSC
 {
     public class UsbSender : ISender
     {
-        private SerialPort _serialPort;
+        private readonly SerialPort _serialPort;
 
-        public UsbSender(string portName, int baudRate)
+        public UsbSender(string portName, uint baudRate)
         {
-            _serialPort = new SerialPort(portName, baudRate)
+            _serialPort = new SerialPort(portName, (int)baudRate)
             {
                 DtrEnable = true,
                 RtsEnable = false,
@@ -24,6 +21,7 @@ namespace Dispedter.Common.OSC
 
             TryOpen();
         }
+
 
         public void TryOpen()
         {
@@ -40,7 +38,7 @@ namespace Dispedter.Common.OSC
                 }
                 catch (Exception)
                 {
-                    
+
                 }
             }
             while (++i < 10);
@@ -48,7 +46,7 @@ namespace Dispedter.Common.OSC
 
         private void DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            
+
         }
 
         public void Send(byte[] message)
@@ -71,7 +69,7 @@ namespace Dispedter.Common.OSC
 
         public void Send(IEnumerable<OscPacket> packets)
         {
-            foreach(var packet in packets)
+            foreach (var packet in packets)
             {
                 Send(packet);
             }

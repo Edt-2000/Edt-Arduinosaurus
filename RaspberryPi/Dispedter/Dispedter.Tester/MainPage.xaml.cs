@@ -1,5 +1,6 @@
 ﻿using Dispedter.Common.OSC;
 using Dispedter.Common.OSCArduino;
+using Dispedter.Common.System;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,20 +28,31 @@ namespace Dispedter.Tester
     public sealed partial class MainPage : Page
     {
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/L" });
-        private readonly ISender _usbSender = new UsbSender("COM3", 9600);
+        private readonly SenderFactory _senderFactory = new SenderFactory(detectUsb: true);
+
+        // private readonly ISender _usbSender = new UsbSender("COM3", 9600);
 
         private Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>> _commandMapping;
         private Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>> _proceduralCommandMapping;
 
+        private ISender _usbSender = null;
+
         public MainPage()
         {
             InitializeComponent();
+
+            InitializeDevicesAsync();
 
             InitializeCommandMapping();
             InitializeProceduralCommandMapping();
 
             Window.Current.CoreWindow.KeyDown += async (s, e) =>
             {
+                if(_usbSender == null)
+                {
+                    return;
+                }
+
                 var key = e.VirtualKey;
 
                 if (_commandMapping.TryGetValue(key, out var command))
@@ -65,9 +77,22 @@ namespace Dispedter.Tester
                     ;
                 }
             };
+        
+    }
+
+        public async void InitializeDevicesAsync()
+        {
+            try
+            {
+                var devices = await _senderFactory.DetectAllSendersAsync();
+
+                _usbSender = devices.First();
+            }
+            catch(Exception)
+            {
+                ;
+            }
         }
-
-
 
         public void InitializeCommandMapping()
         {

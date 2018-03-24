@@ -1,6 +1,6 @@
 ﻿using Dispedter.Common.OSC;
 using Dispedter.Common.OSCArduino;
-using Dispedter.Common.System;
+using Dispedter.Common.Factories;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,25 +30,25 @@ namespace Dispedter.Tester
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/L" });
         private readonly SenderFactory _senderFactory = new SenderFactory(detectUsb: true);
 
-        // private readonly ISender _usbSender = new UsbSender("COM3", 9600);
-
         private Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>> _commandMapping;
         private Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>> _proceduralCommandMapping;
 
         private ISender _usbSender = null;
 
+        private Task _getDevicesTask;
+
         public MainPage()
         {
             InitializeComponent();
 
-            InitializeDevicesAsync();
+            _getDevicesTask = InitializeDevicesAsync();
 
             InitializeCommandMapping();
             InitializeProceduralCommandMapping();
 
             Window.Current.CoreWindow.KeyDown += async (s, e) =>
             {
-                if(_usbSender == null)
+                if (_usbSender == null)
                 {
                     return;
                 }
@@ -57,7 +57,7 @@ namespace Dispedter.Tester
 
                 if (_commandMapping.TryGetValue(key, out var command))
                 {
-                    _usbSender.Send(command());
+                    await _usbSender.SendAsync(command());
                 }
                 else if (_proceduralCommandMapping.TryGetValue(key, out var procedure))
                 {
@@ -66,9 +66,7 @@ namespace Dispedter.Tester
                     {
                         var data = procedure(i);
 
-                        _usbSender.Send(data.command);
-
-                        await Task.Delay(data.delay);
+                        await Task.WhenAll(_usbSender.SendAsync(data.command), Task.Delay(data.delay));
 
                     } while (++i < 100);
                 }
@@ -77,18 +75,16 @@ namespace Dispedter.Tester
                     ;
                 }
             };
-        
-    }
+        }
 
-        public async void InitializeDevicesAsync()
+        private async Task InitializeDevicesAsync()
         {
             try
             {
-                var devices = await _senderFactory.DetectAllSendersAsync();
-
+                var devices = await _senderFactory.GetAllSendersAsync();
                 _usbSender = devices.First();
             }
-            catch(Exception)
+            catch (Exception)
             {
                 ;
             }

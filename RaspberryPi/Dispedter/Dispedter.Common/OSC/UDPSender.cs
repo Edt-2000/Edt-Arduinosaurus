@@ -43,10 +43,25 @@ namespace Dispedter.Common.OSC
 
         public void Send(IEnumerable<OscPacket> packets)
         {
-            foreach(var packet in packets)
+            foreach (var packet in packets)
             {
                 Send(packet);
             }
+        }
+
+        public Task SendAsync(byte[] message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SendAsync(OscPacket packet)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SendAsync(IEnumerable<OscPacket> packets)
+        {
+            throw new NotImplementedException();
         }
 
         public void Close()

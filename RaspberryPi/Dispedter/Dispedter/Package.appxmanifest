@@ -31,7 +31,10 @@
   </Applications>
   <Capabilities>
     <Capability Name="internetClient" />
-    <Capability Name="internetClientServer" />
-    <iot:Capability Name="lowLevelDevices" />
+    <DeviceCapability Name="serialcommunication">
+      <Device Id="any">
+        <Function Type="name:serialPort" />
+      </Device>
+    </DeviceCapability>
   </Capabilities>
 </Package>

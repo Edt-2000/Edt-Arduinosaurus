@@ -1,12 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Ports;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
+using Windows.Devices.SerialCommunication;
+using Windows.Storage.Streams;
 
 namespace Dispedter.Common.OSC
 {
-    public class UsbSender : ISender
+    public class UsbSender : ISender, IDisposable
     {
-        private readonly SerialPort _serialPort;
+        private readonly SerialPort _serialPort = null;
+        private readonly SerialDevice _device = null;
+
+        private DataWriter _serialPortStream;
 
         public UsbSender(string portName, uint baudRate)
         {
@@ -17,11 +25,26 @@ namespace Dispedter.Common.OSC
                 WriteTimeout = 10
             };
 
-            _serialPort.DataReceived += DataReceived;
-
             TryOpen();
         }
 
+        public UsbSender(SerialDevice device)
+        {
+            _device = device;
+
+            _device.BaudRate = 9600;
+
+            _device.WriteTimeout = TimeSpan.FromMilliseconds(2000);
+
+            _device.IsDataTerminalReadyEnabled = true;
+            _device.IsRequestToSendEnabled = false;
+            _device.Parity = SerialParity.None;
+            _device.DataBits = 8;
+            _device.StopBits = SerialStopBitCount.One;
+            _device.Handshake = SerialHandshake.None;
+
+            _serialPortStream = new DataWriter(_device.OutputStream);
+        }
 
         public void TryOpen()
         {
@@ -42,11 +65,6 @@ namespace Dispedter.Common.OSC
                 }
             }
             while (++i < 10);
-        }
-
-        private void DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-
         }
 
         public void Send(byte[] message)
@@ -74,5 +92,63 @@ namespace Dispedter.Common.OSC
                 Send(packet);
             }
         }
+
+        public async Task SendAsync(byte[] message)
+        {
+            try
+            {
+                _serialPortStream.WriteBytes(message);
+                await _serialPortStream.StoreAsync();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        public Task SendAsync(OscPacket packet)
+        {
+            var data = packet.GetBytes();
+            return SendAsync(data);
+        }
+
+        public async Task SendAsync(IEnumerable<OscPacket> packets)
+        {
+            foreach (var packet in packets)
+            {
+                await SendAsync(packet);
+            }
+        }
+
+        #region IDisposable Support
+        private bool _disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    if(_serialPort != null)
+                    {
+                        _serialPort.Close();
+                    }
+
+                    if(_serialPortStream != null)
+                    {
+                        _serialPortStream.Dispose();
+                        _device.Dispose();
+                    }
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 }

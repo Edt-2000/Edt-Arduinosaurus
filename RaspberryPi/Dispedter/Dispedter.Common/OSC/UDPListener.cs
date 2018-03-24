@@ -4,7 +4,7 @@ using Windows.Networking.Sockets;
 
 namespace Dispedter.Common.OSC
 {
-    public class UdpListener : IDisposable
+    public class UdpListener : IListener, IDisposable
     {
         public int Port { get; private set; }
 
@@ -45,7 +45,12 @@ namespace Dispedter.Common.OSC
                 }
             }
         }
-        
+
+        public void AddPacketHandler(TypedEventHandler<UdpListener, OscEventArgs> handler)
+        {
+            OscPacketReceived += handler;
+        }
+
         #region IDisposable Support
         private bool _disposedValue = false;
 
@@ -66,7 +71,7 @@ namespace Dispedter.Common.OSC
         {
             Dispose(true);
         }
-        #endregion
 
+        #endregion
     }
 }

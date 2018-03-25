@@ -107,8 +107,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Factories\ListenerFactory.cs" />
+    <Compile Include="OSCArduino\Colors.cs" />
     <Compile Include="OSCArduino\Command.cs" />
-    <Compile Include="OSCArduino\CommandFactory.cs" />
+    <Compile Include="Factories\CommandFactory.cs" />
     <Compile Include="OSCArduino\PulseLength.cs" />
     <Compile Include="OSC\ByteEventArgs.cs" />
     <Compile Include="OSC\Extensions.cs" />

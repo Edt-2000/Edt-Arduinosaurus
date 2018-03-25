@@ -14,18 +14,21 @@
 #include "Statemachine.h"
 #include "Time.h"
 //#include "Greeter.h"
-#include "RGBLED.h"
-#include "RGB.h"
+#include "EdtFastLED.h"
+#include "EdtRGB.h"
+//#include "RGBLED.h"
+//#include "RGB.h"
 //#include "LED.h"
 #include "FadeMode.h"
+#include "SparkFun_Tlc5940.h"
 
 class LEDApplication : public AbstractApplication
 {
   public:
 	Tlc5940 tlc = Tlc5940();
-	EdtRGBLED rgbLed1 = EdtRGBLED(OSC_LED1, LED1_NR_OF_LEDS);
-	EdtRGBLED rgbLed2 = EdtRGBLED(OSC_LED2, LED2_NR_OF_LEDS);
-	EdtRGBLED rgbLed3 = EdtRGBLED(OSC_LED3, LED3_NR_OF_LEDS);
+	OSC::Device::EdtFastLED rgbLed1 = OSC::Device::EdtFastLED(OSC_LED1, LED1_NR_OF_LEDS);
+	OSC::Device::EdtFastLED rgbLed2 = OSC::Device::EdtFastLED(OSC_LED2, LED2_NR_OF_LEDS);
+	OSC::Device::EdtFastLED rgbLed3 = OSC::Device::EdtFastLED(OSC_LED3, LED3_NR_OF_LEDS);
 
 	// EdtLED led1 = EdtLED(OSC_ONOFFLED1, 3);
 	// EdtLED led2 = EdtLED(OSC_ONOFFLED2, 5);
@@ -34,7 +37,7 @@ class LEDApplication : public AbstractApplication
 	// EdtLED led5 = EdtLED(OSC_ONOFFLED5, 11);
 	// EdtLED led6 = EdtLED(OSC_ONOFFLED6, 13);
 	
-	EdtRGB rgb1 = EdtRGB(OSC_RGB1, 1, 2, 3, &tlc);
+	OSC::Device::EdtRGB rgb1 = OSC::Device::EdtRGB(OSC_RGB1, 1, 2, 3, &tlc);
 
 	//EdtGreeter greeter = EdtGreeter(OSC_GREETER);
 
@@ -44,7 +47,7 @@ class LEDApplication : public AbstractApplication
 
 	void setupStatus()
 	{
-		tlc.init();
+		tlc.init(4095);
 
 		status.setup(13, HIGH);
 		
@@ -88,9 +91,9 @@ class LEDApplication : public AbstractApplication
 
 	void setupOsc()
 	{
-    	rgbLed1.configurePins<A0, A3>(); 
-    	rgbLed2.configurePins<A1, A3>(); 
-    	rgbLed3.configurePins<A2, A3>(); 
+    	rgbLed1.configurePins<A0, 3>(); 
+    	rgbLed2.configurePins<A1, 3>(); 
+    	rgbLed3.configurePins<A2, 3>(); 
 
 		osc = OSC::Arduino(4, 0);
 #ifdef USB

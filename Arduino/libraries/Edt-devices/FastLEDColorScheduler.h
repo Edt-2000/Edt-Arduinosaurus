@@ -16,18 +16,6 @@ namespace OSC {
 		class FastLEDColorScheduler
 		{
 		private:
-			struct Color
-			{
-				uint8_t h;
-				uint8_t s;
-				uint8_t l;
-
-				CHSV chsv()
-				{
-					return CHSV(h, s, l);
-				}
-			};
-
 			struct LedState
 			{
 			public:
@@ -39,7 +27,7 @@ namespace OSC {
 				bool active;
 				uint8_t loop;
 				float fpl;
-				Color color;
+				CHSV color;
 			};
 
 			CRGB *_leds;

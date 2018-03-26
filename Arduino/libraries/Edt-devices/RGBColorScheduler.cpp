@@ -10,7 +10,7 @@
 #define HUE(h) h
 #define VALUE(v) v + ((255 - v) * INTENSITY_BOOST)
 
-#ifndef _MSC_VER
+//#ifndef _MSC_VER
 
 #include "FastLED.h"
 #include "FadeMode.h"
@@ -56,22 +56,22 @@ void OSC::Device::RGBColorScheduler::disableFade()
 
 void OSC::Device::RGBColorScheduler::solid(uint8_t hue, uint8_t saturation, uint8_t value)
 {
-	fill_solid(&_color, 1, CHSV(HUE(hue), saturation, VALUE(value)));
+	_color.setHSV(HUE(hue), saturation, VALUE(value));
 }
 
 void OSC::Device::RGBColorScheduler::solid(uint8_t hue1, uint8_t hue2, uint8_t saturation, uint8_t value, uint8_t percentage)
 {
 	if (percentage > random8()) {
-		fill_solid(&_color, 1, CHSV(HUE(hue2), saturation, value + ((255 - value) * INTENSITY_BOOST)));
+		_color.setHSV(HUE(hue2), saturation, VALUE(value));
 	}
 	else {
-		fill_solid(&_color, 1, CHSV(HUE(hue1), saturation, value + ((255 - value) * INTENSITY_BOOST)));
+		_color.setHSV(HUE(hue1), saturation, VALUE(value));
 	}
 }
 
 void OSC::Device::RGBColorScheduler::rainbow(uint8_t hue, uint8_t deltaHue)
 {
-	fill_solid(&_color, 1, CHSV(HUE(hue) + ((deltaHue / 127.0) * _rainbowPos), 255, 255));
+	_color.setHSV(HUE(hue) + ((deltaHue / 127.0) * _rainbowPos), 255, 255);
 }
 
 void OSC::Device::RGBColorScheduler::intensity(uint8_t intensity) {
@@ -79,7 +79,7 @@ void OSC::Device::RGBColorScheduler::intensity(uint8_t intensity) {
 		_color.setColorCode(CRGB::HTMLColorCode::Black);
 	}
 	else {
-		fill_solid(&_color, 1, CHSV(HUE(0) + (85 - (intensity / 2.5)), 255, VALUE(intensity)));
+		_color.setHSV(HUE(0) + (85 - (intensity / 2.5)), 255, VALUE(intensity));
 	}
 }
 
@@ -92,15 +92,11 @@ void OSC::Device::RGBColorScheduler::strobo(uint8_t hue, uint8_t fps)
 	_strobo.active = fps > 0;
 	_strobo.loop = 0;
 	_strobo.fpl = (255.0 / fps);
-	if (hue == 0) {
-		_strobo.color.h = 0;
-		_strobo.color.s = 0;
-		_strobo.color.l = 255;
+	if (hue == 255) {
+		_color.setColorCode(CRGB::HTMLColorCode::White);
 	}
 	else {
-		_strobo.color.h = hue;
-		_strobo.color.s = 255;
-		_strobo.color.l = 255;
+		_strobo.color.setHSV(hue, 255, 255);
 	}
 }
 
@@ -114,9 +110,7 @@ void OSC::Device::RGBColorScheduler::loop()
 		{
 			_strobo.loop = 0;
 
-			_color = _strobo.color.chsv();
-
-			//_color.setColorCode(CRGB::HTMLColorCode::White);
+			_color = _strobo.color;
 		}
 	}
 	else
@@ -173,78 +167,78 @@ void OSC::Device::RGBColorScheduler::loop()
 	_tlc->set(_channels[2], 4095 - (int)((((double)_color.blue) / 255.0) * 4095));
 }
 
-#else
-
-OSC::Device::RGBColorScheduler::RGBColorScheduler() {
-}
-
-OSC::Device::RGBColorScheduler::RGBColorScheduler(uint8_t redChannel, uint8_t greenChannel, uint8_t blueChannel, uint8_t rainbowPos, Tlc5940 * tlc) {
-}
-
-void OSC::Device::RGBColorScheduler::solid(uint8_t h, uint8_t s, uint8_t v) {
-	commandColor = Command();
-	commandColor.type = Type::solid;
-	commandColor.h = h;
-	commandColor.s = s;
-	commandColor.v = v;
-}
-
-void OSC::Device::RGBColorScheduler::solid(uint8_t h1, uint8_t h2, uint8_t s, uint8_t v, uint8_t percentage) {
-	commandColor = Command();
-	commandColor.type = Type::solid;
-	commandColor.h = h1;
-	commandColor.dh = h2;
-	commandColor.s = s;
-	commandColor.v = v;
-	commandColor.percentage = percentage;
-}
-
-void OSC::Device::RGBColorScheduler::fade(uint8_t duration, FadeMode mode) {
-	commandFade = Command();
-	commandFade.type = Type::fade;
-	commandFade.duration = duration;
-	commandFade.mode = mode;
-}
-
-void OSC::Device::RGBColorScheduler::disableFade() {
-	commandFade = Command();
-	commandFade.type = Type::disableFade;
-}
-
-void OSC::Device::RGBColorScheduler::rainbow(uint8_t h, uint8_t dh) {
-	commandColor = Command();
-	commandColor.type = Type::rainbow;
-	commandColor.h = h;
-	commandColor.dh = dh;
-}
-
-void OSC::Device::RGBColorScheduler::intensity(uint8_t intensity) {
-	commandColor = Command();
-	commandColor.type = Type::intensity;
-	commandColor.intensity = intensity;
-}
-
-void OSC::Device::RGBColorScheduler::strobo(uint8_t h, uint8_t intensity) {
-	commandColor = Command();
-	commandColor.type = Type::strobo;
-	commandColor.h = h;
-	commandColor.intensity = intensity;
-}
-
-void OSC::Device::RGBColorScheduler::loop() {
-
-}
-
-Command OSC::Device::RGBColorScheduler::getCommandColor() {
-	return commandColor;
-}
-
-Command OSC::Device::RGBColorScheduler::getCommandTwinkle() {
-	return commandTwinkle;
-}
-
-Command OSC::Device::RGBColorScheduler::getCommandFade() {
-	return commandFade;
-}
-
-#endif
+//#else
+//
+//OSC::Device::RGBColorScheduler::RGBColorScheduler() {
+//}
+//
+//OSC::Device::RGBColorScheduler::RGBColorScheduler(uint8_t redChannel, uint8_t greenChannel, uint8_t blueChannel, uint8_t rainbowPos, Tlc5940 * tlc) {
+//}
+//
+//void OSC::Device::RGBColorScheduler::solid(uint8_t h, uint8_t s, uint8_t v) {
+//	commandColor = Command();
+//	commandColor.type = Type::solid;
+//	commandColor.h = h;
+//	commandColor.s = s;
+//	commandColor.v = v;
+//}
+//
+//void OSC::Device::RGBColorScheduler::solid(uint8_t h1, uint8_t h2, uint8_t s, uint8_t v, uint8_t percentage) {
+//	commandColor = Command();
+//	commandColor.type = Type::solid;
+//	commandColor.h = h1;
+//	commandColor.dh = h2;
+//	commandColor.s = s;
+//	commandColor.v = v;
+//	commandColor.percentage = percentage;
+//}
+//
+//void OSC::Device::RGBColorScheduler::fade(uint8_t duration, FadeMode mode) {
+//	commandFade = Command();
+//	commandFade.type = Type::fade;
+//	commandFade.duration = duration;
+//	commandFade.mode = mode;
+//}
+//
+//void OSC::Device::RGBColorScheduler::disableFade() {
+//	commandFade = Command();
+//	commandFade.type = Type::disableFade;
+//}
+//
+//void OSC::Device::RGBColorScheduler::rainbow(uint8_t h, uint8_t dh) {
+//	commandColor = Command();
+//	commandColor.type = Type::rainbow;
+//	commandColor.h = h;
+//	commandColor.dh = dh;
+//}
+//
+//void OSC::Device::RGBColorScheduler::intensity(uint8_t intensity) {
+//	commandColor = Command();
+//	commandColor.type = Type::intensity;
+//	commandColor.intensity = intensity;
+//}
+//
+//void OSC::Device::RGBColorScheduler::strobo(uint8_t h, uint8_t intensity) {
+//	commandColor = Command();
+//	commandColor.type = Type::strobo;
+//	commandColor.h = h;
+//	commandColor.intensity = intensity;
+//}
+//
+//void OSC::Device::RGBColorScheduler::loop() {
+//
+//}
+//
+//Command OSC::Device::RGBColorScheduler::getCommandColor() {
+//	return commandColor;
+//}
+//
+//Command OSC::Device::RGBColorScheduler::getCommandTwinkle() {
+//	return commandTwinkle;
+//}
+//
+//Command OSC::Device::RGBColorScheduler::getCommandFade() {
+//	return commandFade;
+//}
+//
+//#endif

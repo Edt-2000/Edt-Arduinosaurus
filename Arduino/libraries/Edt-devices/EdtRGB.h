@@ -103,7 +103,7 @@ namespace OSC {
 
 					_colorScheduler.solid(dualColor.hue1, dualColor.hue2, 255, 254, dualColor.percentage);
 					
-					if (command == OSC::ColorCommands::DualPulse || dualColor.hue1 == 0)
+					if (command == OSC::ColorCommands::DualPulse)
 					{
 						_colorScheduler.fade(dualColor.duration, FadeMode::FadeToBlack);
 					}

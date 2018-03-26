@@ -8,6 +8,7 @@
     mc:Ignorable="d">
 
     <Grid Background="Black">
+        <TextBlock x:Name="ColorIndex"  HorizontalAlignment="Left"  Margin="214,214,0,0" Foreground="White" Text="" VerticalAlignment="Top"/>
 
     </Grid>
 </Page>

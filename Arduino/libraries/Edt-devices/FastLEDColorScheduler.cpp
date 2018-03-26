@@ -1,6 +1,6 @@
 #include "FastLEDColorScheduler.h"
 
-#ifndef _MSC_VER
+//#ifndef _MSC_VER
 
 #include "FastLED.h"
 #include "FadeMode.h"
@@ -84,7 +84,7 @@ void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t center, 
 			_ledState[i].fade = 255;
 		}
 
-		fill_rainbow_reverse(&_leds[_center - leds - 1], leds, hue, deltaHue / (_center - _start));
+		fill_rainbow_reverse(&_leds[_center - leds - 1], leds, hue, 255 - (deltaHue / (_center - _start)));
 	}
 	if (_center != _end)
 	{
@@ -100,7 +100,7 @@ void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t center, 
 			_ledState[i].fade = 255;
 		}
 
-		fill_rainbow(&_leds[_center], leds, hue, deltaHue / (_end - _center));
+		fill_rainbow(&_leds[_center], leds, hue, 255 - (deltaHue / (_end - _center)));
 	}
 }
 
@@ -147,17 +147,13 @@ void OSC::Device::FastLEDColorScheduler::strobo(uint8_t hue, uint8_t fps)
 	_strobo.active = fps > 0;
 	_strobo.loop = 0;
 	_strobo.fpl = (255.0 / fps);
-	if (hue == 0)
+	if (hue == 255)
 	{
-		_strobo.color.h = 0;
-		_strobo.color.s = 0;
-		_strobo.color.l = 255;
+		_strobo.color = CHSV(0, 0, 255);
 	}
 	else
 	{
-		_strobo.color.h = hue;
-		_strobo.color.s = 255;
-		_strobo.color.l = 255;
+		_strobo.color = CHSV(hue, 255, 255);
 	}
 }
 
@@ -172,7 +168,7 @@ void OSC::Device::FastLEDColorScheduler::loop()
 		{
 			_strobo.loop = 0;
 
-			fill_solid(_leds, _nrOfLeds, _strobo.color.chsv());
+			fill_solid(_leds, _nrOfLeds, _strobo.color);
 		}
 	}
 	else
@@ -219,100 +215,100 @@ void OSC::Device::FastLEDColorScheduler::loop()
 	}
 }
 
-#else
+// #else
 
-OSC::Device::FastLEDColorScheduler::FastLEDColorScheduler() {
-}
+// OSC::Device::FastLEDColorScheduler::FastLEDColorScheduler() {
+// }
 
-OSC::Device::FastLEDColorScheduler::FastLEDColorScheduler(CRGB *leds, uint8_t nrOfLeds) {
-}
+// OSC::Device::FastLEDColorScheduler::FastLEDColorScheduler(CRGB *leds, uint8_t nrOfLeds) {
+// }
 
-void OSC::Device::FastLEDColorScheduler::solid(uint8_t start, uint8_t end, uint8_t h, uint8_t s, uint8_t v) {
-	commandColor = Command();
-	commandColor.type = Type::solid;
-	commandColor.start = start;
-	commandColor.end = end;
-	commandColor.h = h;
-	commandColor.s = s;
-	commandColor.v = v;
-}
+// void OSC::Device::FastLEDColorScheduler::solid(uint8_t start, uint8_t end, uint8_t h, uint8_t s, uint8_t v) {
+// 	commandColor = Command();
+// 	commandColor.type = Type::solid;
+// 	commandColor.start = start;
+// 	commandColor.end = end;
+// 	commandColor.h = h;
+// 	commandColor.s = s;
+// 	commandColor.v = v;
+// }
 
-void OSC::Device::FastLEDColorScheduler::fade(uint8_t start, uint8_t end, uint8_t duration, FadeMode mode) {
-	commandFade = Command();
-	commandFade.type = Type::fade;
-	commandFade.start = start;
-	commandFade.end = end;
-	commandFade.duration = duration;
-	commandFade.mode = mode;
-}
+// void OSC::Device::FastLEDColorScheduler::fade(uint8_t start, uint8_t end, uint8_t duration, FadeMode mode) {
+// 	commandFade = Command();
+// 	commandFade.type = Type::fade;
+// 	commandFade.start = start;
+// 	commandFade.end = end;
+// 	commandFade.duration = duration;
+// 	commandFade.mode = mode;
+// }
 
-void OSC::Device::FastLEDColorScheduler::disableFade(uint8_t start, uint8_t end) {
-	commandFade = Command();
-	commandFade.type = Type::disableFade;
-	commandFade.start = start;
-	commandFade.end = end;
-}
+// void OSC::Device::FastLEDColorScheduler::disableFade(uint8_t start, uint8_t end) {
+// 	commandFade = Command();
+// 	commandFade.type = Type::disableFade;
+// 	commandFade.start = start;
+// 	commandFade.end = end;
+// }
 
-void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t end, uint8_t h, uint8_t dh) {
-	commandColor = Command();
-	commandColor.type = Type::rainbow;
-	commandColor.start = start;
-	commandColor.end = end;
-	commandColor.h = h;
-	commandColor.dh = dh;
-}
+// void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t end, uint8_t h, uint8_t dh) {
+// 	commandColor = Command();
+// 	commandColor.type = Type::rainbow;
+// 	commandColor.start = start;
+// 	commandColor.end = end;
+// 	commandColor.h = h;
+// 	commandColor.dh = dh;
+// }
 
-void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t center, uint8_t end, uint8_t h, uint8_t dh, uint8_t intensity) {
-	commandColor = Command();
-	commandColor.type = Type::rainbow;
-	commandColor.start = start;
-	commandColor.center = center;
-	commandColor.end = end;
-	commandColor.h = h;
-	commandColor.dh = dh;
-	commandColor.intensity = intensity;
-}
+// void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t center, uint8_t end, uint8_t h, uint8_t dh, uint8_t intensity) {
+// 	commandColor = Command();
+// 	commandColor.type = Type::rainbow;
+// 	commandColor.start = start;
+// 	commandColor.center = center;
+// 	commandColor.end = end;
+// 	commandColor.h = h;
+// 	commandColor.dh = dh;
+// 	commandColor.intensity = intensity;
+// }
 
-void OSC::Device::FastLEDColorScheduler::twinkle(uint8_t start, uint8_t end, uint8_t h, uint8_t s, uint8_t v, uint8_t intensity, bool blackOut) {
-	commandTwinkle = Command();
-	commandTwinkle.type = Type::twinkle;
-	commandTwinkle.start = start;
-	commandTwinkle.end = end;
-	commandTwinkle.h = h;
-	commandTwinkle.s = s;
-	commandTwinkle.v = v;
-	commandTwinkle.intensity = intensity;
-	commandTwinkle.blackOut = blackOut;
-}
+// void OSC::Device::FastLEDColorScheduler::twinkle(uint8_t start, uint8_t end, uint8_t h, uint8_t s, uint8_t v, uint8_t intensity, bool blackOut) {
+// 	commandTwinkle = Command();
+// 	commandTwinkle.type = Type::twinkle;
+// 	commandTwinkle.start = start;
+// 	commandTwinkle.end = end;
+// 	commandTwinkle.h = h;
+// 	commandTwinkle.s = s;
+// 	commandTwinkle.v = v;
+// 	commandTwinkle.intensity = intensity;
+// 	commandTwinkle.blackOut = blackOut;
+// }
 
-void OSC::Device::FastLEDColorScheduler::strobo(uint8_t h, uint8_t intensity) {
-	commandColor = Command();
-	commandColor.type = Type::strobo;
-	commandColor.h = h;
-	commandColor.intensity = intensity;
-}
+// void OSC::Device::FastLEDColorScheduler::strobo(uint8_t h, uint8_t intensity) {
+// 	commandColor = Command();
+// 	commandColor.type = Type::strobo;
+// 	commandColor.h = h;
+// 	commandColor.intensity = intensity;
+// }
 
-void OSC::Device::FastLEDColorScheduler::kitt(uint8_t position, uint8_t length, uint8_t h) {
-	commandColor = Command();
-	commandColor.type = Type::kitt;
-	commandColor.position = position;
-	commandColor.length = length;
-	commandColor.h = h;
-}
+// void OSC::Device::FastLEDColorScheduler::kitt(uint8_t position, uint8_t length, uint8_t h) {
+// 	commandColor = Command();
+// 	commandColor.type = Type::kitt;
+// 	commandColor.position = position;
+// 	commandColor.length = length;
+// 	commandColor.h = h;
+// }
 
-void OSC::Device::FastLEDColorScheduler::loop() {
-}
+// void OSC::Device::FastLEDColorScheduler::loop() {
+// }
 
-Command OSC::Device::FastLEDColorScheduler::getCommandColor() {
-	return commandColor;
-}
+// Command OSC::Device::FastLEDColorScheduler::getCommandColor() {
+// 	return commandColor;
+// }
 
-Command OSC::Device::FastLEDColorScheduler::getCommandTwinkle() {
-	return commandTwinkle;
-}
+// Command OSC::Device::FastLEDColorScheduler::getCommandTwinkle() {
+// 	return commandTwinkle;
+// }
 
-Command OSC::Device::FastLEDColorScheduler::getCommandFade() {
-	return commandFade;
-}
+// Command OSC::Device::FastLEDColorScheduler::getCommandFade() {
+// 	return commandFade;
+// }
 
-#endif
+// #endif

@@ -61,7 +61,7 @@ namespace Dispedter.Common.Factories
 
         public IEnumerable<OscMessage> CreateVuMeter(int intensity)
         {
-            return _addresses.Select(a => new OscMessage(a, (int)Command.VUMeter, 0, 127, 63, 0, 128, intensity));
+            return _addresses.Select(a => new OscMessage(a, (int)Command.VUMeter, 0, 127, 63, (int)Color.Green, 128, intensity));
         }
 
         public IEnumerable<OscMessage> CreateTwinkle(Color h, int intensity)

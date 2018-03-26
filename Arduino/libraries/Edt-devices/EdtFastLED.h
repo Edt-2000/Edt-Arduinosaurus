@@ -122,7 +122,7 @@ namespace OSC {
 						_colorScheduler.twinkle(dualColor.start, dualColor.end, dualColor.hue2, 255, 255, dualColor.percentage, false);
 					}
 
-					if (command == OSC::ColorCommands::DualPulse || dualColor.hue1 == 0)
+					if (command == OSC::ColorCommands::DualPulse)
 					{
 						_colorScheduler.fade(dualColor.start, dualColor.end, dualColor.duration, FadeMode::FadeToBlack);
 					}

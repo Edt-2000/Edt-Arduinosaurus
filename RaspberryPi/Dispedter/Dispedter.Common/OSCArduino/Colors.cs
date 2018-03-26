@@ -6,16 +6,17 @@ using System.Threading.Tasks;
 
 namespace Dispedter.Common.OSCArduino
 {
-    // TODO: add more colors + really tweak them
-
     public enum Color
     {
         Red = 0,
-        Yellow = 40,
-        Green = 85,
-        BlueGreen = 125,
-        Blue = 160,
-        Purple = 200,
-        Pink = 230
+        Orange = 18,
+        Yellow = 58,
+        Lime = 85,
+        Green = 95,
+        SeaGreen = 105,
+        Turquoise = 129,
+        Blue = 158,
+        Purple = 183,
+        Pink = 218
     }
 }

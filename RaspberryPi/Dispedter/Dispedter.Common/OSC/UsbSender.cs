@@ -34,7 +34,8 @@ namespace Dispedter.Common.OSC
 
             _device.BaudRate = 9600;
 
-            _device.WriteTimeout = TimeSpan.FromMilliseconds(2000);
+            _device.WriteTimeout = TimeSpan.FromMilliseconds(1000);
+            _device.ReadTimeout = TimeSpan.FromMilliseconds(1000);
 
             _device.IsDataTerminalReadyEnabled = true;
             _device.IsRequestToSendEnabled = false;

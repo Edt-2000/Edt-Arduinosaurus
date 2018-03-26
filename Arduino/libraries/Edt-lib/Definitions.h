@@ -53,22 +53,16 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 #define OSC_SUIT "/ST"
 #define OSC_SUIT_CHUK "/ST/CK"
 #define OSC_GUITAR "/GT"
-#define OSC_LED1 "/L/1"
-#define OSC_LED2 "/L/2"
-#define OSC_LED3 "/L/3"
-#define OSC_LED4 "/L/4"
-#define OSC_LED5 "/L/5"
+#define OSC_FL1 "/L/1"
+#define OSC_FL2 "/L/2"
+#define OSC_FL3 "/L/3"
+#define OSC_FL4 "/L/4"
+#define OSC_FL5 "/L/5"
 
-#define LED1_NR_OF_LEDS 29
-#define LED2_NR_OF_LEDS 59
-#define LED3_NR_OF_LEDS 57
-
-#define OSC_ONOFFLED1 "/O/1"
-#define OSC_ONOFFLED2 "/O/2"
-#define OSC_ONOFFLED3 "/O/3"
-#define OSC_ONOFFLED4 "/O/4"
-#define OSC_ONOFFLED5 "/O/5"
-#define OSC_ONOFFLED6 "/O/6"
+#define FL1_NR_OF_LEDS 29
+#define FL2_NR_OF_LEDS 59
+#define FL3_NR_OF_LEDS 57
+#define FL4_NR_OF_LEDS 57
 
 #define OSC_RGB1 "/L/1"
 #define OSC_RGB2 "/L/2"

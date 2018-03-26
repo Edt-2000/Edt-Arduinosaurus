@@ -14,18 +14,6 @@ namespace OSC {
 		class RGBColorScheduler
 		{
 		private:
-			struct Color
-			{
-				uint8_t h;
-				uint8_t s;
-				uint8_t l;
-
-				CHSV chsv()
-				{
-					return CHSV(h, s, l);
-				}
-			};
-
 			uint8_t _channels[3];
 
 			CRGB _color;
@@ -43,7 +31,7 @@ namespace OSC {
 				bool active;
 				int loop;
 				float fpl;
-				Color color;
+				CRGB color;
 			};
 			Strobo _strobo;
 

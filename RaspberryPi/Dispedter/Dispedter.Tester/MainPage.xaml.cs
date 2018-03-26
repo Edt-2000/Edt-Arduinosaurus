@@ -49,51 +49,73 @@ namespace Dispedter.Tester
 
             Window.Current.CoreWindow.KeyDown += async (s, e) =>
             {
-                if (_usbSender == null)
-                {
-                    return;
-                }
-
                 var key = e.VirtualKey;
-
-                if (_commandMapping.TryGetValue(key, out var command))
-                {
-                    await _usbSender.SendAsync(command());
-                }
-                else if (_proceduralCommandMapping.TryGetValue(key, out var procedure))
-                {
-                    var i = 0;
-                    do
-                    {
-                        var data = procedure(i);
-
-                        await Task.WhenAll(_usbSender.SendAsync(data.command), Task.Delay(data.delay));
-
-                    } while (++i < 100);
-                }
-                else
-                {
-                    ;
-                }
+                await SendCommandAsync(key);
             };
         }
 
+        private async Task SendCommandAsync(VirtualKey key)
+        {
+            if (_usbSender == null)
+            {
+                return;
+            }
 
+            if (_usbSender.IsBroken())
+            {
+                _getDevicesTask = InitializeDevicesAsync();
+                return;
+            }
+            
+            if (_commandMapping.TryGetValue(key, out var command))
+            {
+                await _usbSender.SendAsync(command());
+            }
+            else if (_proceduralCommandMapping.TryGetValue(key, out var procedure))
+            {
+                var i = 0;
+                do
+                {
+                    var data = procedure(i);
+
+                    await Task.WhenAll(_usbSender.SendAsync(data.command), Task.Delay(data.delay));
+
+                } while (++i < 100);
+            }
+            else
+            {
+                ;
+            }
+        }
 
         private async Task InitializeDevicesAsync()
         {
             try
             {
-                var devices = await _senderFactory.GetAllSendersAsync();
-                _usbSender = devices.First();
+                _usbSender?.Dispose();
+                _usbSender = null;
+
+                do
+                {
+
+                    var devices = await _senderFactory.GetAllSendersAsync();
+                    _usbSender = devices.FirstOrDefault();
+
+                    if(_usbSender != null)
+                    {
+                        break;
+                    }
+
+                    await Task.Delay(1000);
+
+                } while (true);
             }
             catch (Exception)
             {
                 ;
             }
         }
-
-        public void InitializeCommandMapping()
+        private void InitializeCommandMapping()
         {
             var i = (byte)0;
             var strobo = (byte)0;
@@ -220,12 +242,10 @@ namespace Dispedter.Tester
         {
             return (int)(Math.Sin((i / 100.0) * Math.PI) * 255);
         }
-
         private static int Random()
         {
             return Clamp(new Random().NextDouble());
         }
-
         private static int Clamp(double i)
         {
             return (int)(i * 255);

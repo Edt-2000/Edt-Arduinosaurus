@@ -7,7 +7,7 @@ using Windows.Storage.Streams;
 
 namespace Dispedter.Common.OSC
 {
-    public class UsbSender : ISender, IDisposable
+    public class UsbSender : ISender
     {
         private readonly DeviceInformation _deviceInfo;
         private Task _deviceTask;
@@ -26,6 +26,12 @@ namespace Dispedter.Common.OSC
 
         private async Task ConfigureDeviceAsync()
         {
+            // TODO: this must not become a resouce hogging dead lock
+            if (!_deviceTask.IsCompleted)
+            {
+                await _deviceTask;
+            }
+
             _healty = false;
 
             var retries = 0;
@@ -50,6 +56,9 @@ namespace Dispedter.Common.OSC
                     _serialPortStream = new DataWriter(_device.OutputStream);
 
                     _healty = true;
+
+                    // we're healthy
+                    return;
                 }
                 catch (Exception)
                 {
@@ -57,6 +66,7 @@ namespace Dispedter.Common.OSC
                 }
             } while (++retries < 3);
 
+            // kill me
             _broken = true;
         }
 
@@ -115,8 +125,8 @@ namespace Dispedter.Common.OSC
                 {
                     if (_serialPortStream != null)
                     {
-                        _serialPortStream.Dispose();
-                        _device.Dispose();
+                        _serialPortStream?.Dispose();
+                        _device?.Dispose();
                     }
                 }
 

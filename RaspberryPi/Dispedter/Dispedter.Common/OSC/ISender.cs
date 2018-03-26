@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Dispedter.Common.OSC
 {
-    public interface ISender
+    public interface ISender : IDisposable
     {
         Task SendAsync(byte[] message);
         Task SendAsync(OscPacket packet);

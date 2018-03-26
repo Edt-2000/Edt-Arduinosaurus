@@ -20,6 +20,8 @@ OSC::Device::FastLEDColorScheduler::FastLEDColorScheduler(CRGB *leds, uint8_t nr
 	{
 		_ledState[i].fade = 255;
 	}
+
+	_strobo.active = false;
 }
 
 void OSC::Device::FastLEDColorScheduler::fade(uint8_t start, uint8_t end, uint8_t speed, FadeMode fadeMode)

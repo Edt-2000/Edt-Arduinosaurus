@@ -68,5 +68,10 @@ namespace Dispedter.Common.OSC
         {
             _sock.Close();
         }
+
+        public bool IsBroken()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

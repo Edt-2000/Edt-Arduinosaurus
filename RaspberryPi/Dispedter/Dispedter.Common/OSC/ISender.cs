@@ -8,12 +8,10 @@ namespace Dispedter.Common.OSC
 {
     public interface ISender
     {
-        void Send(byte[] message);
-        void Send(OscPacket packet);
-        void Send(IEnumerable<OscPacket> packets);
-
         Task SendAsync(byte[] message);
         Task SendAsync(OscPacket packet);
         Task SendAsync(IEnumerable<OscPacket> packets);
+
+        bool IsBroken();
     }
 }

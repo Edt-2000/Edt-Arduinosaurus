@@ -38,7 +38,6 @@ namespace Dispedter.Tester
         private Task _getDevicesTask;
 
 
-
         public MainPage()
         {
             InitializeComponent();
@@ -78,6 +77,8 @@ namespace Dispedter.Tester
                 }
             };
         }
+
+
 
         private async Task InitializeDevicesAsync()
         {

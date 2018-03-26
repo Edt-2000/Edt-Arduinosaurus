@@ -32,8 +32,7 @@ namespace Dispedter.Common.Factories
 
                     foreach (var info in infos.Where(i => i.Name.Contains("SparkFun")))
                     {
-                        var serialDevice = await SerialDevice.FromIdAsync(info.Id);
-                        devices.Add(new UsbSender(serialDevice));
+                        devices.Add(new UsbSender(info));
                     }
                 }
             }

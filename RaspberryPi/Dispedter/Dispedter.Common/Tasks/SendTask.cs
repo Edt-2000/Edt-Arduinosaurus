@@ -32,6 +32,12 @@ namespace Dispedter.Common.Tasks
             {
                 // do stuff to keep it working
 
+
+                if (_sender.IsBroken())
+                {
+                    break;
+                }
+
                 await Task.Delay(1000);
 
             } while (true);
@@ -41,7 +47,8 @@ namespace Dispedter.Common.Tasks
         {
             while (_queue.Count > 0 && _queue.TryDequeue(out var packet))
             {
-                _sender.Send(packet);
+                // TODO: await this or something
+                _sender.SendAsync(packet);
             }
         }
     }

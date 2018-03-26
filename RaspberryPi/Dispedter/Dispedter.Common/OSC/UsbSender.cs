@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Ports;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
 using Windows.Storage.Streams;
 
@@ -11,99 +9,79 @@ namespace Dispedter.Common.OSC
 {
     public class UsbSender : ISender, IDisposable
     {
-        private readonly SerialPort _serialPort = null;
-        private readonly SerialDevice _device = null;
+        private readonly DeviceInformation _deviceInfo;
+        private Task _deviceTask;
+        private SerialDevice _device = null;
+
+        private bool _healty = false;
+        private bool _broken = false;
 
         private DataWriter _serialPortStream;
 
-        public UsbSender(string portName, uint baudRate)
+        public UsbSender(DeviceInformation deviceInfo)
         {
-            _serialPort = new SerialPort(portName, (int)baudRate)
-            {
-                DtrEnable = true,
-                RtsEnable = false,
-                WriteTimeout = 10
-            };
-
-            TryOpen();
+            _deviceInfo = deviceInfo;
+            _deviceTask = ConfigureDeviceAsync();
         }
 
-        public UsbSender(SerialDevice device)
+        private async Task ConfigureDeviceAsync()
         {
-            _device = device;
+            _healty = false;
 
-            _device.BaudRate = 9600;
-
-            _device.WriteTimeout = TimeSpan.FromMilliseconds(1000);
-            _device.ReadTimeout = TimeSpan.FromMilliseconds(1000);
-
-            _device.IsDataTerminalReadyEnabled = true;
-            _device.IsRequestToSendEnabled = false;
-            _device.Parity = SerialParity.None;
-            _device.DataBits = 8;
-            _device.StopBits = SerialStopBitCount.One;
-            _device.Handshake = SerialHandshake.None;
-
-            _serialPortStream = new DataWriter(_device.OutputStream);
-        }
-
-        public void TryOpen()
-        {
-            var i = 0;
-
+            var retries = 0;
             do
             {
                 try
                 {
-                    _serialPort.Close();
-                    _serialPort.Open();
+                    _device = await SerialDevice.FromIdAsync(_deviceInfo.Id);
 
-                    return;
+                    _device.BaudRate = 9600;
+
+                    _device.WriteTimeout = TimeSpan.FromMilliseconds(1000);
+                    _device.ReadTimeout = TimeSpan.FromMilliseconds(1000);
+
+                    _device.IsDataTerminalReadyEnabled = true;
+                    _device.IsRequestToSendEnabled = false;
+                    _device.Parity = SerialParity.None;
+                    _device.DataBits = 8;
+                    _device.StopBits = SerialStopBitCount.One;
+                    _device.Handshake = SerialHandshake.None;
+
+                    _serialPortStream = new DataWriter(_device.OutputStream);
+
+                    _healty = true;
                 }
                 catch (Exception)
                 {
 
                 }
-            }
-            while (++i < 10);
-        }
+            } while (++retries < 3);
 
-        public void Send(byte[] message)
-        {
-            try
-            {
-                _serialPort.Write(message, 0, message.Length);
-            }
-            catch (Exception)
-            {
-                TryOpen();
-            }
-        }
-
-        public void Send(OscPacket packet)
-        {
-            var data = packet.GetBytes();
-            Send(data);
-        }
-
-        public void Send(IEnumerable<OscPacket> packets)
-        {
-            foreach (var packet in packets)
-            {
-                Send(packet);
-            }
+            _broken = true;
         }
 
         public async Task SendAsync(byte[] message)
         {
             try
             {
-                _serialPortStream.WriteBytes(message);
-                await _serialPortStream.StoreAsync();
+                if (_healty)
+                {
+                    _serialPortStream.WriteBytes(message);
+                    await _serialPortStream.StoreAsync();
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
+                try
+                {
+                    _serialPortStream?.Dispose();
+                    _device?.Dispose();
+                }
+                catch (Exception)
+                {
+                }
 
+                _deviceTask = ConfigureDeviceAsync();
             }
         }
 
@@ -121,6 +99,11 @@ namespace Dispedter.Common.OSC
             }
         }
 
+        public bool IsBroken()
+        {
+            return _broken;
+        }
+
         #region IDisposable Support
         private bool _disposedValue = false;
 
@@ -130,12 +113,7 @@ namespace Dispedter.Common.OSC
             {
                 if (disposing)
                 {
-                    if(_serialPort != null)
-                    {
-                        _serialPort.Close();
-                    }
-
-                    if(_serialPortStream != null)
+                    if (_serialPortStream != null)
                     {
                         _serialPortStream.Dispose();
                         _device.Dispose();

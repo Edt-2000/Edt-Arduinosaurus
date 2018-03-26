@@ -37,7 +37,14 @@ namespace Dispedter
 
             _defer = taskInstance.GetDeferral();
 
-            await Task.WhenAll(_senders.Select(sender => sender.KeepAliveAsync()));
+            do
+            {
+                await Task.WhenAny(_senders.Select(sender => sender.KeepAliveAsync()));
+
+                // TODO: a device has failed. see which, and try to get it back up
+
+            }
+            while (true);
 
             //_pinState = false;
 

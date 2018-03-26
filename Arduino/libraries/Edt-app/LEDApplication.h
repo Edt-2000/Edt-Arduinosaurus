@@ -55,6 +55,7 @@ class LEDApplication : public AbstractApplication
 		udp.begin(PORT_BROADCAST);
 
 #endif
+		tlc.init(4095);
 	}
 
 	void setupOsc()
@@ -93,7 +94,6 @@ class LEDApplication : public AbstractApplication
 		// rgb4.test();
 		// rgb5.test();
 
-		tlc.init(4095);
 		tlc.clear();
 	}
 

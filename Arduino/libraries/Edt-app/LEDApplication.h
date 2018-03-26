@@ -46,7 +46,7 @@ class LEDApplication : public AbstractApplication
 	{
 #ifdef USB
 
-		Serial.begin(9600);
+		Serial.begin(57600);
 
 #else
 

@@ -35,7 +35,7 @@ namespace Dispedter.Common.OSC
                 {
                     _device = await SerialDevice.FromIdAsync(_deviceInfo.Id);
 
-                    _device.BaudRate = 9600;
+                    _device.BaudRate = 57600;
 
                     _device.WriteTimeout = TimeSpan.FromMilliseconds(1000);
                     _device.ReadTimeout = TimeSpan.FromMilliseconds(1000);

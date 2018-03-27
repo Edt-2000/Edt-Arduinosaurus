@@ -14,15 +14,13 @@ namespace OSC {
 		class RGBColorScheduler
 		{
 		private:
-			uint8_t _channels[3];
-
-			CRGB _color;
+			CRGB *_leds;
+			uint8_t _nrOfLeds;
 
 			uint8_t _fade;
-			uint8_t _rainbowPos;
 
 			FadeMode _fadeMode;
-			CRGB _fadeBackup;
+			CRGB *_fadeBackup;
 
 			Tlc5940 * _tlc;
 
@@ -37,7 +35,7 @@ namespace OSC {
 
 		public:
 			RGBColorScheduler();
-			RGBColorScheduler(uint8_t redChannel, uint8_t greenChannel, uint8_t blueChannel, uint8_t rainbowPos, Tlc5940 * tlc);
+			RGBColorScheduler(CRGB * leds, uint8_t nrOfLeds, Tlc5940 * tlc);
 
 			void solid(uint8_t h, uint8_t s, uint8_t v);
 			void solid(uint8_t h1, uint8_t h2, uint8_t s, uint8_t v, uint8_t percentage);

@@ -22,14 +22,6 @@ namespace OSC {
 				uint8_t fade;
 			};
 
-			struct Strobo
-			{
-				bool active;
-				uint8_t loop;
-				float fpl;
-				CHSV color;
-			};
-
 			CRGB *_leds;
 			LedState *_ledState;
 			FadeMode _fadeMode;
@@ -49,6 +41,13 @@ namespace OSC {
 				return ceilf((percentage / 127.0) * _nrOfLeds);
 			}
 
+			struct Strobo
+			{
+				bool active;
+				uint8_t loop;
+				float fpl;
+				CRGB color;
+			};
 			Strobo _strobo;
 
 		public:

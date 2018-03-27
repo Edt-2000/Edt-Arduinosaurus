@@ -17,7 +17,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_SinglePulse)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -29,7 +29,7 @@ namespace EdtdevicesTest
 			message.addInt(3);
 			message.addInt(4);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 			
 			arduino.addConsumer(&rgb);
 
@@ -57,7 +57,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_SingleSolid)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -68,7 +68,7 @@ namespace EdtdevicesTest
 			message.addInt(2);
 			message.addInt(3);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -95,7 +95,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_SingleSpark)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -107,7 +107,7 @@ namespace EdtdevicesTest
 			message.addInt(3);
 			message.addInt(4);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -136,7 +136,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_DualPulse)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -148,7 +148,7 @@ namespace EdtdevicesTest
 			message.addInt(3);
 			message.addInt(4);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -179,7 +179,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_DualSolid)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -190,7 +190,7 @@ namespace EdtdevicesTest
 			message.addInt(2);
 			message.addInt(3);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -219,7 +219,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_DualSparkle)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -231,7 +231,7 @@ namespace EdtdevicesTest
 			message.addInt(3);
 			message.addInt(4);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -262,7 +262,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_RainbowPulse)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -273,7 +273,7 @@ namespace EdtdevicesTest
 			message.addInt(2);
 			message.addInt(3);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -301,7 +301,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_RainbowSolid)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -312,7 +312,7 @@ namespace EdtdevicesTest
 			message.addInt(2);
 			message.addInt(3);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -338,7 +338,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_RainbowSpark)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -349,7 +349,7 @@ namespace EdtdevicesTest
 			message.addInt(2);
 			message.addInt(3);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -377,7 +377,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_VuMeter)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -389,7 +389,7 @@ namespace EdtdevicesTest
 			message.addInt(2);
 			message.addInt(3);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -414,7 +414,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_Twinkle)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -424,7 +424,7 @@ namespace EdtdevicesTest
 			message.addInt(1);
 			message.addInt(255);
 			
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -451,7 +451,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_TwinkleFade)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -461,7 +461,7 @@ namespace EdtdevicesTest
 			message.addInt(1);
 			message.addInt(0);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -487,7 +487,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_Strobo)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -495,7 +495,7 @@ namespace EdtdevicesTest
 			message.addInt(1);
 			message.addInt(2);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 
@@ -521,7 +521,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_Kitt)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -530,7 +530,7 @@ namespace EdtdevicesTest
 			message.addInt(2);
 			message.addInt(3);
 
-			auto rgb = OSC::Device::EdtRGB("/Test", 1, 2, 3, nullptr);
+			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 
 			arduino.addConsumer(&rgb);
 

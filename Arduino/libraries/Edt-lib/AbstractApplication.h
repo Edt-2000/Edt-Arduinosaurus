@@ -1,7 +1,5 @@
 #pragma once
 
-//#include <functional>
-
 #include <Arduino.h>
 #include "Udp.h"
 #include "Statemachine.h"
@@ -43,7 +41,6 @@ class AbstractApplication
 		{
 		case State::run:
 
-			osc.loop(time.tOSC);
 			applicationLoop();
 
 			break;
@@ -67,7 +64,6 @@ class AbstractApplication
 
 	EdtStatemachine statemachine;
 	EdtTime time;
-	OSC::Arduino osc;
 
   protected:
 	class Status

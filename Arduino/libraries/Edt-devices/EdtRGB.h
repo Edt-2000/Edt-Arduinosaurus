@@ -20,6 +20,8 @@ namespace OSC {
 		{
 		private:
 			const char *_pattern;
+			CRGB *_leds;
+			int _nrOfLeds;
 
 			OSC::SingleColorCommand singleColor;
 			OSC::DualColorCommand dualColor;
@@ -36,11 +38,14 @@ namespace OSC {
 #ifdef _MSC_VER
 			RGBColorScheduler _colorScheduler;
 #endif
-			EdtRGB(const char *pattern, uint8_t const redChannel, uint8_t const greenChannel, uint8_t const blueChannel, Tlc5940 * tlc) : StructMessageConsumer(13)
+			EdtRGB(const char *pattern, uint8_t nrOfLeds, Tlc5940 * tlc) : StructMessageConsumer(13)
 			{
 				_pattern = pattern;
 
-				_colorScheduler = RGBColorScheduler(redChannel, greenChannel, blueChannel, 1, tlc);
+				_nrOfLeds = nrOfLeds;
+				_leds = new CRGB[_nrOfLeds];
+
+				_colorScheduler = RGBColorScheduler(_leds, nrOfLeds, tlc);
 
 				addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &singleColor);
 				addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSolid, &singleColor);

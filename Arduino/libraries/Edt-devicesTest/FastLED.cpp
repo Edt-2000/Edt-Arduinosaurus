@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 
 #include "../../../../OSC-light/OSC-light/OSCArduino.h"
+#include "../../../../OSC-light/OSC-light/IMessage.h"
 #include "../Edt-devices/EdtFastLED.h"
 #include "../Edt-devices/FastLEDColorScheduler.h"
 #include "../Edt-devices/FastLEDColorScheduler.cpp"
@@ -17,7 +18,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_SinglePulse)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -61,7 +62,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_SingleSolid)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -103,7 +104,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_SingleSpark)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -148,7 +149,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_DualPulse)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -204,7 +205,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_DualSolid)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -256,7 +257,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_DualSparkle)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -312,7 +313,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_RainbowPulse)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -355,7 +356,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_RainbowSolid)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -396,7 +397,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_RainbowSpark)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -439,7 +440,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_VuMeter)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -481,7 +482,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_Twinkle)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -521,7 +522,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_TwinkleFade)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -559,7 +560,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_Strobo)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -593,7 +594,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(FastLED_Kitt)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino(1, 0);
+			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
 
 			message.setAddress("/Test");
 

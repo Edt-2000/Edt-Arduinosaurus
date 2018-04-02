@@ -22,14 +22,15 @@ class LEDApplication : public AbstractApplication
 {
   public:
 	Tlc5940 tlc = Tlc5940();
-	OSC::Device::EdtFastLED fl1 = OSC::Device::EdtFastLED(OSC_FL1, FL1_NR_OF_LEDS);
+	OSC::Device::EdtF
+	astLED fl1 = OSC::Device::EdtFastLED(OSC_FL1, FL1_NR_OF_LEDS);
 	//OSC::Device::EdtFastLED fl2 = OSC::Device::EdtFastLED(OSC_FL2, FL2_NR_OF_LEDS);
 	//OSC::Device::EdtFastLED fl3 = OSC::Device::EdtFastLED(OSC_FL3, FL3_NR_OF_LEDS);
 	//OSC::Device::EdtFastLED fl4 = OSC::Device::EdtFastLED(OSC_FL4, FL4_NR_OF_LEDS);
 
 	OSC::Arduino<OSC::Message> osc;
 
-	OSC::Device::EdtRGB rgb1 = OSC::Device::EdtRGB(OSC_RGB1, RGB1_NR_OF_LEDS, &tlc);
+	//OSC::Device::EdtRGB rgb1 = OSC::Device::EdtRGB(OSC_RGB1, RGB1_NR_OF_LEDS, &tlc);
 	
 #ifndef USB
 	EthernetUDP udp;
@@ -74,7 +75,7 @@ class LEDApplication : public AbstractApplication
 		//osc.addConsumer(&fl3);
 		//osc.addConsumer(&fl4);
 
-		osc.addConsumer(&rgb1);
+		//osc.addConsumer(&rgb1);
 
 		// make a test blink
 		fl1.test();
@@ -82,7 +83,7 @@ class LEDApplication : public AbstractApplication
 		//fl3.test();
 		//fl4.test();
 
-		rgb1.test();
+		//rgb1.test();
 
 		tlc.clear();
 	}
@@ -98,7 +99,7 @@ class LEDApplication : public AbstractApplication
 			//fl3.animationLoop();
 			//fl4.animationLoop();
 
-			rgb1.animationLoop();
+			//rgb1.animationLoop();
 
 			FastLED.show();
 

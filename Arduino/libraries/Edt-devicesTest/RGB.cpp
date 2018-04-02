@@ -17,7 +17,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_SinglePulse)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -57,7 +57,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_SingleSolid)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -95,7 +95,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_SingleSpark)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -136,7 +136,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_DualPulse)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -179,7 +179,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_DualSolid)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -219,7 +219,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_DualSparkle)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -262,7 +262,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_RainbowPulse)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -301,7 +301,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_RainbowSolid)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -338,7 +338,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_RainbowSpark)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -377,7 +377,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_VuMeter)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -414,7 +414,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_Twinkle)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -451,7 +451,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_TwinkleFade)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -487,7 +487,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_Strobo)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
@@ -521,7 +521,7 @@ namespace EdtdevicesTest
 		TEST_METHOD(RGB_Kitt)
 		{
 			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::Message>(1, 0);
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 

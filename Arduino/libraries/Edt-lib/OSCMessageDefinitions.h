@@ -2,7 +2,7 @@
 
 namespace OSC
 {
-enum ColorCommands
+enum ColorCommands : uint8_t
 {
 	SingleSolid = 0,
 	SinglePulse = 1,
@@ -96,5 +96,21 @@ struct StroboCommand
 	// 0 - 255
 	uint8_t hue : 8;
 	uint8_t intensity : 8;
+};
+
+struct EdtMessage
+{
+	ColorCommands command : 8;
+	union Commands {
+		SingleColorCommand singleColor;
+		DualColorCommand dualColor;
+		RainbowCommand rainbow;
+		VuMeterCommand vuMeter;
+		TwinkleCommand twinkle;
+		KittCommand kitt;
+		StroboCommand strobo;
+	};
+
+	Commands commands;
 };
 }

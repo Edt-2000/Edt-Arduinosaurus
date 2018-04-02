@@ -16,20 +16,20 @@
 
 namespace OSC {
 	namespace Device {
-		class EdtRGB : public OSC::StructMessageConsumer<OSC::ColorCommands, uint8_t>
+		class EdtRGB : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, uint8_t>>
 		{
 		private:
 			const char *_pattern;
 			CRGB *_leds;
 			int _nrOfLeds;
 
-			OSC::SingleColorCommand singleColor;
+			/*OSC::SingleColorCommand singleColor;
 			OSC::DualColorCommand dualColor;
 			OSC::RainbowCommand rainbow;
 			OSC::VuMeterCommand vuMeter;
 			OSC::TwinkleCommand twinkle;
 			OSC::StroboCommand strobo;
-			OSC::KittCommand kitt;
+			OSC::KittCommand kitt;*/
 			
 #ifndef _MSC_VER
 			RGBColorScheduler _colorScheduler;
@@ -38,7 +38,7 @@ namespace OSC {
 #ifdef _MSC_VER
 			RGBColorScheduler _colorScheduler;
 #endif
-			EdtRGB(const char *pattern, uint8_t nrOfLeds, Tlc5940 * tlc) : StructMessageConsumer(13)
+			EdtRGB(const char *pattern, uint8_t nrOfLeds, Tlc5940 * tlc) : MessageConsumer()
 			{
 				_pattern = pattern;
 
@@ -47,7 +47,7 @@ namespace OSC {
 
 				_colorScheduler = RGBColorScheduler(_leds, nrOfLeds, tlc);
 
-				addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &singleColor);
+				/*addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &singleColor);
 				addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSolid, &singleColor);
 				addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSpark, &singleColor);
 				addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowPulse, &rainbow);
@@ -59,7 +59,7 @@ namespace OSC {
 				addEnumToStructMapping<OSC::DualColorCommand>(OSC::ColorCommands::DualPulse, &dualColor);
 				addEnumToStructMapping<OSC::DualColorCommand>(OSC::ColorCommands::DualSolid, &dualColor);
 				addEnumToStructMapping<OSC::DualColorCommand>(OSC::ColorCommands::DualSparkle, &dualColor);
-				addEnumToStructMapping<OSC::KittCommand>(OSC::ColorCommands::Kitt, &kitt);
+				addEnumToStructMapping<OSC::KittCommand>(OSC::ColorCommands::Kitt, &kitt);*/
 			}
 
 			const char *pattern()
@@ -73,8 +73,18 @@ namespace OSC {
 				_colorScheduler.fade(2);
 			}
 
-			void callbackEnum(OSC::ColorCommands command)
+			void callbackMessage(OSC::StructMessage<OSC::EdtMessage, uint8_t> * message)
 			{
+				// todo: remove these variables
+				auto command = message->messageStruct.command;
+				auto dualColor = message->messageStruct.commands.dualColor;
+				auto kitt = message->messageStruct.commands.kitt;
+				auto rainbow = message->messageStruct.commands.rainbow;
+				auto singleColor = message->messageStruct.commands.singleColor;
+				auto strobo = message->messageStruct.commands.strobo;
+				auto twinkle = message->messageStruct.commands.twinkle;
+				auto vuMeter = message->messageStruct.commands.vuMeter;
+
 				switch (command)
 				{
 

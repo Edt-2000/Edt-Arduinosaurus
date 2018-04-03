@@ -57,7 +57,7 @@ namespace Dispedter.Common.OSC
 
                     _healty = true;
 
-                    // we're healthy
+                    // we're healthy.
                     return;
                 }
                 catch (Exception)

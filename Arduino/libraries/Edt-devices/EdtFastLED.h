@@ -26,14 +26,6 @@ namespace OSC {
 			CRGB *_leds;
 			int _nrOfLeds;
 
-			/*OSC::SingleColorCommand singleColor;
-			OSC::DualColorCommand dualColor;
-			OSC::RainbowCommand rainbow;
-			OSC::VuMeterCommand vuMeter;
-			OSC::TwinkleCommand twinkle;
-			OSC::StroboCommand strobo;
-			OSC::KittCommand kitt;
-*/
 #ifndef _MSC_VER
 			FastLEDColorScheduler _colorScheduler;
 #endif
@@ -50,20 +42,6 @@ namespace OSC {
 				_leds = new CRGB[_nrOfLeds];
 
 				_colorScheduler = FastLEDColorScheduler(_leds, _nrOfLeds);
-
-				/*addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SinglePulse, &singleColor);
-				addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSolid, &singleColor);
-				addEnumToStructMapping<OSC::SingleColorCommand>(OSC::ColorCommands::SingleSpark, &singleColor);
-				addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowPulse, &rainbow);
-				addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowSolid, &rainbow);
-				addEnumToStructMapping<OSC::RainbowCommand>(OSC::ColorCommands::RainbowSpark, &rainbow);
-				addEnumToStructMapping<OSC::VuMeterCommand>(OSC::ColorCommands::VuMeter, &vuMeter);
-				addEnumToStructMapping<OSC::TwinkleCommand>(OSC::ColorCommands::Twinkle, &twinkle);
-				addEnumToStructMapping<OSC::StroboCommand>(OSC::ColorCommands::Strobo, &strobo);
-				addEnumToStructMapping<OSC::DualColorCommand>(OSC::ColorCommands::DualPulse, &dualColor);
-				addEnumToStructMapping<OSC::DualColorCommand>(OSC::ColorCommands::DualSolid, &dualColor);
-				addEnumToStructMapping<OSC::DualColorCommand>(OSC::ColorCommands::DualSparkle, &dualColor);
-				addEnumToStructMapping<OSC::KittCommand>(OSC::ColorCommands::Kitt, &kitt);*/
 			}
 
 			const char *pattern()

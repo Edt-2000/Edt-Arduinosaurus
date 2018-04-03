@@ -567,36 +567,39 @@ namespace EdtdevicesTest
 
 		TEST_METHOD(FastLED_Strobo)
 		{
-			auto message = OSC::Message();
-			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
+			int i = 0;
+			do {
+				auto message = OSC::Message();
+				auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
-			message.setAddress("/Test");
+				message.setAddress("/Test");
 
-			message.addInt((int)OSC::ColorCommands::Strobo);
-			message.addInt(1);
-			message.addInt(2);
+				message.addInt((int)OSC::ColorCommands::Strobo);
+				message.addInt(1);
+				message.addInt(2);
 
-			auto fastLed = OSC::Device::EdtFastLED("/Test", 1);
+				auto fastLed = OSC::Device::EdtFastLED("/Test", 1);
 
-			arduino.addConsumer(&fastLed);
+				arduino.addConsumer(&fastLed);
 
-			auto stream = Stream();
+				auto stream = Stream();
 
-			arduino.bindStream(&stream);
+				arduino.bindStream(&stream);
 
-			message.send(&stream);
+				message.send(&stream);
 
-			arduino.loop();
+				arduino.loop();
 
-			auto color = fastLed._colorScheduler.getCommandColor();
+				auto color = fastLed._colorScheduler.getCommandColor();
 
-			Assert::IsTrue(color.type == Type::strobo, L"Command type incorrect", LINE_INFO());
-			Assert::IsTrue(color.h == 1, L"Command param incorrect", LINE_INFO());
-			Assert::IsTrue(color.intensity == 2, L"Command param incorrect", LINE_INFO());
+				Assert::IsTrue(color.type == Type::strobo, L"Command type incorrect", LINE_INFO());
+				Assert::IsTrue(color.h == 1, L"Command param incorrect", LINE_INFO());
+				Assert::IsTrue(color.intensity == 2, L"Command param incorrect", LINE_INFO());
 
-			auto fade = fastLed._colorScheduler.getCommandFade();
+				auto fade = fastLed._colorScheduler.getCommandFade();
 
-			Assert::IsTrue(fade.type == Type::none, L"Command type incorrect", LINE_INFO());
+				Assert::IsTrue(fade.type == Type::none, L"Command type incorrect", LINE_INFO());
+			} while (++i < 1000);
 		}
 
 		TEST_METHOD(FastLED_Kitt)

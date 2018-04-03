@@ -21,16 +21,16 @@
 class LEDApplication : public AbstractApplication
 {
   public:
+	OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>> osc;
+
 	Tlc5940 tlc = Tlc5940();
-	OSC::Device::EdtF
-	astLED fl1 = OSC::Device::EdtFastLED(OSC_FL1, FL1_NR_OF_LEDS);
-	//OSC::Device::EdtFastLED fl2 = OSC::Device::EdtFastLED(OSC_FL2, FL2_NR_OF_LEDS);
-	//OSC::Device::EdtFastLED fl3 = OSC::Device::EdtFastLED(OSC_FL3, FL3_NR_OF_LEDS);
-	//OSC::Device::EdtFastLED fl4 = OSC::Device::EdtFastLED(OSC_FL4, FL4_NR_OF_LEDS);
+	
+	OSC::Device::EdtFastLED fl1 = OSC::Device::EdtFastLED(OSC_FL1, FL1_NR_OF_LEDS);
+	OSC::Device::EdtFastLED fl2 = OSC::Device::EdtFastLED(OSC_FL2, FL2_NR_OF_LEDS);
+	OSC::Device::EdtFastLED fl3 = OSC::Device::EdtFastLED(OSC_FL3, FL3_NR_OF_LEDS);
+	OSC::Device::EdtFastLED fl4 = OSC::Device::EdtFastLED(OSC_FL4, FL4_NR_OF_LEDS);
 
-	OSC::Arduino<OSC::Message> osc;
-
-	//OSC::Device::EdtRGB rgb1 = OSC::Device::EdtRGB(OSC_RGB1, RGB1_NR_OF_LEDS, &tlc);
+	OSC::Device::EdtRGB rgb1 = OSC::Device::EdtRGB(OSC_RGB1, RGB1_NR_OF_LEDS, &tlc);
 	
 #ifndef USB
 	EthernetUDP udp;
@@ -60,30 +60,30 @@ class LEDApplication : public AbstractApplication
 	void setupOsc()
 	{
 		fl1.configurePins<A0, 3>();
-		//fl2.configurePins<A1, 3>();
-		//fl3.configurePins<A2, 3>();
-		//fl4.configurePins<A3, 3>();
+		fl2.configurePins<A1, 3>();
+		fl3.configurePins<A2, 3>();
+		fl4.configurePins<A3, 3>();
 
-		osc = OSC::Arduino<OSC::Message>(2, 0);
+		osc = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(5, 0);
 #ifdef USB
 		osc.bindStream(&Serial);
 #else
 		osc.bindUDP(&udp, IP_BROADCAST, PORT_BROADCAST);
 #endif
 		osc.addConsumer(&fl1);
-		//osc.addConsumer(&fl2);
-		//osc.addConsumer(&fl3);
-		//osc.addConsumer(&fl4);
+		osc.addConsumer(&fl2);
+		osc.addConsumer(&fl3);
+		osc.addConsumer(&fl4);
 
-		//osc.addConsumer(&rgb1);
+		osc.addConsumer(&rgb1);
 
 		// make a test blink
 		fl1.test();
-		//fl2.test();
-		//fl3.test();
-		//fl4.test();
+		fl2.test();
+		fl3.test();
+		fl4.test();
 
-		//rgb1.test();
+		rgb1.test();
 
 		tlc.clear();
 	}
@@ -95,11 +95,11 @@ class LEDApplication : public AbstractApplication
 		if (time.tVISUAL)
 		{
 			fl1.animationLoop();
-			//fl2.animationLoop();
-			//fl3.animationLoop();
-			//fl4.animationLoop();
+			fl2.animationLoop();
+			fl3.animationLoop();
+			fl4.animationLoop();
 
-			//rgb1.animationLoop();
+			rgb1.animationLoop();
 
 			FastLED.show();
 

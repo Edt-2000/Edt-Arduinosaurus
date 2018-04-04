@@ -60,8 +60,8 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 #define OSC_FL4 "/L/4"
 #define OSC_FL5 "/L/5"
 
-#define FL1_NR_OF_LEDS 29
-#define FL2_NR_OF_LEDS 59
+#define FL1_NR_OF_LEDS 57
+#define FL2_NR_OF_LEDS 57
 #define FL3_NR_OF_LEDS 57
 #define FL4_NR_OF_LEDS 57
 

@@ -13,11 +13,15 @@ namespace Dispedter.Common.Tasks
 
         public Queue<OscPacket> _queue = new Queue<OscPacket>();
 
+        public Task _sendTask = Task.FromResult(0);
+
         public SendTask(ISender sender)
         {
             _sender = sender;
 
         }
+
+        public string SenderId => _sender?.Id;
 
         public void AddMessage(OscPacket packet)
         {
@@ -26,16 +30,27 @@ namespace Dispedter.Common.Tasks
             TrySend();
         }
 
-        public async Task KeepAliveAsync()
+        public void AddMessage(IEnumerable<OscPacket> packets)
+        {
+            foreach (var packet in packets)
+            {
+                _queue.Enqueue(packet);
+            }
+
+            TrySend();
+        }
+
+        public async Task<SendTask> KeepAliveAsync()
         {
             do
             {
-                // do stuff to keep it working
+                // TODO: do stuff to keep it working
 
+                // TODO: break when queue grows too much
 
                 if (_sender.IsBroken())
                 {
-                    break;
+                    return this;
                 }
 
                 await Task.Delay(1000);
@@ -45,11 +60,21 @@ namespace Dispedter.Common.Tasks
 
         private void TrySend()
         {
+            if(!_sendTask.IsCompleted)
+            {
+                _queue.Clear();
+
+                return;
+            }
+
+            var list = new List<Task>();
+
             while (_queue.Count > 0 && _queue.TryDequeue(out var packet))
             {
-                // TODO: await this or something
-                _sender.SendAsync(packet);
+                list.Add(_sender.SendAsync(packet));
             }
+
+            _sendTask = Task.WhenAll(list);
         }
     }
 }

@@ -19,6 +19,8 @@ namespace Dispedter.Common.OSC
             Port = port;
             Address = address;
 
+            Id = $"{address}-{port.ToString()}";
+
             _sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
             var addresses = Dns.GetHostAddresses(address);
@@ -29,6 +31,8 @@ namespace Dispedter.Common.OSC
 
             _remoteIpEndPoint = new IPEndPoint(addresses[0], port);
         }
+
+        public string Id { get; private set; }
 
         public void Send(byte[] message)
         {

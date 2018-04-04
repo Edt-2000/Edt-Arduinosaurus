@@ -17,6 +17,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Dispedter.Common.Tasks;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -33,16 +34,19 @@ namespace Dispedter.Tester
         private Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>> _commandMapping;
         private Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>> _proceduralCommandMapping;
 
-        private ISender _usbSender = null;
+        private List<SendTask> _senders = new List<SendTask>();
 
-        private Task _getDevicesTask;
+
+        private Task _scanForDevicesTask;
+        private Task _manageDevicesTask;
 
 
         public MainPage()
         {
             InitializeComponent();
 
-            _getDevicesTask = InitializeDevicesAsync();
+            _scanForDevicesTask = ScanForDevicesAsync();
+            _manageDevicesTask = ManageDevicesAsync();
 
             InitializeCommandMapping();
             InitializeProceduralCommandMapping();
@@ -56,20 +60,17 @@ namespace Dispedter.Tester
 
         private async Task SendCommandAsync(VirtualKey key)
         {
-            if (_usbSender == null)
+            if (!_senders?.Any() ?? false)
             {
                 return;
             }
 
-            if (_usbSender.IsBroken())
-            {
-                _getDevicesTask = InitializeDevicesAsync();
-                return;
-            }
-            
             if (_commandMapping.TryGetValue(key, out var command))
             {
-                await _usbSender.SendAsync(command());
+                foreach (var sender in _senders)
+                {
+                    sender.AddMessage(command());
+                }
             }
             else if (_proceduralCommandMapping.TryGetValue(key, out var procedure))
             {
@@ -78,7 +79,12 @@ namespace Dispedter.Tester
                 {
                     var data = procedure(i);
 
-                    await Task.WhenAll(_usbSender.SendAsync(data.command), Task.Delay(data.delay));
+                    foreach (var sender in _senders)
+                    {
+                        sender.AddMessage(data.command);
+                    }
+
+                    await Task.Delay(data.delay);
 
                 } while (++i < 100);
             }
@@ -88,33 +94,57 @@ namespace Dispedter.Tester
             }
         }
 
-        private async Task InitializeDevicesAsync()
+        private async Task ManageDevicesAsync()
         {
-            try
+            do
             {
-                _usbSender?.Dispose();
-                _usbSender = null;
-
-                do
+                try
                 {
-
-                    var devices = await _senderFactory.GetAllSendersAsync();
-                    _usbSender = devices.FirstOrDefault();
-
-                    if(_usbSender != null)
+                    while (!_senders.Any())
                     {
-                        break;
+                        await Task.Delay(1000);
                     }
 
-                    await Task.Delay(1000);
+                    var defectiveTask = await Task.WhenAny(_senders.Select(sender => sender.KeepAliveAsync()));
 
-                } while (true);
+                    // a device has failed. see which, remove it
+                    var brokenSender = defectiveTask.Result;
+                    _senders.Remove(brokenSender);
+                }
+                catch (Exception)
+                {
+                    ;
+                }
             }
-            catch (Exception)
-            {
-                ;
-            }
+            while (true);
         }
+
+        private async Task ScanForDevicesAsync()
+        {
+            do
+            {
+                try
+                {
+                    var allSenders = await _senderFactory.GetAllSendersAsync();
+
+                    var newSenders = allSenders.Where(s => !_senders.Select(sendTask => sendTask.SenderId).Contains(s.Id));
+
+                    foreach (var newSender in newSenders)
+                    {
+                        _senders.Add(new SendTask(newSender));
+                    }
+
+                    await Task.Delay(15000);
+
+                }
+                catch (Exception)
+                {
+                    ;
+                }
+            }
+            while (true);
+        }
+
         private void InitializeCommandMapping()
         {
             var i = (byte)0;

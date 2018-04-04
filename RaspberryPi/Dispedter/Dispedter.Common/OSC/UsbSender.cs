@@ -13,7 +13,7 @@ namespace Dispedter.Common.OSC
         private Task _deviceTask;
         private SerialDevice _device = null;
 
-        private bool _healty = false;
+        private bool _healthy = false;
         private bool _broken = false;
 
         private DataWriter _serialPortStream;
@@ -22,17 +22,21 @@ namespace Dispedter.Common.OSC
         {
             _deviceInfo = deviceInfo;
             _deviceTask = ConfigureDeviceAsync();
+
+            Id = deviceInfo.Id;
         }
+
+        public string Id { get; private set; }
 
         private async Task ConfigureDeviceAsync()
         {
             // TODO: this must not become a resouce hogging dead lock
-            if (!_deviceTask.IsCompleted)
+            if (!_deviceTask?.IsCompleted ?? false)
             {
                 await _deviceTask;
             }
 
-            _healty = false;
+            _healthy = false;
 
             var retries = 0;
             do
@@ -55,7 +59,7 @@ namespace Dispedter.Common.OSC
 
                     _serialPortStream = new DataWriter(_device.OutputStream);
 
-                    _healty = true;
+                    _healthy = true;
 
                     // we're healthy.
                     return;
@@ -64,6 +68,10 @@ namespace Dispedter.Common.OSC
                 {
 
                 }
+                
+                // give the system some time to recover
+                await Task.Delay(retries * 1000);
+
             } while (++retries < 3);
 
             // kill me
@@ -74,7 +82,7 @@ namespace Dispedter.Common.OSC
         {
             try
             {
-                if (_healty)
+                if (_healthy)
                 {
                     _serialPortStream.WriteBytes(message);
                     await _serialPortStream.StoreAsync();

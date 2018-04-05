@@ -16,76 +16,76 @@ namespace Dispedter
     public sealed class StartupTask : IBackgroundTask
     {
         private readonly ListenerFactory _listenerFactory = new ListenerFactory(udpListener: true);
-        private readonly SenderFactory _senderFactory = new SenderFactory(detectUsb: true);
+        //private readonly SenderFactory _senderFactory = new SenderFactory(detectUsb: true);
 
         private IEnumerable<IListener> _listeners;
-        private IEnumerable<SendTask> _senders;
+        //private IEnumerable<SendTask> _senders;
 
         private BackgroundTaskDeferral _defer;
 
-        //private const int _ledPin = 5;
+        private const int _ledPin = 5;
         
-        //private GpioPin _pin;
+        private GpioPin _pin;
         
-        //private bool _pinState;
+        private bool _pinState;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
-            //SetupGpio();
-            await SetupSendersAsync();
+            SetupGpio();
+            //await SetupSendersAsync();
             SetupListeners();
 
             _defer = taskInstance.GetDeferral();
 
-            do
-            {
-                await Task.WhenAny(_senders.Select(sender => sender.KeepAliveAsync()));
+            //do
+            //{
+            //    await Task.WhenAny(_senders.Select(sender => sender.KeepAliveAsync()));
 
-                // TODO: a device has failed. see which, and try to get it back up
+            //    // TODO: a device has failed. see which, and try to get it back up
 
-            }
-            while (true);
+            //}
+            //while (true);
 
             //_pinState = false;
 
             
 
-            //do
-            //{
-            //    _pin.Write(_pinState ? GpioPinValue.High : GpioPinValue.Low);
+            do
+            {
+                _pin.Write(_pinState ? GpioPinValue.High : GpioPinValue.Low);
 
             //    //_pinState = !_pinState;
 
-            //    await Task.Delay(50);
-            //}
-            //while (true);
+                await Task.Delay(50);
+            }
+            while (true);
 
             //defer.Complete();
         }
 
-        private async Task SetupSendersAsync()
-        {
-            var senders = await _senderFactory.GetAllSendersAsync();
+        //private async Task SetupSendersAsync()
+        //{
+        //    var senders = await _senderFactory.GetAllSendersAsync();
 
-            _senders = senders.Select(sender => new SendTask(sender));
+        //    _senders = senders.Select(sender => new SendTask(sender));
+        //}
+
+        private void SetupGpio()
+        {
+            var gpio = GpioController.GetDefault();
+
+            // Show an error if there is no GPIO controller
+            if (gpio == null)
+            {
+                _pin = null;
+                return;
+            }
+
+            _pin = gpio.OpenPin(_ledPin);
+            _pin.Write(GpioPinValue.High);
+            _pin.SetDriveMode(GpioPinDriveMode.Output);
         }
 
-        //private void SetupGpio()
-        //{
-        //    var gpio = GpioController.GetDefault();
-
-        //    // Show an error if there is no GPIO controller
-        //    if (gpio == null)
-        //    {
-        //        _pin = null;
-        //        return;
-        //    }
-
-        //    _pin = gpio.OpenPin(_ledPin);
-        //    _pin.Write(GpioPinValue.High);
-        //    _pin.SetDriveMode(GpioPinDriveMode.Output);
-        //}
-        
         private void SetupListeners()
         {
             _listeners = _listenerFactory.GetAllListeners();
@@ -98,10 +98,12 @@ namespace Dispedter
 
         private void OscPacketReceived(UdpListener sender, OscEventArgs args)
         {
-            foreach(var s in _senders)
-            {
-                s.AddMessage(args.GetOscPacket());
-            }
+            _pinState = !_pinState;
+
+            //foreach(var s in _senders)
+            //{
+            //    s.AddMessage(args.GetOscPacket());
+            //}
         }
     }
 }

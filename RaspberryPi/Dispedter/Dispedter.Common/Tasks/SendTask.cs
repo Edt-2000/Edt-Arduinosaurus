@@ -1,6 +1,7 @@
 ﻿using Dispedter.Common.OSC;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,8 @@ namespace Dispedter.Common.Tasks
 
         public SendTask(ISender sender)
         {
+            Trace.TraceInformation($"SendTask for {sender.Id} created.");
+
             _sender = sender;
 
         }
@@ -50,7 +53,14 @@ namespace Dispedter.Common.Tasks
 
                 if (_sender.IsBroken())
                 {
-                    return this;
+                    // try reconnecting once, otherwise, kill this task
+                    await _sender.ReconnectAsync();
+
+                    if (_sender.IsBroken())
+                    {
+                        Trace.TraceInformation($"SendTask for {_sender.Id} broken.");
+                        return this;
+                    }
                 }
 
                 await Task.Delay(1000);

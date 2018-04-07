@@ -14,6 +14,11 @@ namespace Dispedter.Common.Factories
             _addresses = addresses;
         }
 
+        public IEnumerable<OscMessage> CreateTestMessage(int i)
+        {
+            return new[] { new OscMessage("/TD", i) };
+        }
+
         public IEnumerable<OscMessage> CreateSingleSolid(Color h, int s, int v)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.SingleSolid, 0, 127, (int)h, s, v));

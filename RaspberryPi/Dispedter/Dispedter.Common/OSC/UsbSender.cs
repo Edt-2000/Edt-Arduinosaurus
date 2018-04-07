@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
@@ -14,31 +15,34 @@ namespace Dispedter.Common.OSC
         private SerialDevice _device = null;
 
         private bool _healthy = false;
-        private bool _broken = false;
+        private int _failures = 0;
+
+        private bool _isConfiguring = false;
 
         private DataWriter _serialPortStream;
 
         public UsbSender(DeviceInformation deviceInfo)
         {
+            Id = deviceInfo.Id;
+
             _deviceInfo = deviceInfo;
             _deviceTask = ConfigureDeviceAsync();
-
-            Id = deviceInfo.Id;
         }
 
         public string Id { get; private set; }
 
         private async Task ConfigureDeviceAsync()
         {
-            // TODO: this must not become a resouce hogging dead lock
-            if (!_deviceTask?.IsCompleted ?? false)
+            Trace.TraceInformation($"Configuring {Id}..");
+
+            if(_isConfiguring)
             {
-                await _deviceTask;
+                return;
             }
 
+            _isConfiguring = true;
             _healthy = false;
-
-            var retries = 0;
+            
             do
             {
                 try
@@ -60,22 +64,37 @@ namespace Dispedter.Common.OSC
                     _serialPortStream = new DataWriter(_device.OutputStream);
 
                     _healthy = true;
+                    _isConfiguring = false;
+                    _failures = 0;
+
+                    Trace.TraceInformation($"Configuring {Id} success!");
 
                     // we're healthy.
                     return;
                 }
                 catch (Exception)
                 {
+                    Trace.TraceWarning($"Configuring {Id} failed..");
 
+                    _failures++;
                 }
                 
                 // give the system some time to recover
-                await Task.Delay(retries * 1000);
+                await Task.Delay(1000);
 
-            } while (++retries < 3);
+            } while (!IsBroken());
 
             // kill me
-            _broken = true;
+            _isConfiguring = false;
+
+            Trace.TraceError($"{Id} broken..");
+        }
+
+        public Task ReconnectAsync()
+        {
+            Trace.TraceWarning($"Reconnecting {Id}..");
+
+            return ConfigureDeviceAsync();
         }
 
         public async Task SendAsync(byte[] message)
@@ -86,10 +105,17 @@ namespace Dispedter.Common.OSC
                 {
                     _serialPortStream.WriteBytes(message);
                     await _serialPortStream.StoreAsync();
+
+                    Trace.TraceInformation($"Message to {Id} success!");
                 }
             }
             catch (Exception)
             {
+                Trace.TraceError($"Message to {Id} fail!");
+                _failures++;
+
+                Trace.TraceError($"Failures: {_failures}.");
+
                 try
                 {
                     _serialPortStream?.Dispose();
@@ -98,8 +124,6 @@ namespace Dispedter.Common.OSC
                 catch (Exception)
                 {
                 }
-
-                _deviceTask = ConfigureDeviceAsync();
             }
         }
 
@@ -119,7 +143,7 @@ namespace Dispedter.Common.OSC
 
         public bool IsBroken()
         {
-            return _broken;
+            return _failures > 3;
         }
 
         #region IDisposable Support

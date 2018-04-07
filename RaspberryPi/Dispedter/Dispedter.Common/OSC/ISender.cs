@@ -12,6 +12,10 @@ namespace Dispedter.Common.OSC
         Task SendAsync(OscPacket packet);
         Task SendAsync(IEnumerable<OscPacket> packets);
 
+        Task ReconnectAsync();
+
+        Task DeviceIsBroken { get; }
+
         bool IsBroken();
         string Id { get; }
     }

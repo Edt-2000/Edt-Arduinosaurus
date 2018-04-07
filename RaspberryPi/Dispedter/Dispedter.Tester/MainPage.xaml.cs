@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Dispedter.Common.Tasks;
+using System.Diagnostics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -29,12 +30,11 @@ namespace Dispedter.Tester
     public sealed partial class MainPage : Page
     {
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/L" });
-        private readonly SenderFactory _senderFactory = new SenderFactory(detectUsb: true);
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true);
 
         private Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>> _commandMapping;
         private Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>> _proceduralCommandMapping;
 
-        private List<SendTask> _senders = new List<SendTask>();
 
 
         private Task _scanForDevicesTask;
@@ -45,8 +45,8 @@ namespace Dispedter.Tester
         {
             InitializeComponent();
 
-            _scanForDevicesTask = ScanForDevicesAsync();
-            _manageDevicesTask = ManageDevicesAsync();
+            _scanForDevicesTask =_senderManager.ScanForDevicesAsync();
+            _manageDevicesTask = _senderManager.ManageDevicesAsync();
 
             InitializeCommandMapping();
             InitializeProceduralCommandMapping();
@@ -60,26 +60,28 @@ namespace Dispedter.Tester
 
         private async Task SendCommandAsync(VirtualKey key)
         {
-            if (!_senders?.Any() ?? false)
+            if (!_senderManager.Senders?.Any() ?? false)
             {
                 return;
             }
 
-            if (_commandMapping.TryGetValue(key, out var command))
+            if (_commandMapping.TryGetValue(key, out var commandGenerator))
             {
-                foreach (var sender in _senders)
+                var command = commandGenerator();
+
+                foreach (var sender in _senderManager.Senders)
                 {
-                    sender.AddMessage(command());
+                    sender.AddMessage(command);
                 }
             }
-            else if (_proceduralCommandMapping.TryGetValue(key, out var procedure))
+            else if (_proceduralCommandMapping.TryGetValue(key, out var proceduralCommandGenerator))
             {
                 var i = 0;
                 do
                 {
-                    var data = procedure(i);
+                    var data = proceduralCommandGenerator(i);
 
-                    foreach (var sender in _senders)
+                    foreach (var sender in _senderManager.Senders)
                     {
                         sender.AddMessage(data.command);
                     }
@@ -94,64 +96,16 @@ namespace Dispedter.Tester
             }
         }
 
-        private async Task ManageDevicesAsync()
-        {
-            do
-            {
-                try
-                {
-                    while (!_senders.Any())
-                    {
-                        await Task.Delay(1000);
-                    }
-
-                    var defectiveTask = await Task.WhenAny(_senders.Select(sender => sender.KeepAliveAsync()));
-
-                    // a device has failed. see which, remove it
-                    var brokenSender = defectiveTask.Result;
-                    _senders.Remove(brokenSender);
-                }
-                catch (Exception)
-                {
-                    ;
-                }
-            }
-            while (true);
-        }
-
-        private async Task ScanForDevicesAsync()
-        {
-            do
-            {
-                try
-                {
-                    var allSenders = await _senderFactory.GetAllSendersAsync();
-
-                    var newSenders = allSenders.Where(s => !_senders.Select(sendTask => sendTask.SenderId).Contains(s.Id));
-
-                    foreach (var newSender in newSenders)
-                    {
-                        _senders.Add(new SendTask(newSender));
-                    }
-
-                    await Task.Delay(15000);
-
-                }
-                catch (Exception)
-                {
-                    ;
-                }
-            }
-            while (true);
-        }
-
         private void InitializeCommandMapping()
         {
             var i = (byte)0;
             var strobo = (byte)0;
 
+            var test = 0;
+
             _commandMapping = new Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>
             {
+                { VirtualKey.Back, () => _commandFactory.CreateTestMessage(++test) },
                 {
                     VirtualKey.Up, () =>
                     {

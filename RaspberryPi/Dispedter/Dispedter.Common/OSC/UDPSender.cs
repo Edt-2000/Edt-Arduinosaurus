@@ -77,6 +77,10 @@ namespace Dispedter.Common.OSC
         {
             throw new NotImplementedException();
         }
+        public Task ReconnectAsync()
+        {
+            throw new NotImplementedException();
+        }
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
@@ -111,6 +115,7 @@ namespace Dispedter.Common.OSC
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 }

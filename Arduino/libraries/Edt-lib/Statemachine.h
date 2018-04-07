@@ -23,15 +23,12 @@ public:
 
 		switch (_state) {
 		case State::begin:
-			Serial.println("Starting");
 			newState = State::starting;
 			break;
 		case State::starting:
-			Serial.println("Run");
 			newState = State::run;
 			break;
 		default:
-			Serial.println("Begin");
 			newState = State::begin;
 			break;
 		}

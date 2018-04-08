@@ -6,34 +6,64 @@
 
 #include "Arduino.h"
 #include "OSCArduino.h"
+#include "Ethernet.h"
+#include "EthernetUdp.h"
 #include "Statemachine.h"
 #include "Time.h"
 
-struct Simple
-{
-	uint8_t int0 : 8;
-};
+bool messageSend = false;
 
-class TestDevice : public OSC::MessageConsumer<OSC::Message>
+class TestDevice : public OSC::MessageConsumer<OSC::Message>, public OSC::MessageProducer<OSC::Message>
 {
   private:
-	const char *_pattern;
-    bool _state = false;
+	OSC::Message _message;
+
+	long _sendTime;
+
   public:
 	TestDevice(const char *pattern) : MessageConsumer()
 	{
-		_pattern = pattern;
+		_message.setAddress(pattern);
+		_message.reserveAtLeast(2);
+		_message.addInt(0);
+		_message.addInt(0);
+		_message.setValidData(true);
+
+		_sendTime = micros();
 	}
 
 	const char *pattern()
 	{
-		return _pattern;
+		return _message.address;
+	}
+
+	void loop()
+	{
 	}
 
 	void callbackMessage(OSC::Message *message)
 	{
-		_state = !_state;
-		digitalWrite(13, _state ? HIGH : LOW);
+		auto now = micros();
+		auto i = message->getInt(0);
+
+		_message.setInt(0, i + 1);
+		_message.setInt(1, now - _sendTime);
+		_message.setValidData(false);
+
+		digitalWrite(13, (i % 2) ? HIGH : LOW);
+
+		messageSend = false;
+	}
+
+	OSC::Message *generateMessage()
+	{
+		_sendTime = micros();
+
+		_message.setValidData(!messageSend);
+
+		messageSend = true;
+
+		return &_message;
 	}
 };
 
@@ -44,6 +74,8 @@ class PerformanceApplication : public AbstractApplication
 
 	TestDevice device = TestDevice("/TD");
 
+	EthernetUDP udp;
+
 	void setupStatus()
 	{
 		status.setup(13, HIGH);
@@ -53,22 +85,26 @@ class PerformanceApplication : public AbstractApplication
 	{
 		Serial.begin(57600);
 
+		Ethernet.begin(MAC_LED, IP_TRAK);
 
-		//Ethernet.begin(MAC_PING, IPAddress(10, 0, 0, 20));
-
-		//udp.begin(PORT_BROADCAST);
+		udp.begin(PORT_BROADCAST);
 	}
 
 	void setupOsc()
 	{
-		osc = OSC::Arduino<OSC::Message>(1, 0);
-		//osc.bindUDP(&udp, IPAddress(10, 0, 0, 1), 12345);
-		osc.bindStream(&Serial);
+		osc = OSC::Arduino<OSC::Message>(1, 1);
+		osc.bindBoth(&udp, IP_BROADCAST, PORT_BROADCAST, &Serial);
 		osc.addConsumer(&device);
+		osc.addProducer(&device);
+
+		messageSend = false;
 	}
 
 	void applicationLoop()
 	{
+		// slow down the application
+		// otherwise, partial messages from Serial are being read and those will fail to parse.
+		// on uno's only, since the usb works differently on a Leonardo
 		osc.loop(time.tOSC);
 	}
 };

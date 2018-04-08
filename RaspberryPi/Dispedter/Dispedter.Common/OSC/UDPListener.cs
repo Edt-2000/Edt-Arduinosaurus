@@ -8,6 +8,8 @@ namespace Dispedter.Common.OSC
     {
         public int Port { get; private set; }
 
+        public string Id => Port.ToString();
+
         public event TypedEventHandler<UdpListener, ByteEventArgs> BytePacketReceived;
         public event TypedEventHandler<UdpListener, OscEventArgs> OscPacketReceived;
 
@@ -50,6 +52,11 @@ namespace Dispedter.Common.OSC
         {
             OscPacketReceived += handler;
         }
+        
+        public bool IsBroken()
+        {
+            return false;
+        }
 
         #region IDisposable Support
         private bool _disposedValue = false;
@@ -71,7 +78,6 @@ namespace Dispedter.Common.OSC
         {
             Dispose(true);
         }
-
         #endregion
     }
 }

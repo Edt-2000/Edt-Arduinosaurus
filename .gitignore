@@ -324,3 +324,5 @@ ASALocalRun/
 *.nvuser
 
 Arduino/Edt_LED_v1/\.vscode/
+
+Arduino/Edt_Performance_v1/\.vscode/

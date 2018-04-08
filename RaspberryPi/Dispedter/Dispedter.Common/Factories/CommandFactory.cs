@@ -16,7 +16,7 @@ namespace Dispedter.Common.Factories
 
         public IEnumerable<OscMessage> CreateTestMessage(int i)
         {
-            return new[] { new OscMessage("/TD", i) };
+            return new[] { new OscMessage("/TD", i, 0) };
         }
 
         public IEnumerable<OscMessage> CreateSingleSolid(Color h, int s, int v)

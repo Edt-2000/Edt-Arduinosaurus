@@ -6,5 +6,8 @@ namespace Dispedter.Common.OSC
     public interface IListener
     {
         void AddPacketHandler(TypedEventHandler<UdpListener, OscEventArgs> handler);
+
+        bool IsBroken();
+        string Id { get; }
     }
 }

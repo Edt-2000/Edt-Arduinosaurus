@@ -10,20 +10,27 @@ namespace Dispedter.Common.OSC
 {
     public class UsbSender : ISender
     {
+        enum State
+        {
+            Idle,
+            Configuring,
+            Running,
+            Broken
+        }
+
         private readonly DeviceInformation _deviceInfo;
         private Task _deviceTask;
         private SerialDevice _device = null;
 
-        private bool _healthy = false;
-        private int _failures = 0;
-
-        private bool _isConfiguring = false;
+        private State _state = State.Idle;
 
         private DataWriter _serialPortStream;
 
         public UsbSender(DeviceInformation deviceInfo)
         {
             Id = deviceInfo.Id;
+
+            SetDeviceState(State.Idle);
 
             _deviceInfo = deviceInfo;
             _deviceTask = ConfigureDeviceAsync();
@@ -33,16 +40,17 @@ namespace Dispedter.Common.OSC
 
         private async Task ConfigureDeviceAsync()
         {
-            Trace.TraceInformation($"Configuring {Id}..");
+            //Trace.TraceInformation($"Configuring {Id}..");
 
-            if(_isConfiguring)
+            if (_state != State.Idle)
             {
                 return;
             }
 
-            _isConfiguring = true;
-            _healthy = false;
-            
+            SetDeviceState(State.Configuring);
+
+            var retries = 0;
+
             do
             {
                 try
@@ -63,67 +71,78 @@ namespace Dispedter.Common.OSC
 
                     _serialPortStream = new DataWriter(_device.OutputStream);
 
-                    _healthy = true;
-                    _isConfiguring = false;
-                    _failures = 0;
+                    SetDeviceState(State.Running);
 
-                    Trace.TraceInformation($"Configuring {Id} success!");
+                    //Trace.TraceInformation($"Configuring {Id} success!");
 
                     // we're healthy.
                     return;
                 }
                 catch (Exception)
                 {
-                    Trace.TraceWarning($"Configuring {Id} failed..");
+                    //Trace.TraceWarning($"Configuring {Id} failed..");
 
-                    _failures++;
+                    retries++;
                 }
-                
+
                 // give the system some time to recover
                 await Task.Delay(1000);
 
-            } while (!IsBroken());
+            } while (retries < 3);
 
             // kill me
-            _isConfiguring = false;
+            SetDeviceState(State.Broken);
 
-            Trace.TraceError($"{Id} broken..");
+            //Trace.TraceError($"{Id} broken..");
         }
 
-        public Task ReconnectAsync()
+        public bool IsBroken()
         {
-            Trace.TraceWarning($"Reconnecting {Id}..");
+            return _state == State.Broken;
+        }
 
-            return ConfigureDeviceAsync();
+        private void SetDeviceState(State newState)
+        {
+            _state = newState;
+
+            switch (newState)
+            {
+                case State.Idle:
+                    break;
+                case State.Configuring:
+                    break;
+                case State.Running:
+                    break;
+                case State.Broken:
+                    Dispose(true);
+                    break;
+            }
         }
 
         public async Task SendAsync(byte[] message)
         {
             try
             {
-                if (_healthy)
+                if (_state == State.Running)
                 {
                     _serialPortStream.WriteBytes(message);
                     await _serialPortStream.StoreAsync();
-
-                    Trace.TraceInformation($"Message to {Id} success!");
                 }
             }
-            catch (Exception)
+            catch
             {
-                Trace.TraceError($"Message to {Id} fail!");
-                _failures++;
-
-                Trace.TraceError($"Failures: {_failures}.");
+                //Trace.TraceError($"Message to {Id} fail!");
 
                 try
                 {
                     _serialPortStream?.Dispose();
                     _device?.Dispose();
                 }
-                catch (Exception)
+                catch
                 {
                 }
+
+                SetDeviceState(State.Broken);
             }
         }
 
@@ -141,11 +160,6 @@ namespace Dispedter.Common.OSC
             }
         }
 
-        public bool IsBroken()
-        {
-            return _failures > 3;
-        }
-
         #region IDisposable Support
         private bool _disposedValue = false;
 
@@ -155,11 +169,8 @@ namespace Dispedter.Common.OSC
             {
                 if (disposing)
                 {
-                    if (_serialPortStream != null)
-                    {
-                        _serialPortStream?.Dispose();
-                        _device?.Dispose();
-                    }
+                    _serialPortStream?.Dispose();
+                    _device?.Dispose();
                 }
 
                 _disposedValue = true;

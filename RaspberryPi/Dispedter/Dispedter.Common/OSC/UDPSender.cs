@@ -8,20 +8,31 @@ namespace Dispedter.Common.OSC
 {
     public class UdpSender : ISender
     {
+        enum State
+        {
+            Idle,
+            Running,
+            Broken
+        }
+
         private IPEndPoint _remoteIpEndPoint;
-        private Socket _sock;
+        private Socket _socket;
 
         public int Port { get; }
         public string Address { get; }
+
+        private State _state = State.Idle;
 
         public UdpSender(string address, int port)
         {
             Port = port;
             Address = address;
 
-            Id = $"{address}-{port.ToString()}";
+            Id = CreateId(address, port);
 
-            _sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            SetDeviceState(State.Idle);
+
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
             var addresses = Dns.GetHostAddresses(address);
             if (addresses.Length == 0)
@@ -30,92 +41,102 @@ namespace Dispedter.Common.OSC
             }
 
             _remoteIpEndPoint = new IPEndPoint(addresses[0], port);
+
+            SetDeviceState(State.Running);
         }
+
+        public static string CreateId(string address, int port) => $"{address}-{port.ToString()}";
 
         public string Id { get; private set; }
 
-        public void Send(byte[] message)
-        {
-            _sock.SendTo(message, _remoteIpEndPoint);
-        }
+        //public void Send(byte[] message)
+        //{
+        //    _socket.SendTo(message, _remoteIpEndPoint);
+        //}
 
-        public void Send(OscPacket packet)
-        {
-            var data = packet.GetBytes();
-            Send(data);
-        }
+        //public void Send(OscPacket packet)
+        //{
+        //    var data = packet.GetBytes();
+        //    Send(data);
+        //}
 
-        public void Send(IEnumerable<OscPacket> packets)
+        //public void Send(IEnumerable<OscPacket> packets)
+        //{
+        //    foreach (var packet in packets)
+        //    {
+        //        Send(packet);
+        //    }
+        //}
+
+        public async Task SendAsync(byte[] message)
         {
-            foreach (var packet in packets)
+            try
             {
-                Send(packet);
+                if (_state == State.Running)
+                {
+                    await _socket.SendToAsync(message, SocketFlags.None, _remoteIpEndPoint);
+                }
             }
-        }
-
-        public Task SendAsync(byte[] message)
-        {
-            throw new NotImplementedException();
+            catch
+            {
+                SetDeviceState(State.Broken);
+            }
         }
 
         public Task SendAsync(OscPacket packet)
         {
-            throw new NotImplementedException();
+            return SendAsync(packet.GetBytes());
         }
 
-        public Task SendAsync(IEnumerable<OscPacket> packets)
+        public async Task SendAsync(IEnumerable<OscPacket> packets)
         {
-            throw new NotImplementedException();
-        }
-
-        public void Close()
-        {
-            _sock.Close();
+            foreach (var packet in packets)
+            {
+                await SendAsync(packet);
+            }
         }
 
         public bool IsBroken()
         {
-            throw new NotImplementedException();
-        }
-        public Task ReconnectAsync()
-        {
-            throw new NotImplementedException();
+            return _state == State.Broken;
         }
 
+        private void SetDeviceState(State newState)
+        {
+            _state = newState;
+
+            switch (newState)
+            {
+                case State.Idle:
+                    break;
+                case State.Running:
+                    break;
+                case State.Broken:
+                    Dispose(true);
+                    break;
+            }
+        }
+        
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
+                    _socket?.Dispose();
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~UdpSender() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
         }
-
         #endregion
     }
 }

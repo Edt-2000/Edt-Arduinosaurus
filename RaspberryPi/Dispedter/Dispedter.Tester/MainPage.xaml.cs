@@ -17,8 +17,8 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using Dispedter.Common.Tasks;
 using System.Diagnostics;
+using Dispedter.Common.Managers;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -30,7 +30,7 @@ namespace Dispedter.Tester
     public sealed partial class MainPage : Page
     {
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/L" });
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true);
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { "10.0.0.10" });
 
         private Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>> _commandMapping;
         private Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>> _proceduralCommandMapping;
@@ -45,7 +45,7 @@ namespace Dispedter.Tester
         {
             InitializeComponent();
 
-            _scanForDevicesTask =_senderManager.ScanForDevicesAsync();
+            _scanForDevicesTask =_senderManager.ManageDevicesAsync();
             _manageDevicesTask = _senderManager.ManageDevicesAsync();
 
             InitializeCommandMapping();
@@ -71,7 +71,7 @@ namespace Dispedter.Tester
 
                 foreach (var sender in _senderManager.Senders)
                 {
-                    sender.AddMessage(command);
+                    await sender.SendAsync(command);
                 }
             }
             else if (_proceduralCommandMapping.TryGetValue(key, out var proceduralCommandGenerator))
@@ -79,14 +79,14 @@ namespace Dispedter.Tester
                 var i = 0;
                 do
                 {
-                    var data = proceduralCommandGenerator(i);
+                    var (delay, command) = proceduralCommandGenerator(i);
 
                     foreach (var sender in _senderManager.Senders)
                     {
-                        sender.AddMessage(data.command);
+                        await sender.SendAsync(command);
                     }
 
-                    await Task.Delay(data.delay);
+                    await Task.Delay(delay);
 
                 } while (++i < 100);
             }

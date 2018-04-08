@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Dispedter.Common.OSC
@@ -12,11 +10,8 @@ namespace Dispedter.Common.OSC
         Task SendAsync(OscPacket packet);
         Task SendAsync(IEnumerable<OscPacket> packets);
 
-        Task ReconnectAsync();
-
-        Task DeviceIsBroken { get; }
-
         bool IsBroken();
+        
         string Id { get; }
     }
 }

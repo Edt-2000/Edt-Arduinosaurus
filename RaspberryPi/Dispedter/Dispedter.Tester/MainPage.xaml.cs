@@ -19,6 +19,8 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Diagnostics;
 using Dispedter.Common.Managers;
+using Windows.UI;
+using System.Collections.ObjectModel;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -30,23 +32,28 @@ namespace Dispedter.Tester
     public sealed partial class MainPage : Page
     {
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/L" });
+        private readonly ListenerManager _listenerManager = new ListenerManager();
         private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { "10.0.0.10" });
 
         private Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>> _commandMapping;
         private Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>> _proceduralCommandMapping;
 
-
-
         private Task _scanForDevicesTask;
         private Task _manageDevicesTask;
 
+        enum CommandDirection
+        {
+            In,
+            Out
+        }
 
         public MainPage()
         {
             InitializeComponent();
+            InitializeListeners();
 
-            _scanForDevicesTask =_senderManager.ManageDevicesAsync();
-            _manageDevicesTask = _senderManager.ManageDevicesAsync();
+            _scanForDevicesTask = _senderManager.ManageDevicesAsync();
+            _manageDevicesTask = _listenerManager.ManageDevicesAsync();
 
             InitializeCommandMapping();
             InitializeProceduralCommandMapping();
@@ -56,6 +63,14 @@ namespace Dispedter.Tester
                 var key = e.VirtualKey;
                 await SendCommandAsync(key);
             };
+        }
+
+        private void InitializeListeners()
+        {
+            _listenerManager.AttachEventHandler((UdpListener listener, OscEventArgs args) =>
+            {
+                LogCommand(CommandDirection.In, new[] { args.GetOscPacket() as OscMessage });
+            });
         }
 
         private async Task SendCommandAsync(VirtualKey key)
@@ -73,6 +88,8 @@ namespace Dispedter.Tester
                 {
                     await sender.SendAsync(command);
                 }
+
+                LogCommand(CommandDirection.Out, command);
             }
             else if (_proceduralCommandMapping.TryGetValue(key, out var proceduralCommandGenerator))
             {
@@ -86,6 +103,8 @@ namespace Dispedter.Tester
                         await sender.SendAsync(command);
                     }
 
+                    LogCommand(CommandDirection.Out, command);
+
                     await Task.Delay(delay);
 
                 } while (++i < 100);
@@ -93,6 +112,41 @@ namespace Dispedter.Tester
             else
             {
                 ;
+            }
+        }
+
+        private List<string> _outHistory = new List<string>();
+        private ObservableCollection<string> _inHistory = new ObservableCollection<string>();
+
+        private void LogCommand(CommandDirection commandDirection, IEnumerable<OscMessage> messages)
+        {
+            if (commandDirection == CommandDirection.Out)
+            {
+                foreach (var message in messages)
+                {
+                    if (_outHistory.Count > 30)
+                    {
+                        _outHistory.RemoveAt(0);
+                    }
+
+                    _outHistory.Add($"{message.Address} - {string.Join(", ", message.Arguments)}");
+                }
+
+                OutCommandHistory.Text = string.Join("\r\n", _outHistory);
+            }
+            else
+            {
+                foreach (var message in messages)
+                {
+                    if (_inHistory.Count > 30)
+                    {
+                        _inHistory.RemoveAt(0);
+                    }
+
+                    _inHistory.Add($"{message.Address} - {string.Join(", ", message.Arguments)}");
+                }
+
+                InCommandHistory.Text = string.Join("\r\n", _inHistory);
             }
         }
 
@@ -112,8 +166,9 @@ namespace Dispedter.Tester
                         i++;
 
                         ColorIndex.Text = i.ToString();
+                        ColorIndex.Foreground = new SolidColorBrush(ColorFromHSV(i, 1.0, 1.0));
 
-                        return _commandFactory.CreateSingleSolid((Color)i, 255, 254);
+                        return _commandFactory.CreateSingleSolid((ColorPreset)i, 255, 254);
                     }
                 },
                 {
@@ -122,8 +177,9 @@ namespace Dispedter.Tester
                         i--;
 
                         ColorIndex.Text = i.ToString();
+                        ColorIndex.Foreground = new SolidColorBrush(ColorFromHSV(i, 1.0, 1.0));
 
-                        return _commandFactory.CreateSingleSolid((Color)i, 255, 254);
+                        return _commandFactory.CreateSingleSolid((ColorPreset)i, 255, 254);
                     }
                 },
                 {
@@ -132,7 +188,7 @@ namespace Dispedter.Tester
                         strobo <<= 1;
                         strobo++;
 
-                        return _commandFactory.CreateStrobo((Color)Random(), strobo);
+                        return _commandFactory.CreateStrobo((ColorPreset)Random(), strobo);
                     }
                 },
                 {
@@ -140,74 +196,74 @@ namespace Dispedter.Tester
                     () => {
                         strobo >>= 1;
 
-                        return _commandFactory.CreateStrobo((Color)Random(), strobo);
+                        return _commandFactory.CreateStrobo((ColorPreset)Random(), strobo);
                     }
                 },
 
-                { VirtualKey.Q, () => _commandFactory.CreateSingleSolid(Color.Red, 255, 20) },
-                { VirtualKey.W, () => _commandFactory.CreateSingleSolid(Color.Red, 255, 40) },
-                { VirtualKey.E, () => _commandFactory.CreateSingleSolid(Color.Red, 255, 60) },
-                { VirtualKey.R, () => _commandFactory.CreateSingleSolid(Color.Red, 255, 80) },
+                { VirtualKey.Q, () => _commandFactory.CreateSingleSolid(ColorPreset.Red, 255, 20) },
+                { VirtualKey.W, () => _commandFactory.CreateSingleSolid(ColorPreset.Red, 255, 40) },
+                { VirtualKey.E, () => _commandFactory.CreateSingleSolid(ColorPreset.Red, 255, 60) },
+                { VirtualKey.R, () => _commandFactory.CreateSingleSolid(ColorPreset.Red, 255, 80) },
 
                 { VirtualKey.T, () => _commandFactory.CreateRainbowSpark(PulseLength.Long) },
                 { VirtualKey.Y, () => _commandFactory.CreateRainbowSpark(PulseLength.Medium) },
 
-                { VirtualKey.Number1, () => _commandFactory.CreateSingleSolid(Color.Purple, 255, 254) },
-                { VirtualKey.Number2, () => _commandFactory.CreateSingleSolid(Color.Pink, 255, 254) },
-                { VirtualKey.Number3, () => _commandFactory.CreateSingleSolid(Color.Red, 255, 254) },
-                { VirtualKey.Number4, () => _commandFactory.CreateSingleSolid(Color.Orange, 255, 254) },
-                { VirtualKey.Number5, () => _commandFactory.CreateSingleSolid(Color.Yellow, 255, 254) },
-                { VirtualKey.Number6, () => _commandFactory.CreateSingleSolid(Color.Lime, 255, 254) },
-                { VirtualKey.Number7, () => _commandFactory.CreateSingleSolid(Color.Green, 255, 254) },
-                { VirtualKey.Number8, () => _commandFactory.CreateSingleSolid(Color.SeaGreen, 255, 254) },
-                { VirtualKey.Number9, () => _commandFactory.CreateSingleSolid(Color.Turquoise, 255, 254) },
-                { VirtualKey.Number0, () => _commandFactory.CreateSingleSolid(Color.Blue, 255, 254) },
+                { VirtualKey.Number1, () => _commandFactory.CreateSingleSolid(ColorPreset.Purple, 255, 254) },
+                { VirtualKey.Number2, () => _commandFactory.CreateSingleSolid(ColorPreset.Pink, 255, 254) },
+                { VirtualKey.Number3, () => _commandFactory.CreateSingleSolid(ColorPreset.Red, 255, 254) },
+                { VirtualKey.Number4, () => _commandFactory.CreateSingleSolid(ColorPreset.Orange, 255, 254) },
+                { VirtualKey.Number5, () => _commandFactory.CreateSingleSolid(ColorPreset.Yellow, 255, 254) },
+                { VirtualKey.Number6, () => _commandFactory.CreateSingleSolid(ColorPreset.Lime, 255, 254) },
+                { VirtualKey.Number7, () => _commandFactory.CreateSingleSolid(ColorPreset.Green, 255, 254) },
+                { VirtualKey.Number8, () => _commandFactory.CreateSingleSolid(ColorPreset.SeaGreen, 255, 254) },
+                { VirtualKey.Number9, () => _commandFactory.CreateSingleSolid(ColorPreset.Turquoise, 255, 254) },
+                { VirtualKey.Number0, () => _commandFactory.CreateSingleSolid(ColorPreset.Blue, 255, 254) },
 
-                { VirtualKey.NumberPad1, () => _commandFactory.CreateDualSolid(Color.Red, Color.Blue, 25) },
-                { VirtualKey.NumberPad2, () => _commandFactory.CreateDualSolid(Color.Red, Color.Blue, 50) },
-                { VirtualKey.NumberPad3, () => _commandFactory.CreateDualSolid(Color.Red, Color.Blue, 75) },
-                { VirtualKey.NumberPad4, () => _commandFactory.CreateDualSolid(Color.Red, Color.Blue, 100) },
-                { VirtualKey.NumberPad5, () => _commandFactory.CreateDualSolid(Color.Red, Color.Blue, 125) },
-                { VirtualKey.NumberPad6, () => _commandFactory.CreateDualSolid(Color.Red, Color.Blue, 150) },
-                { VirtualKey.NumberPad7, () => _commandFactory.CreateDualSolid(Color.Red, Color.Blue, 175) },
-                { VirtualKey.NumberPad8, () => _commandFactory.CreateDualSolid(Color.Red, Color.Blue, 200) },
-                { VirtualKey.NumberPad9, () => _commandFactory.CreateDualSolid(Color.Red, Color.Blue, 225) },
+                { VirtualKey.NumberPad1, () => _commandFactory.CreateDualSolid(ColorPreset.Red, ColorPreset.Blue, 25) },
+                { VirtualKey.NumberPad2, () => _commandFactory.CreateDualSolid(ColorPreset.Red, ColorPreset.Blue, 50) },
+                { VirtualKey.NumberPad3, () => _commandFactory.CreateDualSolid(ColorPreset.Red, ColorPreset.Blue, 75) },
+                { VirtualKey.NumberPad4, () => _commandFactory.CreateDualSolid(ColorPreset.Red, ColorPreset.Blue, 100) },
+                { VirtualKey.NumberPad5, () => _commandFactory.CreateDualSolid(ColorPreset.Red, ColorPreset.Blue, 125) },
+                { VirtualKey.NumberPad6, () => _commandFactory.CreateDualSolid(ColorPreset.Red, ColorPreset.Blue, 150) },
+                { VirtualKey.NumberPad7, () => _commandFactory.CreateDualSolid(ColorPreset.Red, ColorPreset.Blue, 175) },
+                { VirtualKey.NumberPad8, () => _commandFactory.CreateDualSolid(ColorPreset.Red, ColorPreset.Blue, 200) },
+                { VirtualKey.NumberPad9, () => _commandFactory.CreateDualSolid(ColorPreset.Red, ColorPreset.Blue, 225) },
 
-                { VirtualKey.F1, () => _commandFactory.CreateSingleSolid(Color.Purple, 245, 75) },
-                { VirtualKey.F2, () => _commandFactory.CreateSingleSolid(Color.Pink, 255, 75) },
-                { VirtualKey.F3, () => _commandFactory.CreateSingleSolid(Color.Red, 255, 75) },
-                { VirtualKey.F4, () => _commandFactory.CreateSingleSolid(Color.Orange, 255, 75) },
-                { VirtualKey.F5, () => _commandFactory.CreateSingleSolid(Color.Yellow, 255, 75) },
-                { VirtualKey.F6, () => _commandFactory.CreateSingleSolid(Color.Lime, 255, 75) },
-                { VirtualKey.F7, () => _commandFactory.CreateSingleSolid(Color.Green, 255, 75) },
-                { VirtualKey.F8, () => _commandFactory.CreateSingleSolid(Color.SeaGreen, 255, 75) },
-                { VirtualKey.F9, () => _commandFactory.CreateSingleSolid(Color.Turquoise,255, 75) },
-                { VirtualKey.F10, () => _commandFactory.CreateSingleSolid(Color.Blue, 255, 75) },
+                { VirtualKey.F1, () => _commandFactory.CreateSingleSolid(ColorPreset.Purple, 245, 75) },
+                { VirtualKey.F2, () => _commandFactory.CreateSingleSolid(ColorPreset.Pink, 255, 75) },
+                { VirtualKey.F3, () => _commandFactory.CreateSingleSolid(ColorPreset.Red, 255, 75) },
+                { VirtualKey.F4, () => _commandFactory.CreateSingleSolid(ColorPreset.Orange, 255, 75) },
+                { VirtualKey.F5, () => _commandFactory.CreateSingleSolid(ColorPreset.Yellow, 255, 75) },
+                { VirtualKey.F6, () => _commandFactory.CreateSingleSolid(ColorPreset.Lime, 255, 75) },
+                { VirtualKey.F7, () => _commandFactory.CreateSingleSolid(ColorPreset.Green, 255, 75) },
+                { VirtualKey.F8, () => _commandFactory.CreateSingleSolid(ColorPreset.SeaGreen, 255, 75) },
+                { VirtualKey.F9, () => _commandFactory.CreateSingleSolid(ColorPreset.Turquoise,255, 75) },
+                { VirtualKey.F10, () => _commandFactory.CreateSingleSolid(ColorPreset.Blue, 255, 75) },
 
-                { VirtualKey.F11, () => _commandFactory.CreateDualSpark(Color.Red, Color.Blue, 127, PulseLength.Long) },
-                { VirtualKey.F12, () => _commandFactory.CreateDualSpark(Color.Green, Color.Pink, 127, PulseLength.Long) },
+                { VirtualKey.F11, () => _commandFactory.CreateDualSpark(ColorPreset.Red, ColorPreset.Blue, 127, PulseLength.Long) },
+                { VirtualKey.F12, () => _commandFactory.CreateDualSpark(ColorPreset.Green, ColorPreset.Pink, 127, PulseLength.Long) },
 
                 { VirtualKey.G, () => _commandFactory.CreateSingleSolid(0, 0, 255) },
 
-                { VirtualKey.U, () => _commandFactory.CreateSingleSpark(Color.Red, 255, 254, PulseLength.Medium) },
-                { VirtualKey.I, () => _commandFactory.CreateSingleSpark(Color.Blue, 255, 254, PulseLength.Medium) },
-                { VirtualKey.O, () => _commandFactory.CreateSingleSpark(Color.Purple, 255, 254, PulseLength.Medium) },
-                { VirtualKey.P, () => _commandFactory.CreateSingleSpark(Color.Green, 255, 254, PulseLength.Medium) },
+                { VirtualKey.U, () => _commandFactory.CreateSingleSpark(ColorPreset.Red, 255, 254, PulseLength.Medium) },
+                { VirtualKey.I, () => _commandFactory.CreateSingleSpark(ColorPreset.Blue, 255, 254, PulseLength.Medium) },
+                { VirtualKey.O, () => _commandFactory.CreateSingleSpark(ColorPreset.Purple, 255, 254, PulseLength.Medium) },
+                { VirtualKey.P, () => _commandFactory.CreateSingleSpark(ColorPreset.Green, 255, 254, PulseLength.Medium) },
 
-                { VirtualKey.H, () => _commandFactory.CreateSinglePulse(Color.Red, 255, 254, PulseLength.Medium) },
-                { VirtualKey.J, () => _commandFactory.CreateSinglePulse(Color.Blue, 255, 254, PulseLength.Medium) },
-                { VirtualKey.K, () => _commandFactory.CreateSinglePulse(Color.Purple, 255, 254, PulseLength.Medium) },
-                { VirtualKey.L, () => _commandFactory.CreateSinglePulse(Color.Green, 255, 254, PulseLength.Medium) },
+                { VirtualKey.H, () => _commandFactory.CreateSinglePulse(ColorPreset.Red, 255, 254, PulseLength.Medium) },
+                { VirtualKey.J, () => _commandFactory.CreateSinglePulse(ColorPreset.Blue, 255, 254, PulseLength.Medium) },
+                { VirtualKey.K, () => _commandFactory.CreateSinglePulse(ColorPreset.Purple, 255, 254, PulseLength.Medium) },
+                { VirtualKey.L, () => _commandFactory.CreateSinglePulse(ColorPreset.Green, 255, 254, PulseLength.Medium) },
 
-                { VirtualKey.B, () => _commandFactory.CreateSinglePulse(Color.Red, 255, 254, PulseLength.Long) },
-                { VirtualKey.N, () => _commandFactory.CreateSinglePulse(Color.Blue, 255, 254, PulseLength.Long) },
-                { VirtualKey.M, () => _commandFactory.CreateSinglePulse(Color.Purple, 255, 254, PulseLength.Long) },
-                { (VirtualKey)188, () => _commandFactory.CreateSinglePulse(Color.Green, 255, 254, PulseLength.Long) }, // comma
+                { VirtualKey.B, () => _commandFactory.CreateSinglePulse(ColorPreset.Red, 255, 254, PulseLength.Long) },
+                { VirtualKey.N, () => _commandFactory.CreateSinglePulse(ColorPreset.Blue, 255, 254, PulseLength.Long) },
+                { VirtualKey.M, () => _commandFactory.CreateSinglePulse(ColorPreset.Purple, 255, 254, PulseLength.Long) },
+                { (VirtualKey)188, () => _commandFactory.CreateSinglePulse(ColorPreset.Green, 255, 254, PulseLength.Long) }, // comma
 
-                { VirtualKey.Space, () => _commandFactory.CreateStrobo((Color)Random(), strobo) },
+                { VirtualKey.Space, () => _commandFactory.CreateStrobo((ColorPreset)Random(), strobo) },
                 { VirtualKey.Escape, () => _commandFactory.CreateStrobo(0, 0) },
 
-                { VirtualKey.Z, () => _commandFactory.CreateTwinkle((Color)Random(), Random()) },
+                { VirtualKey.Z, () => _commandFactory.CreateTwinkle((ColorPreset)Random(), Random()) },
                 { VirtualKey.X, () => _commandFactory.CreateRainbowSolid() },
             };
         }
@@ -216,9 +272,9 @@ namespace Dispedter.Tester
             _proceduralCommandMapping = new Dictionary<VirtualKey, Func<int, (int, IEnumerable<OscMessage>)>>
             {
                 { VirtualKey.A, (i) => (10, _commandFactory.CreateVuMeter(Wave(i))) },
-                { VirtualKey.S, (i) => (20, _commandFactory.CreateTwinkle(Color.Red, Wave(i))) },
-                { VirtualKey.D, (i) => (5, _commandFactory.CreateTwinkle((Color)Random(), Random())) },
-                { VirtualKey.F, (i) => (5, _commandFactory.CreateSingleSolid((Color)Clamp(i / 100.0), 255, 254)) }
+                { VirtualKey.S, (i) => (20, _commandFactory.CreateTwinkle(ColorPreset.Red, Wave(i))) },
+                { VirtualKey.D, (i) => (5, _commandFactory.CreateTwinkle((ColorPreset)Random(), Random())) },
+                { VirtualKey.F, (i) => (5, _commandFactory.CreateSingleSolid((ColorPreset)Clamp(i / 100.0), 255, 254)) }
             };
         }
 
@@ -233,6 +289,45 @@ namespace Dispedter.Tester
         private static int Clamp(double i)
         {
             return (int)(i * 255);
+        }
+
+        public static Color ColorFromHSV(double hue, double saturation, double value)
+        {
+            var baseValue = 60 * (255.0 / 360.0);
+
+            var hi = Convert.ToInt32(Math.Floor(hue / baseValue)) % 6;
+            var f = hue / baseValue - Math.Floor(hue / baseValue);
+
+            value = value * 255;
+            var v = Convert.ToByte(value);
+            var p = Convert.ToByte(value * (1 - saturation));
+            var q = Convert.ToByte(value * (1 - f * saturation));
+            var t = Convert.ToByte(value * (1 - (1 - f) * saturation));
+
+            if (hi == 0)
+            {
+                return Color.FromArgb(255, v, t, p);
+            }
+            else if (hi == 1)
+            {
+                return Color.FromArgb(255, q, v, p);
+            }
+            else if (hi == 2)
+            {
+                return Color.FromArgb(255, p, v, t);
+            }
+            else if (hi == 3)
+            {
+                return Color.FromArgb(255, p, q, v);
+            }
+            else if (hi == 4)
+            {
+                return Color.FromArgb(255, t, p, v);
+            }
+            else
+            {
+                return Color.FromArgb(255, v, p, q);
+            }
         }
     }
 }

@@ -131,6 +131,7 @@ namespace Dispedter.Common.OSC
             }
             catch
             {
+                SetDeviceState(State.Broken);
                 //Trace.TraceError($"Message to {Id} fail!");
 
                 try
@@ -141,8 +142,6 @@ namespace Dispedter.Common.OSC
                 catch
                 {
                 }
-
-                SetDeviceState(State.Broken);
             }
         }
 

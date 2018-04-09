@@ -108,7 +108,7 @@
   <ItemGroup>
     <Compile Include="Managers\ListenerManager.cs" />
     <Compile Include="Managers\SenderManager.cs" />
-    <Compile Include="OSCArduino\Colors.cs" />
+    <Compile Include="OSCArduino\ColorPreset.cs" />
     <Compile Include="OSCArduino\Command.cs" />
     <Compile Include="Factories\CommandFactory.cs" />
     <Compile Include="OSCArduino\PulseLength.cs" />

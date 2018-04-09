@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dispedter.Common.OSCArduino
+﻿namespace Dispedter.Common.OSCArduino
 {
-    public enum Color
+    public enum ColorPreset
     {
         Red = 0,
         Orange = 18,

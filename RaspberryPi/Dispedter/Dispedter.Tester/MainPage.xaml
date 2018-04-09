@@ -9,6 +9,7 @@
 
     <Grid Background="Black">
         <TextBlock x:Name="ColorIndex"  HorizontalAlignment="Left"  Margin="214,214,0,0" Foreground="White" Text="" VerticalAlignment="Top"/>
-
+        <TextBlock x:Name="OutCommandHistory" HorizontalAlignment="Stretch" Margin="280,214,600,20" Foreground="#00FF00" Text="Test" VerticalAlignment="Stretch" />
+        <TextBlock x:Name="InCommandHistory" HorizontalAlignment="Stretch" Margin="700,214,20,20" Foreground="#DF00FF" Text="Test" VerticalAlignment="Stretch" />
     </Grid>
 </Page>

@@ -49,25 +49,6 @@ namespace Dispedter.Common.OSC
 
         public string Id { get; private set; }
 
-        //public void Send(byte[] message)
-        //{
-        //    _socket.SendTo(message, _remoteIpEndPoint);
-        //}
-
-        //public void Send(OscPacket packet)
-        //{
-        //    var data = packet.GetBytes();
-        //    Send(data);
-        //}
-
-        //public void Send(IEnumerable<OscPacket> packets)
-        //{
-        //    foreach (var packet in packets)
-        //    {
-        //        Send(packet);
-        //    }
-        //}
-
         public async Task SendAsync(byte[] message)
         {
             try

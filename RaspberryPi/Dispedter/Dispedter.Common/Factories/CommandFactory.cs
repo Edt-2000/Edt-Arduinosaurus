@@ -19,32 +19,32 @@ namespace Dispedter.Common.Factories
             return new[] { new OscMessage("/TD", i, 0) };
         }
 
-        public IEnumerable<OscMessage> CreateSingleSolid(Color h, int s, int v)
+        public IEnumerable<OscMessage> CreateSingleSolid(ColorPreset h, int s, int v)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.SingleSolid, 0, 127, (int)h, s, v));
         }
 
-        public IEnumerable<OscMessage> CreateSinglePulse(Color h, int s, int v, PulseLength p)
+        public IEnumerable<OscMessage> CreateSinglePulse(ColorPreset h, int s, int v, PulseLength p)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.SinglePulse, 0, 127, (int)h, s, v, (int)p));
         }
 
-        public IEnumerable<OscMessage> CreateSingleSpark(Color h, int s, int v, PulseLength p)
+        public IEnumerable<OscMessage> CreateSingleSpark(ColorPreset h, int s, int v, PulseLength p)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.SingleSpark, 0, 127, (int)h, s, v, (int)p));
         }
 
-        public IEnumerable<OscMessage> CreateDualSolid(Color h1, Color h2, int percentage)
+        public IEnumerable<OscMessage> CreateDualSolid(ColorPreset h1, ColorPreset h2, int percentage)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.DualSolid, 0, 127, (int)h1, (int)h2, percentage));
         }
 
-        public IEnumerable<OscMessage> CreateDualPulse(Color h1, Color h2, int percentage, PulseLength p)
+        public IEnumerable<OscMessage> CreateDualPulse(ColorPreset h1, ColorPreset h2, int percentage, PulseLength p)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.DualPulse, 0, 127, (int)h1, (int)h2, percentage, (int)p));
         }
 
-        public IEnumerable<OscMessage> CreateDualSpark(Color h1, Color h2, int percentage, PulseLength p)
+        public IEnumerable<OscMessage> CreateDualSpark(ColorPreset h1, ColorPreset h2, int percentage, PulseLength p)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.DualSpark, 0, 127, (int)h1, (int)h2, percentage, (int)p));
         }
@@ -66,20 +66,20 @@ namespace Dispedter.Common.Factories
 
         public IEnumerable<OscMessage> CreateVuMeter(int intensity)
         {
-            return _addresses.Select(a => new OscMessage(a, (int)Command.VUMeter, 0, 127, 63, (int)Color.Green, 128, intensity));
+            return _addresses.Select(a => new OscMessage(a, (int)Command.VUMeter, 0, 127, 63, (int)ColorPreset.Green, 128, intensity));
         }
 
-        public IEnumerable<OscMessage> CreateTwinkle(Color h, int intensity)
+        public IEnumerable<OscMessage> CreateTwinkle(ColorPreset h, int intensity)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.Twinkle, 0, 127, (int)h, intensity));
         }
 
-        public IEnumerable<OscMessage> CreateStrobo(Color h, int speed)
+        public IEnumerable<OscMessage> CreateStrobo(ColorPreset h, int speed)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.Strobo, (int)h, speed));
         }
 
-        public IEnumerable<OscMessage> CretaeKitt(int position, int length, Color h)
+        public IEnumerable<OscMessage> CretaeKitt(int position, int length, ColorPreset h)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.Kitt, position, length, (int)h));
         }

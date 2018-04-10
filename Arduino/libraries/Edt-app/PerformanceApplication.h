@@ -11,6 +11,11 @@
 #include "Statemachine.h"
 #include "Time.h"
 
+//#define LEO
+#define UNO
+
+#ifdef LEO
+
 bool messageSend = false;
 
 class TestDevice : public OSC::MessageConsumer<OSC::Message>, public OSC::MessageProducer<OSC::Message>
@@ -102,9 +107,73 @@ class PerformanceApplication : public AbstractApplication
 
 	void applicationLoop()
 	{
-		// slow down the application
-		// otherwise, partial messages from Serial are being read and those will fail to parse.
-		// on uno's only, since the usb works differently on a Leonardo
 		osc.loop(time.tOSC);
 	}
 };
+
+#endif;
+#ifdef UNO
+
+class TestDevice : public OSC::MessageConsumer<OSC::Message>
+{
+  private:
+	const char * _pattern;
+
+  public:
+	TestDevice(const char *pattern) : MessageConsumer()
+	{
+		_pattern = pattern;
+	}
+
+	const char *pattern()
+	{
+		return _pattern;
+	}
+
+	void loop()
+	{
+	}
+
+	void callbackMessage(OSC::Message *message)
+	{
+		auto i = message->getInt(0);
+		digitalWrite(13, (i % 2) ? HIGH : LOW);
+	}
+};
+
+class PerformanceApplication : public AbstractApplication
+{
+  public:
+	OSC::Arduino<OSC::Message> osc;
+
+	TestDevice device = TestDevice("/TD");
+
+	void setupStatus()
+	{
+		status.setup(13, HIGH);
+	}
+
+	void setupNetwork()
+	{
+		Serial.begin(57600);
+	}
+
+	void setupOsc()
+	{
+		osc = OSC::Arduino<OSC::Message>(1, 0);
+		osc.bindStream(&Serial);
+		osc.addConsumer(&device);
+	}
+
+	void applicationLoop()
+	{
+		// slow down the application
+		// otherwise, partial messages from Serial are being read and those will fail to parse.
+		// on uno's only, since the usb works differently on a Leonardo
+		if(time.tOSC) {
+			osc.loop(false);
+		}
+	}
+};
+
+#endif;

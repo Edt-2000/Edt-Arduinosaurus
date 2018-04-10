@@ -67,9 +67,9 @@ namespace Dispedter.Tester
 
         private void InitializeListeners()
         {
-            _listenerManager.AttachEventHandler((UdpListener listener, OscEventArgs args) =>
+            _listenerManager.AttachEventHandler(async (UdpListener listener, OscEventArgs args) =>
             {
-                LogCommand(CommandDirection.In, new[] { args.GetOscPacket() as OscMessage });
+                await LogCommandAsync(CommandDirection.In, new[] { args.GetOscPacket() as OscMessage });
             });
         }
 
@@ -89,7 +89,7 @@ namespace Dispedter.Tester
                     await sender.SendAsync(command);
                 }
 
-                LogCommand(CommandDirection.Out, command);
+                await LogCommandAsync(CommandDirection.Out, command);
             }
             else if (_proceduralCommandMapping.TryGetValue(key, out var proceduralCommandGenerator))
             {
@@ -103,7 +103,7 @@ namespace Dispedter.Tester
                         await sender.SendAsync(command);
                     }
 
-                    LogCommand(CommandDirection.Out, command);
+                    await LogCommandAsync(CommandDirection.Out, command);
 
                     await Task.Delay(delay);
 
@@ -115,21 +115,26 @@ namespace Dispedter.Tester
             }
         }
 
+        private DateTime _previousOut = DateTime.UtcNow;
         private List<string> _outHistory = new List<string>();
-        private ObservableCollection<string> _inHistory = new ObservableCollection<string>();
+        private DateTime _previousIn = DateTime.UtcNow;
+        private List<string> _inHistory = new List<string>();
 
-        private void LogCommand(CommandDirection commandDirection, IEnumerable<OscMessage> messages)
+        private async Task LogCommandAsync(CommandDirection commandDirection, IEnumerable<OscMessage> messages)
         {
             if (commandDirection == CommandDirection.Out)
             {
                 foreach (var message in messages)
                 {
+                    var delta = DateTime.UtcNow - _previousOut;
+                    _previousOut = DateTime.UtcNow;
+
                     if (_outHistory.Count > 30)
                     {
                         _outHistory.RemoveAt(0);
                     }
 
-                    _outHistory.Add($"{message.Address} - {string.Join(", ", message.Arguments)}");
+                    _outHistory.Add($"+{delta.TotalSeconds:0.0000} - {message.Address} - {string.Join(", ", message.Arguments)}");
                 }
 
                 OutCommandHistory.Text = string.Join("\r\n", _outHistory);
@@ -138,15 +143,23 @@ namespace Dispedter.Tester
             {
                 foreach (var message in messages)
                 {
+                    var delta = DateTime.UtcNow - _previousIn;
+                    _previousIn = DateTime.UtcNow;
+                    var deltaOutIn = _previousIn - _previousOut;
+
                     if (_inHistory.Count > 30)
                     {
                         _inHistory.RemoveAt(0);
                     }
 
-                    _inHistory.Add($"{message.Address} - {string.Join(", ", message.Arguments)}");
+                    _inHistory.Add($"+{delta.TotalSeconds:0.0000} - {message.Address} - {string.Join(", ", message.Arguments)} -- <+{deltaOutIn.TotalSeconds:0.0000}>");
                 }
 
-                InCommandHistory.Text = string.Join("\r\n", _inHistory);
+                var data = string.Join("\r\n", _inHistory);
+
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
+                    InCommandHistory.Text = data;
+                });
             }
         }
 

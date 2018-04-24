@@ -39,7 +39,7 @@ namespace Dispedter.Common.OSC
 
             _deviceInfo = deviceInfo;
             _deviceTask = ConfigureDeviceAsync();
-            _buffer = new byte[28];
+            _buffer = new byte[128];
         }
 
         public string Id { get; private set; }
@@ -47,8 +47,6 @@ namespace Dispedter.Common.OSC
 
         private async Task ConfigureDeviceAsync()
         {
-            //Trace.TraceInformation($"Configuring {Id}..");
-
             if (_state != State.Idle)
             {
                 return;
@@ -75,7 +73,6 @@ namespace Dispedter.Common.OSC
                     _device.DataBits = 8;
                     _device.StopBits = SerialStopBitCount.One;
                     _device.Handshake = SerialHandshake.None;
-                    _device.ErrorReceived += ErrorReceived;
 
                     _serialPortStream = new DataReader(_device.InputStream);
                     _serialPortStream.InputStreamOptions = InputStreamOptions.Partial;
@@ -84,15 +81,11 @@ namespace Dispedter.Common.OSC
 
                     SetDeviceState(State.Running);
 
-                    //Trace.TraceInformation($"Configuring {Id} success!");
-
                     // we're healthy.
                     return;
                 }
                 catch (Exception)
                 {
-                    //Trace.TraceWarning($"Configuring {Id} failed..");
-
                     retries++;
                 }
 
@@ -103,15 +96,8 @@ namespace Dispedter.Common.OSC
 
             // kill me
             SetDeviceState(State.Broken);
-
-            //Trace.TraceError($"{Id} broken..");
         }
-
-        private void ErrorReceived(SerialDevice sender, ErrorReceivedEventArgs args)
-        {
-            //SetDeviceState(State.Broken);
-        }
-
+        
         private async Task ReadTaskAsync()
         {
             do
@@ -125,21 +111,18 @@ namespace Dispedter.Common.OSC
                     if (bytesRead > 0)
                     {
                         _serialPortStream.ReadBytes(_buffer);
+                        
+                        var messages = OscPacket.GetPackets(_buffer, (int)bytesRead);
 
-                        var message = OscPacket.GetPacket(_buffer);
-                        OscPacketReceived?.Invoke(this, new OscEventArgs(message));
-
-                        //var messages = OscPacket.GetPackets(_buffer, (int)bytesRead);
-
-                        //foreach (var message in messages)
-                        //{
-                        //    OscPacketReceived?.Invoke(this, new OscEventArgs(message));
-                        //}
+                        foreach (var message in messages)
+                        {
+                            OscPacketReceived?.Invoke(this, new OscEventArgs(message));
+                        }
                     }
                 }
                 catch
                 {
-                    
+                    // do not care   
                 }
             }
             while (true);

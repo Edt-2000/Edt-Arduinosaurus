@@ -125,11 +125,11 @@ class GuitarApplication : public AbstractApplication
 {
   public:
     OSC::Arduino<OSC::StructMessage<Message, uint8_t>> osc;
-    OSC::Arduino<OSC::StructMessage<InterMessage, uint32_t>> interArduinoOsc;
+    //OSC::Arduino<OSC::StructMessage<InterMessage, uint32_t>> interArduinoOsc;
 
     Node node = Node(address);
-    NodeServer interNodeServer = NodeServer(address);
-    NodeClient interNodeClient = NodeClient(otherAddress);
+    // NodeServer interNodeServer = NodeServer(address);
+    // NodeClient interNodeClient = NodeClient(otherAddress);
 
     void setupStatus()
     {
@@ -145,10 +145,10 @@ class GuitarApplication : public AbstractApplication
             delay(1000);
         }
 
-        pinMode(0, INPUT_PULLUP);
-        pinMode(1, INPUT_PULLUP);
+        // pinMode(0, INPUT_PULLUP);
+        // pinMode(1, INPUT_PULLUP);
         
-        Serial1.begin(9600);
+        // Serial1.begin(9600);
     }
 
     void setupOsc()
@@ -159,19 +159,19 @@ class GuitarApplication : public AbstractApplication
 
         osc.addProducer(&node);
 
-        interArduinoOsc = OSC::Arduino<OSC::StructMessage<InterMessage, uint32_t>>(1, 1);
+        // interArduinoOsc = OSC::Arduino<OSC::StructMessage<InterMessage, uint32_t>>(1, 1);
 
-        interArduinoOsc.bindStream(&Serial1);
+        // interArduinoOsc.bindStream(&Serial1);
 
-        interArduinoOsc.addProducer(&interNodeServer);
-        interArduinoOsc.addConsumer(&interNodeClient);
+        // interArduinoOsc.addProducer(&interNodeServer);
+        // interArduinoOsc.addConsumer(&interNodeClient);
     }
 
     void applicationLoop()
     {
     //if(time.t1000ms) {
-        osc.loop(time.t100ms);
-        interArduinoOsc.loop(time.t100ms);
+        osc.loop(time.tOSC);
+        //interArduinoOsc.loop(time.t100ms);
         //}
     }
 } application;

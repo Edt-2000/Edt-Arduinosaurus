@@ -36,7 +36,11 @@ namespace Dispedter.Common.OSC
                 try
                 {
                     var packet = OscPacket.GetPacket(data);
-                    OscPacketReceived?.Invoke(this, new OscEventArgs(packet));
+
+                    if (packet != null)
+                    {
+                        OscPacketReceived?.Invoke(this, new OscEventArgs(packet));
+                    }
                 }
                 catch (Exception)
                 {

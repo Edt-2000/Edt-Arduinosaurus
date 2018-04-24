@@ -40,8 +40,6 @@ namespace Dispedter.Common.OSC
 
         private async Task ConfigureDeviceAsync()
         {
-            //Trace.TraceInformation($"Configuring {Id}..");
-
             if (_state != State.Idle)
             {
                 return;
@@ -73,15 +71,11 @@ namespace Dispedter.Common.OSC
 
                     SetDeviceState(State.Running);
 
-                    //Trace.TraceInformation($"Configuring {Id} success!");
-
                     // we're healthy.
                     return;
                 }
                 catch (Exception)
                 {
-                    //Trace.TraceWarning($"Configuring {Id} failed..");
-
                     retries++;
                 }
 
@@ -92,8 +86,6 @@ namespace Dispedter.Common.OSC
 
             // kill me
             SetDeviceState(State.Broken);
-
-            //Trace.TraceError($"{Id} broken..");
         }
 
         public bool IsBroken()
@@ -132,8 +124,7 @@ namespace Dispedter.Common.OSC
             catch
             {
                 SetDeviceState(State.Broken);
-                //Trace.TraceError($"Message to {Id} fail!");
-
+                
                 try
                 {
                     _serialPortStream?.Dispose();

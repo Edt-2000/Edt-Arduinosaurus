@@ -19,6 +19,11 @@ namespace Dispedter.Common.OSC
             }
         }
 
+        public static IEnumerable<OscPacket> GetPackets(byte[] oscData, int maxLength)
+        {
+            yield break;
+        }
+
         public abstract byte[] GetBytes();
 
         #region Parse OSC packages

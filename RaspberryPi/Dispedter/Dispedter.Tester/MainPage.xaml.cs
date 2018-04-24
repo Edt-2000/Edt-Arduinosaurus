@@ -32,14 +32,14 @@ namespace Dispedter.Tester
     public sealed partial class MainPage : Page
     {
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/L" });
-        private readonly ListenerManager _listenerManager = new ListenerManager();
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { "10.0.0.10" });
+        private readonly ListenerManager _listenerManager = new ListenerManager(detectUsb: true);
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: false, udpDestinations: new[] { "10.0.0.10" });
 
         private Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>> _commandMapping;
         private Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>> _proceduralCommandMapping;
 
-        private Task _scanForDevicesTask;
-        private Task _manageDevicesTask;
+        private Task _senderTask;
+        private Task _listenerTask;
 
         enum CommandDirection
         {
@@ -52,8 +52,8 @@ namespace Dispedter.Tester
             InitializeComponent();
             InitializeListeners();
 
-            _scanForDevicesTask = _senderManager.ManageDevicesAsync();
-            _manageDevicesTask = _listenerManager.ManageDevicesAsync();
+            _senderTask = _senderManager.ManageDevicesAsync();
+            _listenerTask = _listenerManager.ManageDevicesAsync();
 
             InitializeCommandMapping();
             InitializeProceduralCommandMapping();
@@ -67,7 +67,7 @@ namespace Dispedter.Tester
 
         private void InitializeListeners()
         {
-            _listenerManager.AttachEventHandler(async (UdpListener listener, OscEventArgs args) =>
+            _listenerManager.AttachEventHandler(async (IListener listener, OscEventArgs args) =>
             {
                 await LogCommandAsync(CommandDirection.In, new[] { args.GetOscPacket() as OscMessage });
             });

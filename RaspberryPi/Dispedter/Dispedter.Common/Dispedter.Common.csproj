@@ -123,6 +123,7 @@
     <Compile Include="OSC\Timetag.cs" />
     <Compile Include="OSC\UdpListener.cs" />
     <Compile Include="OSC\UdpSender.cs" />
+    <Compile Include="OSC\UsbListener.cs" />
     <Compile Include="OSC\UsbSender.cs" />
     <Compile Include="OSC\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

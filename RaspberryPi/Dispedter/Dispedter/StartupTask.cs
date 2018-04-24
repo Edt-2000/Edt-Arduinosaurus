@@ -33,13 +33,10 @@ namespace Dispedter
         }
         private void SetupListeners()
         {
-            foreach(var listener in _listenerManager.Listeners)
-            {
-                listener.AddPacketHandler(OscPacketReceived);
-            }
+            _listenerManager.AttachEventHandler(OscPacketReceived);
         }
 
-        private void OscPacketReceived(UdpListener sender, OscEventArgs args)
+        private void OscPacketReceived(IListener sender, OscEventArgs args)
         {
             var packet = args.GetOscPacket();
 

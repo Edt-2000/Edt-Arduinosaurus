@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
+using Windows.Devices.SerialCommunication;
 using Windows.Foundation;
 
 namespace Dispedter.Common.Managers
@@ -11,18 +13,19 @@ namespace Dispedter.Common.Managers
     public class ListenerManager
     {
         private const int _udpPort = 12345;
+        private readonly bool _detectUsb;
 
         private List<IListener> _listeners = new List<IListener>();
-        private List<TypedEventHandler<UdpListener, OscEventArgs>> _eventHandlers = new List<TypedEventHandler<UdpListener, OscEventArgs>>();
+        private List<TypedEventHandler<IListener, OscEventArgs>> _eventHandlers = new List<TypedEventHandler<IListener, OscEventArgs>>();
 
-        public ListenerManager()
+        public ListenerManager(bool detectUsb = false)
         {
-
+            _detectUsb = detectUsb;
         }
 
         public List<IListener> Listeners { get => _listeners; }
 
-        public void AttachEventHandler(TypedEventHandler<UdpListener, OscEventArgs> eventHandler)
+        public void AttachEventHandler(TypedEventHandler<IListener, OscEventArgs> eventHandler)
         {
             if(_listeners.Count > 0)
             {
@@ -38,6 +41,25 @@ namespace Dispedter.Common.Managers
             {
                 try
                 {
+                    if (_detectUsb)
+                    {
+                        var allDevices = await GetAllUsbDevicesAsync();
+
+                        var newListeners = allDevices.Where(s => !_listeners.Select(listener => listener.Id).Contains(s.Id));
+
+                        foreach (var newListener in newListeners)
+                        {
+                            var usbListener = new UsbListener(newListener);
+
+                            foreach (var handler in _eventHandlers)
+                            {
+                                usbListener.AddPacketHandler(handler);
+                            }
+
+                            _listeners.Add(usbListener);
+                        }
+                    }
+
                     _listeners.RemoveAll(l => l.IsBroken());
 
                     if (!_listeners.Exists(s => s.Id == _udpPort.ToString()))
@@ -46,7 +68,7 @@ namespace Dispedter.Common.Managers
 
                         foreach (var handler in _eventHandlers)
                         {
-                            udpListener.OscPacketReceived += handler;
+                            udpListener.AddPacketHandler(handler);
                         }
 
                         _listeners.Add(udpListener);
@@ -59,6 +81,33 @@ namespace Dispedter.Common.Managers
                 }
             }
             while (true);
+        }
+
+        private async Task<IEnumerable<DeviceInformation>> GetAllUsbDevicesAsync()
+        {
+            var devices = new List<DeviceInformation>();
+
+            try
+            {
+                var _serialSelector = SerialDevice.GetDeviceSelector();
+                var infos = await DeviceInformation.FindAllAsync(_serialSelector);
+
+                foreach (var info in infos.Where(i => IsTargetDevice(i.Name)))
+                {
+                    devices.Add(info);
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+            return devices;
+        }
+
+        private bool IsTargetDevice(string name)
+        {
+            var names = new[] { "SparkFun", "Arduino", "UART" };
+            return names.Any(n => name.Contains(n));
         }
     }
 }

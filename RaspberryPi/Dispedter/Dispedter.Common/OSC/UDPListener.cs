@@ -4,15 +4,14 @@ using Windows.Networking.Sockets;
 
 namespace Dispedter.Common.OSC
 {
-    public class UdpListener : IListener, IDisposable
+    public class UdpListener : IListener
     {
+        private event TypedEventHandler<IListener, OscEventArgs> OscPacketReceived;
+
         public int Port { get; private set; }
 
         public string Id => Port.ToString();
-
-        public event TypedEventHandler<UdpListener, ByteEventArgs> BytePacketReceived;
-        public event TypedEventHandler<UdpListener, OscEventArgs> OscPacketReceived;
-
+        
         private DatagramSocket _socket;
         private IAsyncAction _socketTask;
         
@@ -34,8 +33,6 @@ namespace Dispedter.Common.OSC
 
                 reader.ReadBytes(data);
 
-                BytePacketReceived?.Invoke(this, new ByteEventArgs(data));
-
                 try
                 {
                     var packet = OscPacket.GetPacket(data);
@@ -47,12 +44,11 @@ namespace Dispedter.Common.OSC
                 }
             }
         }
-
-        public void AddPacketHandler(TypedEventHandler<UdpListener, OscEventArgs> handler)
+        public void AddPacketHandler(TypedEventHandler<IListener, OscEventArgs> handler)
         {
             OscPacketReceived += handler;
         }
-        
+
         public bool IsBroken()
         {
             return false;

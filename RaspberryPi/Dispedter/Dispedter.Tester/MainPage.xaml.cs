@@ -33,7 +33,7 @@ namespace Dispedter.Tester
     {
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/L" });
         private readonly ListenerManager _listenerManager = new ListenerManager(detectUsb: true);
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: false, udpDestinations: new[] { "10.0.0.10" });
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: false, udpDestinations: new[] { "192.168.2.45" });
 
         private Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>> _commandMapping;
         private Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>> _proceduralCommandMapping;

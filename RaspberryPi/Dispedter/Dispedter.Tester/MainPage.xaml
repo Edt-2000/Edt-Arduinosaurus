@@ -7,12 +7,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <Page.Resources>
-        <x:String x:Key="InHistory">Test</x:String>
+        <x:String x:Key="InHistory">In</x:String>
     </Page.Resources>
 
     <Grid Background="Black">
         <TextBlock x:Name="ColorIndex"  HorizontalAlignment="Left"  Margin="214,214,0,0" Foreground="White" Text="" VerticalAlignment="Top"/>
-        <TextBlock x:Name="OutCommandHistory" HorizontalAlignment="Stretch" Margin="280,214,600,20" Foreground="#00FF00" Text="Test" VerticalAlignment="Stretch" />
+        <TextBlock x:Name="OutCommandHistory" HorizontalAlignment="Stretch" Margin="280,214,600,20" Foreground="#00FF00" Text="Out" VerticalAlignment="Stretch" />
         <TextBlock x:Name="InCommandHistory" HorizontalAlignment="Stretch" Margin="700,214,20,20" Foreground="#FF00FF" Text="{StaticResource InHistory}" VerticalAlignment="Stretch" />
     </Grid>
 </Page>

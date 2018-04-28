@@ -518,17 +518,16 @@ namespace EdtdevicesTest
 			Assert::IsTrue(fade.type == Type::none, L"Command type incorrect", LINE_INFO());
 		}
 
-		TEST_METHOD(RGB_Kitt)
+		TEST_METHOD(RGB_Chase)
 		{
 			auto message = OSC::Message();
 			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
-			message.addInt((int)OSC::ColorCommands::Kitt);
+			message.addInt((int)OSC::ColorCommands::Chase);
 			message.addInt(1);
 			message.addInt(2);
-			message.addInt(3);
 
 			auto rgb = OSC::Device::EdtRGB("/Test", 5, nullptr);
 

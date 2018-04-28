@@ -14,6 +14,6 @@
         DualSolid = 9,
         DualPulse = 10,
         DualSpark = 11,
-        Kitt = 12
+        Chase = 12
     }
 }

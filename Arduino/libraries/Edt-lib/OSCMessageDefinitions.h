@@ -16,7 +16,7 @@ enum ColorCommands : uint8_t
 	DualSolid = 9,
 	DualPulse = 10,
 	DualSparkle = 11,
-	Kitt = 12
+	Chase = 12
 };
 
 struct SingleColorCommand
@@ -81,14 +81,11 @@ struct TwinkleCommand
 	uint8_t intensity : 8;
 };
 
-struct KittCommand
+struct ChaseCommand
 {
-	// 0 - 127
-	uint8_t position : 8;
-	uint8_t length : 8;
-
 	// 0 - 255
 	uint8_t hue : 8;
+	uint8_t speed : 8;
 };
 
 struct StroboCommand
@@ -107,7 +104,7 @@ struct EdtMessage
 		RainbowCommand rainbow;
 		VuMeterCommand vuMeter;
 		TwinkleCommand twinkle;
-		KittCommand kitt;
+		ChaseCommand chase;
 		StroboCommand strobo;
 	};
 

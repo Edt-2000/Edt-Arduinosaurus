@@ -1,6 +1,8 @@
 #pragma once
 
 #include "FadeMode.h"
+#include "AnimationType.h"
+#include "Animation.h"
 
 #ifdef _MSC_VER
 #include "../Edt-devicesTest/stdafx.h"
@@ -41,6 +43,36 @@ namespace OSC {
 				return ceilf((percentage / 127.0) * _nrOfLeds);
 			}
 
+			Animation _animations[10];
+			uint8_t _animationsActive = 0;
+			uint8_t _maxAnimations = 10;
+
+			void addAnimation(Animation animation) {
+				if (_animationsActive >= _maxAnimations) {
+					return;
+				}
+
+				_animations[_animationsActive++] = animation;
+			}
+
+			void insertAnimation(Animation animation) {
+				_animations[0] = animation;
+				_animationsActive = 1;
+			}
+
+			void removeAnimation(uint8_t animationNr) {
+				if (_animationsActive > 2 && animationNr < _animationsActive - 1) {
+					_animations[animationNr] = _animations[--_animationsActive];
+				}
+				else {
+					--_animationsActive;
+				}
+			}
+
+			void resetAnimations() {
+				_animationsActive = 0;
+			}
+/*
 			struct Strobo
 			{
 				bool active;
@@ -48,20 +80,21 @@ namespace OSC {
 				float fpl;
 				CRGB color;
 			};
-			Strobo _strobo;
+			Strobo _strobo;*/
 
 		public:
 			FastLEDColorScheduler();
 			FastLEDColorScheduler(CRGB *leds, uint8_t nrOfLeds);
 
 			void solid(uint8_t start, uint8_t end, uint8_t h, uint8_t s, uint8_t v);
+			void solid(uint8_t start, uint8_t end, CHSV color);
 			void fade(uint8_t start, uint8_t end, uint8_t duration, FadeMode mode = FadeMode::FadeToBlack);
 			void disableFade(uint8_t start, uint8_t end);
 			void rainbow(uint8_t start, uint8_t end, uint8_t h, uint8_t dh);
 			void rainbow(uint8_t start, uint8_t center, uint8_t end, uint8_t h, uint8_t dh, uint8_t intensity);
 			void twinkle(uint8_t start, uint8_t end, uint8_t h, uint8_t s, uint8_t v, uint8_t intensity, bool blackOut = true);
 			void strobo(uint8_t h, uint8_t intensity);
-			void kitt(uint8_t position, uint8_t length, uint8_t h);
+			void chase(uint8_t h, uint8_t speed);
 
 			void loop();
 

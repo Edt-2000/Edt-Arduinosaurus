@@ -29,6 +29,11 @@ namespace Dispedter.Common.Factories
             return _addresses.Select(a => new OscMessage(a, (int)Command.SinglePulse, 0, 127, (int)h, s, v, (int)p));
         }
 
+        public IEnumerable<OscMessage> CreateSinglePulse(int start, int end, ColorPreset h, int s, int v, PulseLength p)
+        {
+            return _addresses.Select(a => new OscMessage(a, (int)Command.SinglePulse, start, end, (int)h, s, v, (int)p));
+        }
+
         public IEnumerable<OscMessage> CreateSingleSpark(ColorPreset h, int s, int v, PulseLength p)
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.SingleSpark, 0, 127, (int)h, s, v, (int)p));
@@ -79,9 +84,9 @@ namespace Dispedter.Common.Factories
             return _addresses.Select(a => new OscMessage(a, (int)Command.Strobo, (int)h, speed));
         }
 
-        public IEnumerable<OscMessage> CretaeKitt(int position, int length, ColorPreset h)
+        public IEnumerable<OscMessage> CreateChase(ColorPreset h, int speed)
         {
-            return _addresses.Select(a => new OscMessage(a, (int)Command.Kitt, position, length, (int)h));
+            return _addresses.Select(a => new OscMessage(a, (int)Command.Chase, (int)h, speed));
         }
     }
 }

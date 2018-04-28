@@ -45,7 +45,7 @@ namespace Dispedter.Common.Managers
                     {
                         var allDevices = await GetAllUsbDevicesAsync();
 
-                        var newListeners = allDevices.Where(s => !_listeners.Select(listener => listener.Id).Contains(s.Id));
+                        var newListeners = allDevices.Where(s => !_listeners.Any(l => l.Id == s.Id));
 
                         foreach (var newListener in newListeners)
                         {

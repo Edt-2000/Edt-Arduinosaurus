@@ -66,14 +66,14 @@ namespace OSC {
 			void callbackMessage(OSC::StructMessage<OSC::EdtMessage, uint8_t> * message)
 			{
 				// todo: remove these variables
-				auto command = message->messageStruct.command;
-				auto dualColor = message->messageStruct.commands.dualColor;
-				auto kitt = message->messageStruct.commands.kitt;
-				auto rainbow = message->messageStruct.commands.rainbow;
-				auto singleColor = message->messageStruct.commands.singleColor;
-				auto strobo = message->messageStruct.commands.strobo;
-				auto twinkle = message->messageStruct.commands.twinkle;
-				auto vuMeter = message->messageStruct.commands.vuMeter;
+				const auto command = message->messageStruct.command;
+				const auto dualColor = message->messageStruct.commands.dualColor;
+				const auto chase = message->messageStruct.commands.chase;
+				const auto rainbow = message->messageStruct.commands.rainbow;
+				const auto singleColor = message->messageStruct.commands.singleColor;
+				const auto strobo = message->messageStruct.commands.strobo;
+				const auto twinkle = message->messageStruct.commands.twinkle;
+				const auto vuMeter = message->messageStruct.commands.vuMeter;
 
 				switch (command)
 				{
@@ -179,15 +179,10 @@ namespace OSC {
 
 					break;
 
-				case OSC::ColorCommands::Kitt:
+				case OSC::ColorCommands::Chase:
 
-					if (kitt.position > 0) {
-						_colorScheduler.kitt(kitt.position, kitt.length, kitt.hue);
-					}
-					else {
-						_colorScheduler.fade(0, 127, 127);
-					}
-
+					_colorScheduler.chase(chase.hue, chase.speed);
+					
 					break;
 				}
 			}

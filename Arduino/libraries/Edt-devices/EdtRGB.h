@@ -56,7 +56,6 @@ namespace OSC {
 				// todo: remove these variables
 				auto command = message->messageStruct.command;
 				auto dualColor = message->messageStruct.commands.dualColor;
-				auto kitt = message->messageStruct.commands.kitt;
 				auto rainbow = message->messageStruct.commands.rainbow;
 				auto singleColor = message->messageStruct.commands.singleColor;
 				auto strobo = message->messageStruct.commands.strobo;
@@ -169,7 +168,7 @@ namespace OSC {
 
 					break;
 
-				case OSC::ColorCommands::Kitt:
+				case OSC::ColorCommands::Chase:
 
 					// No implementation
 

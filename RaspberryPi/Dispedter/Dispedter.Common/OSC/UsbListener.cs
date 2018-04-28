@@ -122,6 +122,8 @@ namespace Dispedter.Common.OSC
                 }
                 catch
                 {
+                    await Task.Delay(1000);
+
                     // do not care   
                 }
             }

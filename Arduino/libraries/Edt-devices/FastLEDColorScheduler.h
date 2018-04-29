@@ -1,8 +1,8 @@
 #pragma once
 
 #include "FadeMode.h"
-#include "AnimationType.h"
-#include "Animation.h"
+#include "Animations.h"
+#include "LedState.h"
 
 #ifdef _MSC_VER
 #include "../Edt-devicesTest/stdafx.h"
@@ -18,12 +18,7 @@ namespace OSC {
 		class FastLEDColorScheduler
 		{
 		private:
-			struct LedState
-			{
-			public:
-				uint8_t fade;
-			};
-
+			
 			CRGB *_leds;
 			LedState *_ledState;
 			FadeMode _fadeMode;
@@ -43,45 +38,7 @@ namespace OSC {
 				return ceilf((percentage / 127.0) * _nrOfLeds);
 			}
 
-			Animation _animations[10];
-			uint8_t _animationsActive = 0;
-			uint8_t _maxAnimations = 10;
-
-			void addAnimation(Animation animation) {
-				if (_animationsActive >= _maxAnimations) {
-					return;
-				}
-
-				_animations[_animationsActive++] = animation;
-			}
-
-			void insertAnimation(Animation animation) {
-				_animations[0] = animation;
-				_animationsActive = 1;
-			}
-
-			void removeAnimation(uint8_t animationNr) {
-				if (_animationsActive > 2 && animationNr < _animationsActive - 1) {
-					_animations[animationNr] = _animations[--_animationsActive];
-				}
-				else {
-					--_animationsActive;
-				}
-			}
-
-			void resetAnimations() {
-				_animationsActive = 0;
-			}
-/*
-			struct Strobo
-			{
-				bool active;
-				uint8_t loop;
-				float fpl;
-				CRGB color;
-			};
-			Strobo _strobo;*/
-
+			Animations _animations;
 		public:
 			FastLEDColorScheduler();
 			FastLEDColorScheduler(CRGB *leds, uint8_t nrOfLeds);

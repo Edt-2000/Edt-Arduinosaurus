@@ -232,7 +232,6 @@ namespace Dispedter.Tester
                 {
                     VirtualKey.Right,
                     () => {
-                        strobo <<= 1;
                         strobo++;
 
                         return _commandFactory.CreateStrobo((ColorPreset)Random(), strobo);
@@ -241,7 +240,7 @@ namespace Dispedter.Tester
                 {
                     VirtualKey.Left,
                     () => {
-                        strobo >>= 1;
+                        strobo--;
 
                         return _commandFactory.CreateStrobo((ColorPreset)Random(), strobo);
                     }

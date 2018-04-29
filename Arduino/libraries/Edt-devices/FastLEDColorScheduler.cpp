@@ -82,7 +82,6 @@ void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t center, 
 
 	if (_start != _center)
 	{
-
 		int leds = (_center - _start) * (intensity / 255.0);
 
 		for (int i = _start; i < _center - leds; i++)
@@ -98,7 +97,6 @@ void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t center, 
 	}
 	if (_center != _end)
 	{
-
 		int leds = (_end - _center) * (intensity / 255.0);
 
 		for (int i = _center + leds; i < _end; i++)
@@ -136,102 +134,85 @@ void OSC::Device::FastLEDColorScheduler::chase(uint8_t hue, uint8_t speed)
 {
 	if (speed == 0)
 	{
-		resetAnimations();
+		_animations.resetAnimations();
 	}
 	else
 	{
-		addAnimation(Animation(AnimationType::Chase, CHSV(hue, 255, 255), speed, 0));
+		_animations.addAnimation(Animation(AnimationType::Chase, CHSV(hue, 255, 255), speed, 0));
 	}
 }
 
 void OSC::Device::FastLEDColorScheduler::strobo(uint8_t hue, uint8_t fps)
 {
-	disableFade(0, _nrOfLeds);
+	disableFade(0, 127);
 
-	fill_solid(_leds, _nrOfLeds, 0);
+	fill_solid(_leds, _nrOfLeds, CRGB::HTMLColorCode::Black);
 
 	if (fps == 0)
 	{
-		resetAnimations();
+		_animations.resetAnimations();
 	}
 	else
 	{
 		if (hue < 255)
 		{
-			insertAnimation(Animation(AnimationType::Strobo, CHSV(hue, 255, 255), 255.0 / fps, 0));
+			_animations.insertAnimation(Animation(AnimationType::Strobo, CHSV(hue, 255, 255), 255.0 / fps, 0));
 		}
 		else
 		{
-			insertAnimation(Animation(AnimationType::Strobo, CHSV(0, 0, 255), 255.0 / fps, 0));
+			_animations.insertAnimation(Animation(AnimationType::Strobo, CHSV(0, 0, 255), 255.0 / fps, 0));
 		}
 	}
-
-	/*
-		_strobo.active = fps > 0;
-		_strobo.loop = 0;
-		_strobo.fpl = (255.0 / fps);
-		if (hue == 255)
-		{
-			_strobo.color = CRGB::HTMLColorCode::White;
-		}
-		else
-		{
-			_strobo.color.setHSV(hue, 255, 255);
-		}*/
 }
 
 void OSC::Device::FastLEDColorScheduler::loop()
 {
 	int i = 0;
 
-	while (i < _animationsActive)
+	while (i < _animations.animationsActive)
 	{
-		switch (_animations[i].type)
+		switch (_animations.animations[i].type)
 		{
 		case AnimationType::Strobo:
 
 			fill_solid(_leds, _nrOfLeds, CHSV(0, 0, 0));
 
-			if ((_animations[i].state++) > _animations[i].data)
+			if ((_animations.animations[i].state++) > _animations.animations[i].data)
 			{
-				_animations[i].state = 0;
+				_animations.animations[i].state = 0;
 
-				fill_solid(_leds, _nrOfLeds, _animations[i].color);
+				fill_solid(_leds, _nrOfLeds, _animations.animations[i].color);
 			}
 
 			// there is nothing else to animate besides flashing of the strobo
 			return;
 		case AnimationType::Chase:
 
-			if (_animations[i].state > 255 - _animations[i].data)
+			if (_animations.animations[i].state > 255 - _animations.animations[i].data)
 			{
-				removeAnimation(i);
+				_animations.removeAnimation(i);
 
 				// cycle to next animation type without incrementing i, since _animationsActive -= 1
 				continue;
 			}
 
-			_animations[i].state += _animations[i].data;
+			_animations.animations[i].state += _animations.animations[i].data;
 
-			solid(_animations[i].state / 2, (_animations[i].state / 2) + 1, _animations[i].color);
-			fade(_animations[i].state / 2, (_animations[i].state / 2) + 1, 63);
+			uint8_t from = _animations.animations[i].state / 2;
+			uint8_t to = (_animations.animations[i].state / 2) + 1;
+			if (to > 127)
+			{
+				to = 127;
+			}
+
+			solid(from, to, _animations.animations[i].color);
+			fade(from, to, 63, _fadeMode);
 
 			break;
 		}
 
 		i++;
 	}
-
-	/*if (_strobo.active)
-		{
-			fill_solid(_leds, _nrOfLeds, CRGB::HTMLColorCode::Black);
-
-			if ((_strobo.loop++) > _strobo.fpl)
-			{
-				_strobo.loop = 0;
-
-				fill_solid(_leds, _nrOfLeds, _strobo.color);
-			}*/
 
 	switch (_fadeMode)
 	{

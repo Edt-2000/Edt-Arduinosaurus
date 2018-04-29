@@ -1,6 +1,8 @@
 #pragma once
 
 #include "FadeMode.h"
+#include "Animations.h" 
+#include "LedState.h"
 
 #ifdef _MSC_VER
 #include "../Edt-devicesTest/stdafx.h"
@@ -15,29 +17,22 @@ namespace OSC {
 		{
 		private:
 			CRGB *_leds;
-			uint8_t _nrOfLeds;
-
-			uint8_t _fade;
-
+			LedState _ledState;
 			FadeMode _fadeMode;
+
+			uint8_t _nrOfLeds;
 			CRGB *_fadeBackup;
 
 			Tlc5940 * _tlc;
 
-			struct Strobo
-			{
-				bool active;
-				int loop;
-				float fpl;
-				CRGB color;
-			};
-			Strobo _strobo;
-
+			Animations _animations;
+			
 		public:
 			RGBColorScheduler();
 			RGBColorScheduler(CRGB * leds, uint8_t nrOfLeds, Tlc5940 * tlc);
 
 			void solid(uint8_t h, uint8_t s, uint8_t v);
+			void solid(CHSV color);
 			void solid(uint8_t h1, uint8_t h2, uint8_t s, uint8_t v, uint8_t percentage);
 			void fade(uint8_t duration, FadeMode mode = FadeMode::FadeToBlack);
 			void disableFade();
@@ -46,6 +41,7 @@ namespace OSC {
 			void strobo(uint8_t h, uint8_t intensity);
 
 			void loop();
+			void output();
 
 #ifdef _MSC_VER
 			Command getCommandColor();

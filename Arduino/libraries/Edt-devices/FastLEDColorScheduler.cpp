@@ -130,15 +130,27 @@ void OSC::Device::FastLEDColorScheduler::twinkle(uint8_t start, uint8_t end, uin
 	}
 }
 
-void OSC::Device::FastLEDColorScheduler::chase(uint8_t hue, uint8_t speed)
+void OSC::Device::FastLEDColorScheduler::chase(uint8_t hue, uint8_t speed, uint8_t style)
 {
-	if (speed == 0)
+	if (speed == 0 || style > 3)
 	{
 		_animations.resetAnimations();
 	}
 	else
 	{
-		_animations.addAnimation(Animation(AnimationType::Chase, CHSV(hue, 255, 255), speed, 0));
+		_animations.addAnimation(Animation((AnimationType)style, CHSV(hue, 255, 255), speed, 0));
+	}
+}
+
+void OSC::Device::FastLEDColorScheduler::bash(uint8_t hue, uint8_t intensity)
+{
+	if (intensity == 0)
+	{
+		_animations.resetAnimations();
+	}
+	else
+	{
+		_animations.addAnimation(Animation(AnimationType::Bash, CHSV(hue, 255, 255), intensity, 0));
 	}
 }
 
@@ -167,10 +179,16 @@ void OSC::Device::FastLEDColorScheduler::strobo(uint8_t hue, uint8_t fps)
 
 void OSC::Device::FastLEDColorScheduler::loop()
 {
-	int i = 0;
+	uint8_t i = 0;
+
+	uint8_t from;
+	uint8_t to;
 
 	while (i < _animations.animationsActive)
 	{
+		uint8_t chaseFadeSpeed = 63;
+		bool chaseReverse = false;
+		
 		switch (_animations.animations[i].type)
 		{
 		case AnimationType::Strobo:
@@ -186,7 +204,14 @@ void OSC::Device::FastLEDColorScheduler::loop()
 
 			// there is nothing else to animate besides flashing of the strobo
 			return;
-		case AnimationType::Chase:
+
+		case AnimationType::ChaseDefault:
+		case AnimationType::ChaseDefaultReverse:
+		case AnimationType::ChaseLongTail:
+		case AnimationType::ChaseLongTailReverse:
+
+			chaseFadeSpeed = ((_animations.animations[i].type & AnimationType::ChaseLongTail) > 0) ? 1 : 63;
+			chaseReverse = (_animations.animations[i].type & AnimationType::ChaseDefaultReverse) > 0;
 
 			if (_animations.animations[i].state > 255 - _animations.animations[i].data)
 			{
@@ -198,15 +223,56 @@ void OSC::Device::FastLEDColorScheduler::loop()
 
 			_animations.animations[i].state += _animations.animations[i].data;
 
-			uint8_t from = _animations.animations[i].state / 2;
-			uint8_t to = (_animations.animations[i].state / 2) + 1;
+			from = _animations.animations[i].state / 2;
+			to = (_animations.animations[i].state / 2) + 1;
 			if (to > 127)
 			{
 				to = 127;
 			}
 
-			solid(from, to, _animations.animations[i].color);
-			fade(from, to, 63, _fadeMode);
+			if (chaseReverse)
+			{
+				solid(127 - to, 127 - from, _animations.animations[i].color);
+				fade(127 - to, 127  - from, chaseFadeSpeed, _fadeMode);
+			}
+			else
+			{
+				solid(from, to, _animations.animations[i].color);
+				fade(from, to, chaseFadeSpeed, _fadeMode);
+			}
+
+			break;
+
+		case AnimationType::Bash:
+
+			if (_animations.animations[i].state >= 250)
+			{
+				_animations.removeAnimation(i);
+
+				fade(0, 127, 16, FadeMode::FadeToBlack);
+
+				// cycle to next animation type without incrementing i, since _animationsActive -= 1
+				continue;
+			}
+
+			_animations.animations[i].state += 2;
+
+			if (_animations.animations[i].state % 16 == 0)
+			{
+				from = 0;
+				to = 64 + (_animations.animations[i].state / 4);
+
+				solid(from, to, _animations.animations[i].color);
+				solid(to, 127, CHSV(0, 0, 0));
+			}
+			else if (_animations.animations[i].state % 8 == 0)
+			{
+				from = 64 - (_animations.animations[i].state / 4);
+				to = 127;
+
+				solid(from, to, _animations.animations[i].color);
+				solid(0, from, CHSV(0, 0, 0));
+			}
 
 			break;
 		}
@@ -337,12 +403,21 @@ void OSC::Device::FastLEDColorScheduler::strobo(uint8_t h, uint8_t intensity)
 	commandColor.intensity = intensity;
 }
 
-void OSC::Device::FastLEDColorScheduler::chase(uint8_t h, uint8_t speed)
+void OSC::Device::FastLEDColorScheduler::chase(uint8_t h, uint8_t speed, uint8_t style)
 {
 	commandColor = Command();
 	commandColor.type = Type::chase;
 	commandColor.h = h;
 	commandColor.speed = speed;
+	commandColor.style = style;
+}
+
+void OSC::Device::FastLEDColorScheduler::bash(uint8_t h, uint8_t intensity)
+{
+	commandColor = Command();
+	commandColor.type = Type::bash;
+	commandColor.h = h;
+	commandColor.intensity = intensity;
 }
 
 void OSC::Device::FastLEDColorScheduler::loop()

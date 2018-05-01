@@ -69,6 +69,7 @@ namespace OSC {
 				const auto command = message->messageStruct.command;
 				const auto dualColor = message->messageStruct.commands.dualColor;
 				const auto chase = message->messageStruct.commands.chase;
+				const auto bash = message->messageStruct.commands.bash;
 				const auto rainbow = message->messageStruct.commands.rainbow;
 				const auto singleColor = message->messageStruct.commands.singleColor;
 				const auto strobo = message->messageStruct.commands.strobo;
@@ -181,8 +182,14 @@ namespace OSC {
 
 				case OSC::ColorCommands::Chase:
 
-					_colorScheduler.chase(chase.hue, chase.speed);
+					_colorScheduler.chase(chase.hue, chase.speed, (uint8_t)chase.style);
 					
+					break;
+
+				case OSC::ColorCommands::Bash:
+
+					_colorScheduler.bash(bash.hue, bash.intensity);
+
 					break;
 				}
 			}

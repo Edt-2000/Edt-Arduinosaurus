@@ -169,6 +169,7 @@ namespace OSC {
 					break;
 
 				case OSC::ColorCommands::Chase:
+				case OSC::ColorCommands::Bash:
 
 					// No implementation
 

@@ -16,7 +16,8 @@ enum ColorCommands : uint8_t
 	DualSolid = 9,
 	DualPulse = 10,
 	DualSparkle = 11,
-	Chase = 12
+	Chase = 12,
+	Bash = 13
 };
 
 struct SingleColorCommand
@@ -81,11 +82,24 @@ struct TwinkleCommand
 	uint8_t intensity : 8;
 };
 
+enum ChaseStyle
+{
+	Default = 0,
+	LongTail = 1
+};
 struct ChaseCommand
 {
 	// 0 - 255
 	uint8_t hue : 8;
 	uint8_t speed : 8;
+	ChaseStyle style: 8;
+};
+
+struct BashCommand
+{
+	// 0 - 255
+	uint8_t hue : 8;
+	uint8_t intensity : 8;
 };
 
 struct StroboCommand
@@ -105,6 +119,7 @@ struct EdtMessage
 		VuMeterCommand vuMeter;
 		TwinkleCommand twinkle;
 		ChaseCommand chase;
+		BashCommand bash;
 		StroboCommand strobo;
 	};
 

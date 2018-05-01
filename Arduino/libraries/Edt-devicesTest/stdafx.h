@@ -37,7 +37,8 @@ enum Type {
 	twinkle,
 	strobo,
 	intensity,
-	chase
+	chase,
+	bash
 };
 struct Command {
 public:
@@ -58,6 +59,7 @@ public:
 	uint8_t length = 0;
 	uint8_t percentage = 0;
 	uint8_t speed = 0;
+	uint8_t style = 0;
 };
 class Tlc5940 {
 public:

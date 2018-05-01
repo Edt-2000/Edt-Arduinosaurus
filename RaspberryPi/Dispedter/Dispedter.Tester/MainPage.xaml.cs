@@ -34,7 +34,7 @@ namespace Dispedter.Tester
     {
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/L" });
         private readonly ListenerManager _listenerManager = new ListenerManager(detectUsb: false);
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true); //, udpDestinations: new[] { IPAddress.Parse("169.254.219.93") });
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { IPAddress.Parse("169.254.219.93") });
 
         private Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>> _commandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>>();
         private Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>> _proceduralCommandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>>();
@@ -74,6 +74,8 @@ namespace Dispedter.Tester
             Window.Current.CoreWindow.KeyDown += async (s, e) =>
             {
                 var key = e.VirtualKey;
+
+                KeyCode.Text = $"{(int)key}";
 
                 if (e.VirtualKey == VirtualKey.Control)
                 {
@@ -311,8 +313,17 @@ namespace Dispedter.Tester
 
                 { VirtualKey.Z, () => _commandFactory.CreateTwinkle((ColorPreset)Random(), Random()) },
                 { VirtualKey.X, () => _commandFactory.CreateRainbowSolid() },
-                { VirtualKey.C, () => _commandFactory.CreateChase((ColorPreset)Random(), 1) },
-                { VirtualKey.V, () => _commandFactory.CreateChase((ColorPreset)Random(), Random() / 16) },
+
+                { VirtualKey.C, () => _commandFactory.CreateChase((ColorPreset)Random(), 1, 1) },
+                { VirtualKey.V, () => _commandFactory.CreateChase((ColorPreset)Random(), Math.Max(1, Random() / 16), 0) },
+
+                { (VirtualKey)187, () => _commandFactory.CreateChase((ColorPreset)Random(), 1, 3) },
+                { (VirtualKey)189, () => _commandFactory.CreateChase((ColorPreset)Random(), Math.Max(1, Random() / 16), 2) },
+
+
+                { (VirtualKey)219, () => _commandFactory.CreateBash((ColorPreset)Random(), 16) },
+                { (VirtualKey)221, () => _commandFactory.CreateBash((ColorPreset)Random(), 127) },
+                { (VirtualKey)220, () => _commandFactory.CreateBash((ColorPreset)Random(), 255) },
             });
         }
 

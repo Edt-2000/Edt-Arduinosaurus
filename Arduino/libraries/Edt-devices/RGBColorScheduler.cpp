@@ -194,11 +194,24 @@ void OSC::Device::RGBColorScheduler::loop()
 }
 
 inline void OSC::Device::RGBColorScheduler::output() {
-	int j = 0;
+	// moronic pinout:
+	// 
+	// | AUX | LED 1 | LED 2 | LED 3  | LED 4    | LED 5   |
+	// | 1   | 2 3 4 | 5 6 7 | 8 9 10 | 11 12 13 | 14 15 0 |
+	// |     | G B R | G B R | G B R  | G  B  R  | G  B  R |
+	//
+	// (who designed the board? :P)
+
+	// tclAddress is a struct with a 4 bit integer
+	// so 15 + 1 = 0 automatically
+	tlcAddress tlc;
+
+	tlc.address = 1;
+
 	for (int i = 0; i < _nrOfLeds; i++) {
-		_tlc->set(++j, 4095 - (int)((((double)_leds[i].red) / 255.0) * 4095));
-		_tlc->set(++j, 4095 - (int)((((double)_leds[i].green) / 255.0) * 4095));
-		_tlc->set(++j, 4095 - (int)((((double)_leds[i].blue) / 255.0) * 4095));
+		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].green) / 255.0) * 4095));
+		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].blue) / 255.0) * 4095));
+		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].red) / 255.0) * 4095));
 	}
 }
 

@@ -93,5 +93,10 @@ namespace Dispedter.Common.Factories
         {
             return _addresses.Select(a => new OscMessage(a, (int)Command.Bash, (int)h, intensity));
         }
+
+        public IEnumerable<OscMessage> CreateRainbowUsingAddresses()
+        {
+            return _addresses.Select((a, i) => new OscMessage(a, (int)Command.SingleSolid, 0, 127, (int)(i * (255.0 / _addresses.Count())), 255, 254));
+        }
     }
 }

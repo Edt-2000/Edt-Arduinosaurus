@@ -63,14 +63,16 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 #define OSC_FL7 "/F/7"
 #define OSC_FL8 "/F/8"
 
+// TODO: fix memory issue
+
 #define FL1_NR_OF_LEDS 57
 #define FL2_NR_OF_LEDS 57
 #define FL3_NR_OF_LEDS 57
-#define FL4_NR_OF_LEDS 57
-#define FL5_NR_OF_LEDS 57
-#define FL6_NR_OF_LEDS 57
-#define FL7_NR_OF_LEDS 57
-#define FL8_NR_OF_LEDS 57
+#define FL4_NR_OF_LEDS 51
+#define FL5_NR_OF_LEDS 40
+#define FL6_NR_OF_LEDS 40
+#define FL7_NR_OF_LEDS 40
+#define FL8_NR_OF_LEDS 40
 
 #define OSC_RGB1 "/R/1"
 #define OSC_RGB2 "/R/2"

@@ -83,7 +83,6 @@ class LEDApplication : public AbstractApplication
 		// FL 1 | FL 2 | FL 3 | FL 4 |
 		// 0    | 2    | 3    | 1    |
  
-
 		fls[0].configurePins<A0, 3>();
 		fls[1].configurePins<A2, 3>();
 		fls[2].configurePins<A3, 3>();

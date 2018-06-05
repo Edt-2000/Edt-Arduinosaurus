@@ -5,9 +5,9 @@
 
 class Animations {
 private:
-	uint8_t _maxAnimations = 16;
+	uint8_t _maxAnimations = 12;
 public:
-	Animation animations[16];
+	Animation animations[12];
 	uint8_t animationsActive = 0;
 
 	void addAnimation(Animation animation) {

@@ -21,7 +21,6 @@ namespace OSC {
 		private:
 			const char *_pattern;
 			CRGB *_leds;
-			int _nrOfLeds;
 			
 #ifndef _MSC_VER
 			RGBColorScheduler _colorScheduler;
@@ -34,8 +33,7 @@ namespace OSC {
 			{
 				_pattern = pattern;
 
-				_nrOfLeds = nrOfLeds;
-				_leds = new CRGB[_nrOfLeds];
+				_leds = new CRGB[nrOfLeds];
 
 				_colorScheduler = RGBColorScheduler(_leds, nrOfLeds, tlc);
 			}

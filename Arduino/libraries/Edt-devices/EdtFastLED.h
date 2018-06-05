@@ -24,7 +24,6 @@ namespace OSC {
 		private:
 			const char *_pattern;
 			CRGB *_leds;
-			int _nrOfLeds;
 
 #ifndef _MSC_VER
 			FastLEDColorScheduler _colorScheduler;
@@ -38,10 +37,9 @@ namespace OSC {
 			{
 				_pattern = pattern;
 
-				_nrOfLeds = nrOfLeds;
-				_leds = new CRGB[_nrOfLeds];
+				_leds = new CRGB[nrOfLeds];
 
-				_colorScheduler = FastLEDColorScheduler(_leds, _nrOfLeds);
+				_colorScheduler = FastLEDColorScheduler(_leds, nrOfLeds);
 			}
 
 			const char *pattern()
@@ -52,7 +50,7 @@ namespace OSC {
 			template <uint8_t dataPin, uint8_t clockPin>
 			void configurePins()
 			{
-				FastLED.addLeds<APA102, dataPin, clockPin, BGR>(_leds, _nrOfLeds);
+				FastLED.addLeds<APA102, dataPin, clockPin, BGR>(_leds, _colorScheduler.nrOfLeds);
 
 				_colorScheduler.solid(0, 127, 32, 240, 32);
 			}

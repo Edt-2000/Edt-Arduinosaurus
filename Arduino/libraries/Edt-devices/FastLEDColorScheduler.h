@@ -26,20 +26,20 @@ namespace OSC {
 			uint8_t _start;
 			uint8_t _center;
 			uint8_t _end;
-			uint8_t _length;
-			uint8_t _nrOfLeds;
 
 			uint8_t normalizeLedNrDown(uint8_t percentage)
 			{
-				return floorf((percentage / 127.0) * _nrOfLeds);
+				return floorf((percentage / 127.0) * nrOfLeds);
 			}
 			uint8_t normalizeLedNrUp(uint8_t percentage)
 			{
-				return ceilf((percentage / 127.0) * _nrOfLeds);
+				return ceilf((percentage / 127.0) * nrOfLeds);
 			}
 
 			Animations _animations;
 		public:
+			uint8_t nrOfLeds;
+
 			FastLEDColorScheduler();
 			FastLEDColorScheduler(CRGB *leds, uint8_t nrOfLeds);
 

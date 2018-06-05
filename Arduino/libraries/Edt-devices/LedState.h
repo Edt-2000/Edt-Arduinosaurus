@@ -6,7 +6,6 @@
 #include "FastLED.h"
 #endif
 
-
 struct LedState
 {
 public:

@@ -32,8 +32,8 @@ namespace Dispedter.Tester
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/F", "/R" });
-        private readonly CommandFactory _specialCommandFactory = new CommandFactory(new[] { "/F/1", "/F/2", "/F/3", "/F/4", "/F/5", "/F/6", "/F/7", "/F/8" });
+        private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/F?", "/R?" });
+        private readonly CommandFactory _specialCommandFactory = new CommandFactory(new[] { "/F1", "/F2", "/F3", "/F4", "/F5", "/F6", "/F7", "/F8" });
         private readonly ListenerManager _listenerManager = new ListenerManager(detectUsb: false);
         private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { IPAddress.Parse("169.254.219.93") });
 

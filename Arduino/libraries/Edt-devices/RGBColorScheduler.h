@@ -20,7 +20,6 @@ namespace OSC {
 			LedState _ledState;
 			FadeMode _fadeMode;
 
-			uint8_t _nrOfLeds;
 			CRGB *_fadeBackup;
 
 			Tlc5940 * _tlc;
@@ -31,6 +30,8 @@ namespace OSC {
 			Animations _animations;
 			
 		public:
+			uint8_t nrOfLeds;
+
 			RGBColorScheduler();
 			RGBColorScheduler(CRGB * leds, uint8_t nrOfLeds, Tlc5940 * tlc);
 

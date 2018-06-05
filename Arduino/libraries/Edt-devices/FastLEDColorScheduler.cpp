@@ -13,7 +13,7 @@ OSC::Device::FastLEDColorScheduler::FastLEDColorScheduler(CRGB *leds, uint8_t nr
 {
 	_leds = leds;
 	_ledState = new LedState[nrOfLeds];
-	_nrOfLeds = nrOfLeds;
+	this->nrOfLeds = nrOfLeds;
 
 	for (int i = 0; i < nrOfLeds; i++)
 	{
@@ -48,30 +48,21 @@ void OSC::Device::FastLEDColorScheduler::disableFade(uint8_t start, uint8_t end)
 void OSC::Device::FastLEDColorScheduler::solid(uint8_t start, uint8_t end, uint8_t hue, uint8_t saturation, uint8_t value)
 {
 	solid(start, end, CHSV(hue, saturation, value));
-
-	// _start = normalizeLedNrDown(start);
-	// _end = normalizeLedNrUp(end);
-	// _length = _end - _start;
-
-	// fill_solid(_leds + _start, _length, CHSV(hue, saturation, value));
 }
 
 void OSC::Device::FastLEDColorScheduler::solid(uint8_t start, uint8_t end, CHSV color)
 {
 	_start = normalizeLedNrDown(start);
 	_end = normalizeLedNrUp(end);
-	_length = _end - _start;
 
-	fill_solid(_leds + _start, _length, color);
+	fill_solid(_leds + _start, _end - _start, color);
 }
 
 void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t end, uint8_t hue, uint8_t deltaHue)
 {
 	_start = normalizeLedNrDown(start);
 	_end = normalizeLedNrUp(end);
-	_length = _end - _start;
-
-	fill_rainbow(_leds + _start, _length, hue, (deltaHue / 127.0) * (255.0 / _length));
+	fill_rainbow(_leds + _start, _end - _start, hue, (deltaHue / 127.0) * (255.0 / (_end - _start)));
 }
 
 void OSC::Device::FastLEDColorScheduler::rainbow(uint8_t start, uint8_t center, uint8_t end, uint8_t hue, uint8_t deltaHue, uint8_t intensity)
@@ -158,7 +149,7 @@ void OSC::Device::FastLEDColorScheduler::strobo(uint8_t hue, uint8_t fps)
 {
 	disableFade(0, 127);
 
-	fill_solid(_leds, _nrOfLeds, CRGB::HTMLColorCode::Black);
+	fill_solid(_leds, nrOfLeds, CRGB::HTMLColorCode::Black);
 
 	if (fps == 0)
 	{
@@ -193,13 +184,13 @@ void OSC::Device::FastLEDColorScheduler::loop()
 		{
 		case AnimationType::Strobo:
 
-			fill_solid(_leds, _nrOfLeds, CHSV(0, 0, 0));
+			fill_solid(_leds, nrOfLeds, CHSV(0, 0, 0));
 
 			if ((_animations.animations[i].state++) > _animations.animations[i].data)
 			{
 				_animations.animations[i].state = 0;
 
-				fill_solid(_leds, _nrOfLeds, _animations.animations[i].color);
+				fill_solid(_leds, nrOfLeds, _animations.animations[i].color);
 			}
 
 			// there is nothing else to animate besides flashing of the strobo
@@ -283,7 +274,7 @@ void OSC::Device::FastLEDColorScheduler::loop()
 	switch (_fadeMode)
 	{
 	case FadeMode::FadeToBlack:
-		for (int i = 0; i < _nrOfLeds; i++)
+		for (int i = 0; i < nrOfLeds; i++)
 		{
 			if (_ledState[i].fade < 255)
 			{
@@ -301,7 +292,7 @@ void OSC::Device::FastLEDColorScheduler::loop()
 		}
 		break;
 	case FadeMode::FadeOneByOne:
-		for (int i = 0; i < _nrOfLeds; i++)
+		for (int i = 0; i < nrOfLeds; i++)
 		{
 			if (_ledState[i].fade < 255)
 			{

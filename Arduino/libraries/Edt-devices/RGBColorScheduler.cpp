@@ -1,14 +1,14 @@
 #include "RGBColorScheduler.h"
 
-#define COLOR_INVERSE 255
-#define COLOR_CORRECTION 0 //98
+// > 0
+#define COLOR_RED_CORRECTION 0
+#define COLOR_GREEN_CORRECTION 0
+#define COLOR_BLUE_CORRECTION 0
 
-#define INTENSITY_BOOST 0.0
-
-#define RAINBOW_POSITIONS 6
+// #define INTENSITY_BOOST 0.0
 
 #define HUE(h) h
-#define VALUE(v) v + ((255 - v) * INTENSITY_BOOST)
+#define VALUE(v) v // + ((255 - v) * INTENSITY_BOOST)
 
 #ifndef _MSC_VER
 
@@ -209,9 +209,9 @@ inline void OSC::Device::RGBColorScheduler::output() {
 	tlc.address = 1;
 
 	for (int i = 0; i < nrOfLeds; i++) {
-		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].green) / 255.0) * 4095));
-		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].blue) / 255.0) * 4095));
-		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].red) / 255.0) * 4095));
+		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].green) / 255.0) * (4095 - COLOR_GREEN_CORRECTION)));
+		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].blue) / 255.0) * (4095 - COLOR_BLUE_CORRECTION)));
+		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].red) / 255.0) * (4095 - COLOR_RED_CORRECTION)));
 	}
 }
 

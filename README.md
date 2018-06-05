@@ -3,12 +3,6 @@ Arduino &amp; GameTrak based expressive midi controller
 
 >This is our playground for all our code and experiments, we are in the progress of making separate git repositories for released code. Have a look at the [Edt-2000 organisation](https://github.com/Edt-2000) for all the repositories.
 
-## TODO:
-
-- Optimization: Producers take a OSCMessage they modify instead of yield a message
-- Naming: Rename RGBLED, RGB, LED
-- LED: implement new effects
-
 ## Pinout
 
 FastLED:
@@ -28,36 +22,68 @@ G = GR = 4
 start = 0 - 127 (0 = begin, 127 = end)
 end = 0 - 127
 
+h, s, v = 0 - 255
+duration, intensity, speed = 0 - 225
+
+
 ### Single color, solid
-/address 1 [start: int] [end: int] [h: int] [s: int] [l: int] [duration (only required with l == 0): int]
+/address 1 [start: int] [end: int] [h: int] [s: int] [v: int] [duration (only required with l == 0): int]
 
 l == 0 dims using pulse
 
 ### Single color, pulse
-/address 2 [start: int] [end: int] [h: int] [s: int] [l: int] [duration: int]
+/address 2 [start: int] [end: int] [h: int] [s: int] [v: int] [duration: int]
+
+### Single color, spark
+/address 7 [start: int] [end: int] [h: int] [s: int] [v: int] [duration: int]
+
+### Dual color, solid
+/address 9 [start: int] [end: int] [h1: int] [h2: int] [duration (only required with l == 0): int]
+
+l == 0 dims using pulse
+s and v are 255 by default
+
+### Dual color, pulse
+/address 10 [start: int] [end: int] [h1: int] [h2: int] [duration: int]
+
+### Dual color, spark
+/address 11 [start: int] [end: int] [h1: int] [h2: int] [duration: int]
 
 ### Rainbow color, solid
-/address 3 [start: int] [end: int] [h start: int] [delta h: int] [duration (only required with delta h == 0): int]
+/address 2 [start: int] [end: int] [h start: int] [delta h: int] [duration (only required with delta h == 0): int]
 
 delta h == 0 dims using pulse
 delta h == 127 = full rainbow
 delta h == 255 = two full rainbows
 
 ### Rainbow color, pulse
-/address 4 [start: int] [end: int] [h start: int] [delta h: int] [duration: int]
+/address 2 [start: int] [end: int] [h start: int] [delta h: int] [duration: int]
+
+### Rainbow color, spark
+/address 8 [start: int] [end: int] [h start: int] [delta h: int] [duration: int]
 
 ### VU Meter
-/address 100 [start: int] [end: int] [center: int] [h start: int] [delta h: int] [intensity: int]
+/address 4 [start: int] [end: int] [center: int] [h start: int] [delta h: int] [intensity: int]
 
 ### Twinkle
-/address 101 [start: int] [end: int] [h: int] [saturation: int]
+/address 5 [start: int] [end: int] [h: int] [intensity: int]
 
 ### Strobo
-/address 200 [h: int] [fps: int]
+/address 6 [h: int] [fps: int]
 
-h == 0 yields white strobo
+h == 255 yields white strobo
 fps == 0 stops strobo
 
+### Chase
+/address 12 [hue: int] [speed: int] [style: int]
+
+style == 0 default chase
+style == 1 default reverse chase
+style == 2 long tail chase
+style == 3 long tail reverse chase
+
+### Bash
+/address 13 [hue: int] [intensity: int]
 
 ## License
 

@@ -19,11 +19,11 @@ namespace Dispedter.Common.OSC
         private Socket _socket;
 
         public int Port { get; }
-        public string Address { get; }
+        public IPAddress Address { get; }
 
         private State _state = State.Idle;
 
-        public UdpSender(string address, int port)
+        public UdpSender(IPAddress address, int port)
         {
             Port = port;
             Address = address;
@@ -34,18 +34,12 @@ namespace Dispedter.Common.OSC
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-            var addresses = Dns.GetHostAddresses(address);
-            if (addresses.Length == 0)
-            {
-                throw new Exception("Unable to find IP address for " + address);
-            }
-
-            _remoteIpEndPoint = new IPEndPoint(addresses[0], port);
+            _remoteIpEndPoint = new IPEndPoint(address, port);
 
             SetDeviceState(State.Running);
         }
 
-        public static string CreateId(string address, int port) => $"{address}-{port.ToString()}";
+        public static string CreateId(IPAddress address, int port) => $"{address.ToString()}-{port.ToString()}";
 
         public string Id { get; private set; }
 
@@ -97,7 +91,7 @@ namespace Dispedter.Common.OSC
                     break;
             }
         }
-        
+
         #region IDisposable Support
         private bool _disposedValue = false;
 

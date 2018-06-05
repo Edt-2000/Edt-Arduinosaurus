@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
@@ -11,13 +12,13 @@ namespace Dispedter.Common.Managers
     public class SenderManager
     {
         private readonly bool _detectUsb;
-        private readonly IEnumerable<string> _udpDestinations;
+        private readonly IEnumerable<IPAddress> _udpDestinations;
 
         private const int _udpPort = 12345;
 
         private List<ISender> _senders = new List<ISender>();
 
-        public SenderManager(bool detectUsb = false, IEnumerable<string> udpDestinations = null)
+        public SenderManager(bool detectUsb = false, IEnumerable<IPAddress> udpDestinations = null)
         {
             _detectUsb = detectUsb;
             _udpDestinations = udpDestinations;

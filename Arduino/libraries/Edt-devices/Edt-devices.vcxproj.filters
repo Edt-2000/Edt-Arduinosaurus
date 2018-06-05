@@ -30,6 +30,18 @@
     <ClInclude Include="RGBColorScheduler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AnimationType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LedState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FastLEDColorScheduler.cpp">

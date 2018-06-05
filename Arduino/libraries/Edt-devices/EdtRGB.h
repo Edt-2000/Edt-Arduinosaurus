@@ -21,7 +21,6 @@ namespace OSC {
 		private:
 			const char *_pattern;
 			CRGB *_leds;
-			int _nrOfLeds;
 			
 #ifndef _MSC_VER
 			RGBColorScheduler _colorScheduler;
@@ -34,8 +33,7 @@ namespace OSC {
 			{
 				_pattern = pattern;
 
-				_nrOfLeds = nrOfLeds;
-				_leds = new CRGB[_nrOfLeds];
+				_leds = new CRGB[nrOfLeds];
 
 				_colorScheduler = RGBColorScheduler(_leds, nrOfLeds, tlc);
 			}
@@ -56,7 +54,6 @@ namespace OSC {
 				// todo: remove these variables
 				auto command = message->messageStruct.command;
 				auto dualColor = message->messageStruct.commands.dualColor;
-				auto kitt = message->messageStruct.commands.kitt;
 				auto rainbow = message->messageStruct.commands.rainbow;
 				auto singleColor = message->messageStruct.commands.singleColor;
 				auto strobo = message->messageStruct.commands.strobo;
@@ -169,7 +166,8 @@ namespace OSC {
 
 					break;
 
-				case OSC::ColorCommands::Kitt:
+				case OSC::ColorCommands::Chase:
+				case OSC::ColorCommands::Bash:
 
 					// No implementation
 

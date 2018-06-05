@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
 
@@ -15,7 +16,35 @@ namespace Dispedter.Common.OSC
             }
             else
             {
-                return parseMessage(OscData);
+                return parseMessage(OscData, out var dummy);
+            }
+        }
+
+        public static IEnumerable<OscPacket> GetPackets(byte[] oscData, int maxLength)
+        {
+            var length = 0;
+            while (length < maxLength)
+            {
+                OscMessage message;
+                int delta;
+
+                try
+                {
+                    message = parseMessage(oscData.Skip(length).ToArray(), out delta);
+
+                    if (!message.Address.StartsWith("/"))
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    break;
+                }
+
+                yield return message;
+
+                length += delta;
             }
         }
 
@@ -28,7 +57,7 @@ namespace Dispedter.Common.OSC
         /// </summary>
         /// <param name="msg"></param>
         /// <returns>Message containing various arguments and an address</returns>
-        private static OscMessage parseMessage(byte[] msg)
+        private static OscMessage parseMessage(byte[] msg, out int messageLength)
         {
             var index = 0;
 
@@ -59,6 +88,11 @@ namespace Dispedter.Common.OSC
 
             foreach (var type in types)
             {
+                if(index + 4 > msg.Length)
+                {
+                    break;
+                }
+
                 // skip leading comma
                 if (type == ',' && !commaParsed)
                 {
@@ -66,30 +100,30 @@ namespace Dispedter.Common.OSC
                     continue;
                 }
 
-                switch(type)
+                switch (type)
                 {
                     case ('\0'):
                         break;
 
-                    case('i'):
+                    case ('i'):
                         var intVal = GetInt(msg, index);
                         arguments.Add(intVal);
                         index += 4;
                         break;
-                
-                    case('f'):
+
+                    case ('f'):
                         var floatVal = GetFloat(msg, index);
                         arguments.Add(floatVal);
                         index += 4;
                         break;
 
-                    case('s'):
+                    case ('s'):
                         var stringVal = GetString(msg, index);
                         arguments.Add(stringVal);
                         index += stringVal.Length;
                         break;
-                
-                    case('b'):
+
+                    case ('b'):
                         var blob = GetBlob(msg, index);
                         arguments.Add(blob);
                         index += 4 + blob.Length;
@@ -112,13 +146,13 @@ namespace Dispedter.Common.OSC
                         arguments.Add(dval);
                         index += 8;
                         break;
-                        
+
                     case ('c'):
                         var cval = GetChar(msg, index);
                         arguments.Add(cval);
                         index += 4;
                         break;
-                        
+
                     case ('T'):
                         arguments.Add(true);
                         break;
@@ -159,6 +193,8 @@ namespace Dispedter.Common.OSC
                 }
             }
 
+            messageLength = index;
+
             return new OscMessage(address, arguments.ToArray());
         }
 
@@ -191,7 +227,7 @@ namespace Dispedter.Common.OSC
                 index += 4;
 
                 var messageBytes = bundle.SubArray(index, size);
-                var message = parseMessage(messageBytes);
+                var message = parseMessage(messageBytes, out var dummy);
 
                 messages.Add(message);
 
@@ -209,7 +245,7 @@ namespace Dispedter.Common.OSC
         #endregion
 
         #region Get arguments from byte array
-        
+
         private static string getAddress(byte[] msg, int index)
         {
             var i = index;
@@ -268,8 +304,8 @@ namespace Dispedter.Common.OSC
         {
             var reversed = new byte[4];
             reversed[3] = msg[index];
-            reversed[2] = msg[index+1];
-            reversed[1] = msg[index+2];
+            reversed[2] = msg[index + 1];
+            reversed[1] = msg[index + 2];
             reversed[0] = msg[index + 3];
             var val = BitConverter.ToSingle(reversed, 0);
             return val;
@@ -279,7 +315,7 @@ namespace Dispedter.Common.OSC
         {
             string output = null;
             var i = index + 4;
-            for (; (i-1) < msg.Length; i += 4)
+            for (; (i - 1) < msg.Length; i += 4)
             {
                 if (msg[i - 1] == 0)
                 {
@@ -313,13 +349,13 @@ namespace Dispedter.Common.OSC
         {
             var var = new byte[8];
             var[7] = msg[index];
-            var[6] = msg[index+1];
-            var[5] = msg[index+2];
-            var[4] = msg[index+3];
-            var[3] = msg[index+4];
-            var[2] = msg[index+5];
-            var[1] = msg[index+6];
-            var[0] = msg[index+7];
+            var[6] = msg[index + 1];
+            var[5] = msg[index + 2];
+            var[4] = msg[index + 3];
+            var[3] = msg[index + 4];
+            var[2] = msg[index + 5];
+            var[1] = msg[index + 6];
+            var[0] = msg[index + 7];
 
             var val = BitConverter.ToInt64(var, 0);
             return val;
@@ -345,7 +381,7 @@ namespace Dispedter.Common.OSC
         {
             return (char)msg[index + 3];
         }
-        
+
         #endregion
 
         #region Create byte arrays for arguments
@@ -458,7 +494,7 @@ namespace Dispedter.Common.OSC
             output[3] = (byte)value;
             return output;
         }
-        
+
         #endregion
 
     }

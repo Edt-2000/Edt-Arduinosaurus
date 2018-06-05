@@ -12,7 +12,7 @@ namespace Dispedter
     public sealed class StartupTask : IBackgroundTask
     {
         private readonly ListenerManager _listenerManager = new ListenerManager();
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { "10.0.0.1" });
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true); //, udpDestinations: new[] { "10.0.0.1" });
 
         private BackgroundTaskDeferral _defer;
 
@@ -21,11 +21,11 @@ namespace Dispedter
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
-            _manageSendersTask = _senderManager.ManageDevicesAsync();
-            _manageListenersTask = _listenerManager.ManageDevicesAsync();
-
             SetupListeners();
 
+            _manageSendersTask = _senderManager.ManageDevicesAsync();
+            _manageListenersTask = _listenerManager.ManageDevicesAsync();
+            
             _defer = taskInstance.GetDeferral();
             
             // we never complete
@@ -33,13 +33,10 @@ namespace Dispedter
         }
         private void SetupListeners()
         {
-            foreach(var listener in _listenerManager.Listeners)
-            {
-                listener.AddPacketHandler(OscPacketReceived);
-            }
+            _listenerManager.AttachEventHandler(OscPacketReceived);
         }
 
-        private void OscPacketReceived(UdpListener sender, OscEventArgs args)
+        private void OscPacketReceived(IListener sender, OscEventArgs args)
         {
             var packet = args.GetOscPacket();
 

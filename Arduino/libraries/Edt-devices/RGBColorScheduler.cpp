@@ -3,7 +3,7 @@
 #define COLOR_INVERSE 255
 #define COLOR_CORRECTION 0 //98
 
-#define INTENSITY_BOOST 0.3
+#define INTENSITY_BOOST 0.0
 
 #define RAINBOW_POSITIONS 6
 
@@ -24,26 +24,25 @@ OSC::Device::RGBColorScheduler::RGBColorScheduler()
 OSC::Device::RGBColorScheduler::RGBColorScheduler(CRGB * leds, uint8_t nrOfLeds, Tlc5940 * tlc)
 {
 	_leds = leds;
-	_nrOfLeds = nrOfLeds;
-	_fadeBackup = new CRGB[_nrOfLeds];
+	this->nrOfLeds = nrOfLeds;
 
-	fill_solid(_leds, _nrOfLeds, CRGB::HTMLColorCode::Black);
+	_fadeBackup = new CRGB[nrOfLeds];
 
-	_fade = 255;
+	fill_solid(_leds, nrOfLeds, CRGB::HTMLColorCode::Black);
 
-	_strobo.active = false;
+	_ledState.fade = 255;
 
 	_tlc = tlc;
 }
 
 void OSC::Device::RGBColorScheduler::fade(uint8_t speed, FadeMode fadeMode)
 {
-	_fade = speed;
+	_ledState.fade = speed;
 	_fadeMode = fadeMode;
 
 	if (_fadeMode == FadeMode::FadeOneByOne)
 	{
-		for (int i = 0; i < _nrOfLeds; i++) {
+		for (int i = 0; i < nrOfLeds; i++) {
 			_fadeBackup[i] = _leds[i];
 		}
 	}
@@ -51,17 +50,22 @@ void OSC::Device::RGBColorScheduler::fade(uint8_t speed, FadeMode fadeMode)
 
 void OSC::Device::RGBColorScheduler::disableFade()
 {
-	_fade = 255;
+	_ledState.fade = 255;
 }
 
 void OSC::Device::RGBColorScheduler::solid(uint8_t hue, uint8_t saturation, uint8_t value)
 {
-	fill_solid(_leds, _nrOfLeds, CHSV(HUE(hue), saturation, VALUE(value)));
+	fill_solid(_leds, nrOfLeds, CHSV(HUE(hue), saturation, VALUE(value)));
+}
+
+void OSC::Device::RGBColorScheduler::solid(CHSV color)
+{
+	fill_solid(_leds, nrOfLeds, color);
 }
 
 void OSC::Device::RGBColorScheduler::solid(uint8_t hue1, uint8_t hue2, uint8_t saturation, uint8_t value, uint8_t percentage)
 {
-	for (int i = 0; i < _nrOfLeds; i++) {
+	for (int i = 0; i < nrOfLeds; i++) {
 		if (percentage > random8()) {
 			_leds[i].setHSV(HUE(hue2), saturation, VALUE(value));
 		}
@@ -73,15 +77,15 @@ void OSC::Device::RGBColorScheduler::solid(uint8_t hue1, uint8_t hue2, uint8_t s
 
 void OSC::Device::RGBColorScheduler::rainbow(uint8_t hue, uint8_t deltaHue)
 {
-	fill_rainbow(_leds, _nrOfLeds, HUE(hue), (deltaHue / 127.0) * (255.0 / _nrOfLeds));
+	fill_rainbow(_leds, nrOfLeds, HUE(hue), (deltaHue / 127.0) * (255.0 / nrOfLeds));
 }
 
 void OSC::Device::RGBColorScheduler::intensity(uint8_t intensity) {
 	if (intensity == 0) {
-		fill_solid(_leds, _nrOfLeds, CRGB::HTMLColorCode::Black);
+		fill_solid(_leds, nrOfLeds, CRGB::HTMLColorCode::Black);
 	}
 	else {
-		fill_solid(_leds, _nrOfLeds, CHSV(HUE(0) + (85 - (intensity / 2.5)), 255, VALUE(intensity)));
+		fill_solid(_leds, nrOfLeds, CHSV(HUE(0) + (85 - (intensity / 2.5)), 255, VALUE(intensity)));
 	}
 }
 
@@ -89,90 +93,125 @@ void OSC::Device::RGBColorScheduler::strobo(uint8_t hue, uint8_t fps)
 {
 	disableFade();
 
-	fill_solid(_leds, _nrOfLeds, CRGB::HTMLColorCode::Black);
+	fill_solid(_leds, nrOfLeds, CRGB::HTMLColorCode::Black);
 
-	_strobo.active = fps > 0;
-	_strobo.loop = 0;
-	_strobo.fpl = (255.0 / fps);
-	if (hue == 255) {
-		_strobo.color = CRGB::HTMLColorCode::White;
+	if (fps == 0)
+	{
+		_animations.resetAnimations();
 	}
-	else {
-		_strobo.color.setHSV(HUE(hue), 255, 255);
+	else
+	{
+		if (hue < 255)
+		{
+			_animations.insertAnimation(Animation(AnimationType::Strobo, CHSV(HUE(hue), 255, 255), 255.0 / fps, 0));
+		}
+		else
+		{
+			_animations.insertAnimation(Animation(AnimationType::Strobo, CHSV(0, 0, 255), 255.0 / fps, 0));
+		}
 	}
 }
 
 void OSC::Device::RGBColorScheduler::loop()
 {
-	if (_strobo.active)
-	{
-		fill_solid(_leds, _nrOfLeds, CRGB::HTMLColorCode::Black);
+	int i = 0;
 
-		if ((_strobo.loop++) > _strobo.fpl)
-		{
-			_strobo.loop = 0;
-
-			fill_solid(_leds, _nrOfLeds, _strobo.color);
-		}
-	}
-	else
+	while (i < _animations.animationsActive)
 	{
-		switch (_fadeMode)
+		switch (_animations.animations[i].type)
 		{
-		case FadeMode::FadeToBlack:
-			if (_fade < 255)
+		case AnimationType::Strobo:
+
+			fill_solid(_leds, nrOfLeds, CHSV(0, 0, 0));
+
+			if ((_animations.animations[i].state++) > _animations.animations[i].data)
 			{
-				if (_fade > 255 - 62)
+				_animations.animations[i].state = 0;
+
+				fill_solid(_leds, nrOfLeds, _animations.animations[i].color);
+			}
+
+			// there is nothing else to animate besides flashing of the strobo
+			output();
+			return;
+		}
+
+		i++;
+	}
+
+	switch (_fadeMode)
+	{
+	case FadeMode::FadeToBlack:
+		if (_ledState.fade < 255)
+		{
+			if (_ledState.fade > 255 - 62)
+			{
+				_ledState.fade = 255;
+			}
+			else
+			{
+				_ledState.fade += ((_ledState.fade) / 4) + 1;
+			}
+
+			fadeToBlackBy(_leds, nrOfLeds, _ledState.fade);
+		}
+		break;
+	case FadeMode::FadeOneByOne:
+		if (_ledState.fade < 255)
+		{
+			if (_ledState.fade > random8())
+			{
+				for (int i = 0; i < nrOfLeds; i++) {
+					_fadeBackup[i] = _leds[i];
+				}
+				fill_solid(_leds, nrOfLeds, CRGB::HTMLColorCode::Black);
+			}
+			else
+			{
+				if (_ledState.fade > 255 - 17)
 				{
-					_fade = 255;
+					_ledState.fade = 255;
+
+					fill_solid(_leds, nrOfLeds, CRGB::HTMLColorCode::Black);
 				}
 				else
 				{
-					_fade += ((_fade) / 4) + 1;
-				}
+					_ledState.fade += ((_ledState.fade) / 16) + 1;
 
-				fadeToBlackBy(_leds, _nrOfLeds, _fade);
-			}
-			break;
-		case FadeMode::FadeOneByOne:
-			if (_fade < 255)
-			{
-				if (_fade > random8())
-				{
-					for(int i = 0; i < _nrOfLeds; i++) {
-						_fadeBackup[i] = _leds[i];
+					for (int i = 0; i < nrOfLeds; i++) {
+						_leds[i] = _fadeBackup[i];
 					}
-					fill_solid(_leds, _nrOfLeds, CRGB::HTMLColorCode::Black);
-				}
-				else
-				{
-					if (_fade > 255 - 17)
-					{
-						_fade = 255;
-
-						fill_solid(_leds, _nrOfLeds, CRGB::HTMLColorCode::Black);
-					}
-					else
-					{
-						_fade += ((_fade) / 16) + 1;
-
-						for (int i = 0; i < _nrOfLeds; i++) {
-							_leds[i] = _fadeBackup[i];
-						}
-						fadeToBlackBy(_leds, _nrOfLeds, _fade);
-					}
+					fadeToBlackBy(_leds, nrOfLeds, _ledState.fade);
 				}
 			}
-
-			break;
 		}
+
+		break;
+
 	}
 
-	int j = 0;
-	for (int i = 0; i < _nrOfLeds; i++) {
-		_tlc->set(++j, 4095 - (int)((((double)_leds[i].red) / 255.0) * 4095));
-		_tlc->set(++j, 4095 - (int)((((double)_leds[i].green) / 255.0) * 4095));
-		_tlc->set(++j, 4095 - (int)((((double)_leds[i].blue) / 255.0) * 4095));
+	output();
+}
+
+inline void OSC::Device::RGBColorScheduler::output() {
+	// moronic pinout:
+	// 
+	// | AUX | LED 1 | LED 2 | LED 3  | LED 4    | LED 5   |
+	// | 1   | 2 3 4 | 5 6 7 | 8 9 10 | 11 12 13 | 14 15 0 |
+	// |     | G B R | G B R | G B R  | G  B  R  | G  B  R |
+	//
+	// (who designed the board? :P)
+
+	// tclAddress is a struct with a 4 bit integer
+	// so 15 + 1 = 0 automatically
+	tlcAddress tlc;
+
+	tlc.address = 1;
+
+	for (int i = 0; i < nrOfLeds; i++) {
+		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].green) / 255.0) * 4095));
+		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].blue) / 255.0) * 4095));
+		_tlc->set(++tlc.address, 4095 - (int)((((double)_leds[i].red) / 255.0) * 4095));
 	}
 }
 

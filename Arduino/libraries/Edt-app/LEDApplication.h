@@ -24,14 +24,33 @@ class LEDApplication : public AbstractApplication
 	OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>> osc;
 
 	Tlc5940 tlc = Tlc5940();
-	
-	OSC::Device::EdtFastLED fl1 = OSC::Device::EdtFastLED(OSC_FL1, FL1_NR_OF_LEDS);
-	OSC::Device::EdtFastLED fl2 = OSC::Device::EdtFastLED(OSC_FL2, FL2_NR_OF_LEDS);
-	OSC::Device::EdtFastLED fl3 = OSC::Device::EdtFastLED(OSC_FL3, FL3_NR_OF_LEDS);
-	OSC::Device::EdtFastLED fl4 = OSC::Device::EdtFastLED(OSC_FL4, FL4_NR_OF_LEDS);
 
-	OSC::Device::EdtRGB rgb1 = OSC::Device::EdtRGB(OSC_RGB1, RGB1_NR_OF_LEDS, &tlc);
-	
+#ifdef EDTLED1
+	OSC::Device::EdtFastLED fls[4] = { 
+		OSC::Device::EdtFastLED(OSC_FL1, FL1_NR_OF_LEDS),
+		OSC::Device::EdtFastLED(OSC_FL2, FL2_NR_OF_LEDS),
+		OSC::Device::EdtFastLED(OSC_FL3, FL3_NR_OF_LEDS),
+		OSC::Device::EdtFastLED(OSC_FL4, FL4_NR_OF_LEDS)
+	};
+#endif
+
+#ifdef EDTLED2
+	OSC::Device::EdtFastLED fls[4] = { 
+		OSC::Device::EdtFastLED(OSC_FL5, FL5_NR_OF_LEDS),
+		OSC::Device::EdtFastLED(OSC_FL6, FL6_NR_OF_LEDS),
+		OSC::Device::EdtFastLED(OSC_FL7, FL7_NR_OF_LEDS),
+		OSC::Device::EdtFastLED(OSC_FL8, FL8_NR_OF_LEDS)
+	};
+#endif
+
+#ifdef EDTLED1
+	OSC::Device::EdtRGB rgb = OSC::Device::EdtRGB(OSC_RGB1, RGB1_NR_OF_LEDS, &tlc);
+#endif
+
+#ifdef EDTLED2
+	OSC::Device::EdtRGB rgb = OSC::Device::EdtRGB(OSC_RGB2, RGB2_NR_OF_LEDS, &tlc);
+#endif
+
 #ifndef USB
 	EthernetUDP udp;
 #endif
@@ -59,10 +78,15 @@ class LEDApplication : public AbstractApplication
 
 	void setupOsc()
 	{
-		fl1.configurePins<A0, 3>();
-		fl2.configurePins<A1, 3>();
-		fl3.configurePins<A2, 3>();
-		fl4.configurePins<A3, 3>();
+		// pinout
+		//
+		// FL 1 | FL 2 | FL 3 | FL 4 |
+		// 0    | 2    | 3    | 1    |
+ 
+		fls[0].configurePins<A0, 3>();
+		fls[1].configurePins<A2, 3>();
+		fls[2].configurePins<A3, 3>();
+		fls[3].configurePins<A1, 3>();
 
 		osc = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(5, 0);
 #ifdef USB
@@ -70,20 +94,20 @@ class LEDApplication : public AbstractApplication
 #else
 		osc.bindUDP(&udp, IP_BROADCAST, PORT_BROADCAST);
 #endif
-		osc.addConsumer(&fl1);
-		osc.addConsumer(&fl2);
-		osc.addConsumer(&fl3);
-		osc.addConsumer(&fl4);
+		osc.addConsumer(&fls[0]);
+		osc.addConsumer(&fls[1]);
+		osc.addConsumer(&fls[2]);
+		osc.addConsumer(&fls[3]);
 
-		osc.addConsumer(&rgb1);
+		osc.addConsumer(&rgb);
 
 		// make a test blink
-		fl1.test();
-		fl2.test();
-		fl3.test();
-		fl4.test();
+		fls[0].test();
+		fls[1].test();
+		fls[2].test();
+		fls[3].test();
 
-		rgb1.test();
+		rgb.test();
 
 		tlc.clear();
 	}
@@ -94,12 +118,12 @@ class LEDApplication : public AbstractApplication
 
 		if (time.tVISUAL)
 		{
-			fl1.animationLoop();
-			fl2.animationLoop();
-			fl3.animationLoop();
-			fl4.animationLoop();
+			fls[0].animationLoop();
+			fls[1].animationLoop();
+			fls[2].animationLoop();
+			fls[3].animationLoop();
 
-			rgb1.animationLoop();
+			rgb.animationLoop();
 
 			FastLED.show();
 

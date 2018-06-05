@@ -122,10 +122,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Animations.h" />
+    <ClInclude Include="AnimationType.h" />
     <ClInclude Include="EdtFastLED.h" />
     <ClInclude Include="EdtRGB.h" />
     <ClInclude Include="FadeMode.h" />
     <ClInclude Include="FastLEDColorScheduler.h" />
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="LedState.h" />
     <ClInclude Include="RGBColorScheduler.h" />
   </ItemGroup>
   <ItemGroup>

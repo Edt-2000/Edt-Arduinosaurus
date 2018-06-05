@@ -602,14 +602,14 @@ namespace EdtdevicesTest
 			} while (++i < 1000);
 		}
 
-		TEST_METHOD(FastLED_Kitt)
+		TEST_METHOD(FastLED_Chase)
 		{
 			auto message = OSC::Message();
 			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 
 			message.setAddress("/Test");
 
-			message.addInt((int)OSC::ColorCommands::Kitt);
+			message.addInt((int)OSC::ColorCommands::Chase);
 			message.addInt(1);
 			message.addInt(2);
 			message.addInt(3);
@@ -628,15 +628,48 @@ namespace EdtdevicesTest
 
 			auto color = fastLed._colorScheduler.getCommandColor();
 
-			Assert::IsTrue(color.type == Type::kitt, L"Command type incorrect", LINE_INFO());
-			Assert::IsTrue(color.position == 1, L"Command param incorrect", LINE_INFO());
-			Assert::IsTrue(color.length == 2, L"Command param incorrect", LINE_INFO());
-			Assert::IsTrue(color.h == 3, L"Command param incorrect", LINE_INFO());
+			Assert::IsTrue(color.type == Type::chase, L"Command type incorrect", LINE_INFO());
+			Assert::IsTrue(color.h == 1, L"Command param incorrect", LINE_INFO());
+			Assert::IsTrue(color.speed == 2, L"Command param incorrect", LINE_INFO());
+			Assert::IsTrue(color.style == 3, L"Command param incorrect", LINE_INFO());
 
 			auto fade = fastLed._colorScheduler.getCommandFade();
 
 			Assert::IsTrue(fade.type == Type::none, L"Command type incorrect", LINE_INFO());
 		}
 
+		TEST_METHOD(FastLED_Bash)
+		{
+			auto message = OSC::Message();
+			auto arduino = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
+
+			message.setAddress("/Test");
+
+			message.addInt((int)OSC::ColorCommands::Bash);
+			message.addInt(1);
+			message.addInt(2);
+
+			auto fastLed = OSC::Device::EdtFastLED("/Test", 1);
+
+			arduino.addConsumer(&fastLed);
+
+			auto stream = Stream();
+
+			arduino.bindStream(&stream);
+
+			message.send(&stream);
+
+			arduino.loop();
+
+			auto color = fastLed._colorScheduler.getCommandColor();
+
+			Assert::IsTrue(color.type == Type::bash, L"Command type incorrect", LINE_INFO());
+			Assert::IsTrue(color.h == 1, L"Command param incorrect", LINE_INFO());
+			Assert::IsTrue(color.intensity == 2, L"Command param incorrect", LINE_INFO());
+
+			auto fade = fastLed._colorScheduler.getCommandFade();
+
+			Assert::IsTrue(fade.type == Type::none, L"Command type incorrect", LINE_INFO());
+		}
 	};
 }

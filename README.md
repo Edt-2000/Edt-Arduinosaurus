@@ -29,9 +29,9 @@ duration, intensity, speed = 0 - 225
 
 
 ### Single color, solid
-`/address 1 [start: int] [end: int] [h: int] [s: int] [v: int] [duration (only required with l == 0): int]`
+`/address 1 [start: int] [end: int] [h: int] [s: int] [v: int] [duration (required with l == 0): int]`
 
-l == 0 dims using pulse
+- `l == 0` dims using pulse
 
 ### Single color, pulse
 `/address 2 [start: int] [end: int] [h: int] [s: int] [v: int] [duration: int]`
@@ -40,10 +40,10 @@ l == 0 dims using pulse
 `/address 7 [start: int] [end: int] [h: int] [s: int] [v: int] [duration: int]`
 
 ### Dual color, solid
-`/address 9 [start: int] [end: int] [h1: int] [h2: int] [duration (only required with l == 0): int]`
+`/address 9 [start: int] [end: int] [h1: int] [h2: int] [duration (required with l == 0): int]`
 
-`l == 0` dims using pulse
-`s` and `v` are 255 by default
+- `l == 0` dims using pulse
+- `s` and `v` are 255 by default
 
 ### Dual color, pulse
 `/address 10 [start: int] [end: int] [h1: int] [h2: int] [duration: int]`
@@ -52,11 +52,11 @@ l == 0 dims using pulse
 `/address 11 [start: int] [end: int] [h1: int] [h2: int] [duration: int]`
 
 ### Rainbow color, solid
-`/address 2 [start: int] [end: int] [h start: int] [delta h: int] [duration (only required with delta h == 0): int]`
+`/address 2 [start: int] [end: int] [h start: int] [delta h: int] [duration (required with delta h == 0): int]`
 
-`delta h == 0` dims using pulse
-`delta h == 127` = full rainbow
-`delta h == 255` = two full rainbows
+- `delta h == 0` dims using pulse
+- `delta h == 127` = full rainbow
+- `delta h == 255` = two full rainbows
 
 ### Rainbow color, pulse
 `/address 2 [start: int] [end: int] [h start: int] [delta h: int] [duration: int]`
@@ -73,16 +73,16 @@ l == 0 dims using pulse
 ### Strobo
 `/address 6 [h: int] [fps: int]`
 
-`h == 255` yields white strobo
-`fps == 0` stops strobo
+- `h == 255` yields white strobo
+- `fps == 0` stops strobo
 
 ### Chase
 `/address 12 [hue: int] [speed: int] [style: int]`
 
-`style == 0` default chase
-`style == 1` default reverse chase
-`style == 2` long tail chase
-`style == 3` long tail reverse chase
+- `style == 0` default chase
+- `style == 1` default reverse chase
+- `style == 2` long tail chase
+- `style == 3` long tail reverse chase
 
 ### Bash
 `/address 13 [hue: int] [intensity: int]`
@@ -91,6 +91,6 @@ l == 0 dims using pulse
 
 Details about the licensing can be found in the LICENSE file.
 
-* Please use this code for your own DIY projects
-* When you make interesting changes and additions; send us a message and/or make a Pull Request
-* Send us a link to your blog if you have one, we would love others to use our work to create cool live performances
+- Please use this code for your own DIY projects
+- When you make interesting changes and additions; send us a message and/or make a Pull Request
+- Send us a link to your blog if you have one, we would love others to use our work to create cool live performances

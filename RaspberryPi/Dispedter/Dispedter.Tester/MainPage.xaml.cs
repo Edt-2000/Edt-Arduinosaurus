@@ -35,7 +35,7 @@ namespace Dispedter.Tester
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/F?", "/R?" });
         private readonly CommandFactory _specialCommandFactory = new CommandFactory(new[] { "/F1", "/F2", "/F3", "/F4", "/F5", "/F6", "/F7", "/F8" });
         private readonly ListenerManager _listenerManager = new ListenerManager(detectUsb: false);
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { IPAddress.Parse("169.254.219.93") });
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { IPAddress.Parse("192.168.1.122")/*IPAddress.Parse("169.254.219.93")*/ });
 
         private Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>> _commandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>>();
         private Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>> _proceduralCommandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>>();

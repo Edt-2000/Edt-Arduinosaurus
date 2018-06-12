@@ -124,6 +124,8 @@
   <ItemGroup>
     <ClInclude Include="Animations.h" />
     <ClInclude Include="AnimationType.h" />
+    <ClInclude Include="DMXSlave.h" />
+    <ClInclude Include="EdtDMX.h" />
     <ClInclude Include="EdtFastLED.h" />
     <ClInclude Include="EdtRGB.h" />
     <ClInclude Include="FadeMode.h" />
@@ -133,6 +135,7 @@
     <ClInclude Include="RGBColorScheduler.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DMXLedSpot.h" />
     <ClCompile Include="FastLEDColorScheduler.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>

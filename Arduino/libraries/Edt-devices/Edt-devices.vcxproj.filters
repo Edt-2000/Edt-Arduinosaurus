@@ -42,6 +42,12 @@
     <ClInclude Include="Animations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DMXSlave.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EdtDMX.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FastLEDColorScheduler.cpp">
@@ -49,6 +55,9 @@
     </ClCompile>
     <ClCompile Include="RGBColorScheduler.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DMXLedSpot.h">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

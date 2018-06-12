@@ -77,3 +77,5 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 
 #define RGB1_NR_OF_LEDS 5
 #define RGB2_NR_OF_LEDS 5
+
+#define OSC_DMX1 "/F1"

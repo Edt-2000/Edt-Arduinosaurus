@@ -21,7 +21,10 @@
 #include "FadeMode.h"
 #include "SparkFun_Tlc5940.h"
 
-auto slave = new DMXLedSpot();
+//auto slave1 = ;
+//auto slave2 = new DMXLedSpot();
+
+DMXSlave ** slaves = new DMXSlave*[2];
 
 class DMXApplication : public AbstractApplication
 {
@@ -29,7 +32,7 @@ class DMXApplication : public AbstractApplication
 	OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>> osc;
 
 	OSC::Device::EdtDMX dmx = 
-		OSC::Device::EdtDMX(OSC_FL1, slave)
+		OSC::Device::EdtDMX(OSC_FL1, slaves, 2)
 	;
 
 #ifndef USB
@@ -48,8 +51,7 @@ class DMXApplication : public AbstractApplication
 		Serial.begin(57600);
 
 #else
-
-		Ethernet.begin(MAC_LED, IPAddress(192, 168, 1, 122));
+		Ethernet.begin(MAC_LED, IPAddress(169, 254, 219, 81));
 
 		udp.begin(PORT_BROADCAST);
 
@@ -58,6 +60,8 @@ class DMXApplication : public AbstractApplication
 
 	void setupOsc()
 	{
+		DMXSerial.init(DMXController);
+
 		osc = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
 #ifdef USB
 		osc.bindStream(&Serial);

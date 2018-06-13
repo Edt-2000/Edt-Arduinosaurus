@@ -1,3 +1,5 @@
+#pragma once
+
 #include "DMXSlave.h"
 #include "..\DMX\DMXSerial.h"
 #include "FadeMode.h"
@@ -8,13 +10,13 @@
 #include "FastLED.h"
 #endif
 
-
-
-class DMXLedSpot : public DMXSlave {
-private:
+class DMXLedSpot : public DMXSlave
+{
+  private:
 	int _address;
 
-	enum Mode {
+	enum Mode
+	{
 		Uninitialized = 0,
 		Color = 1,
 		Strobo = 2
@@ -26,16 +28,20 @@ private:
 	uint8_t _fade;
 	FadeMode _fadeMode;
 
-	inline void switchMode(Mode mode) {
-		if (mode == _mode) {
+	inline void switchMode(Mode mode)
+	{
+		if (mode == _mode)
+		{
 			return;
 		}
 
-		if (mode == Mode::Color) {
+		if (mode == Mode::Color)
+		{
 			// switch to brightness control
 			DMXSerial.write(_address, 255);
 		}
-		else if(mode == Mode::Strobo) {
+		else if (mode == Mode::Strobo)
+		{
 			// switch to off to allow for flash control
 			DMXSerial.write(_address, 0);
 		}
@@ -43,7 +49,8 @@ private:
 		_mode = mode;
 	}
 
-	inline void output() {
+	inline void output()
+	{
 		DMXSerial.write(_address + 1, _color[0].r);
 		DMXSerial.write(_address + 2, _color[0].g);
 		DMXSerial.write(_address + 3, _color[0].b);
@@ -52,16 +59,18 @@ private:
 		DMXSerial.write(_address + 4, _color[1].r);
 	}
 
-public:
-
-	void initialize(int address) {
+  public:
+	void initialize(int address)
+	{
 		_address = address;
 
 		DMXSerial.write(address, 0);
 	}
 
-	void loop() {
-		if (_mode == Mode::Color) {
+	void loop()
+	{
+		if (_mode == Mode::Color)
+		{
 
 			switch (_fadeMode)
 			{
@@ -78,7 +87,6 @@ public:
 					}
 
 					fadeToBlackBy(_color, 2, _fade);
-
 				}
 				break;
 
@@ -118,15 +126,18 @@ public:
 		}
 	}
 
-	void solid(uint8_t h, uint8_t s, uint8_t v) {
+	void solid(uint8_t h, uint8_t s, uint8_t v)
+	{
 		switchMode(Mode::Color);
 
 		// use white led when h & s are zero (grey scale)
-		if (h == 0 && s == 0) {
+		if (h == 0 && s == 0)
+		{
 			_color[0] = CRGB::HTMLColorCode::Black;
 			_color[1].r = v;
 		}
-		else {
+		else
+		{
 			_color[0].setHSV(h, s, v);
 			_color[1] = CRGB::HTMLColorCode::Black;
 		}
@@ -134,14 +145,17 @@ public:
 		output();
 	}
 
-	void solid(uint8_t h1, uint8_t h2, uint8_t s, uint8_t v, uint8_t percentage) {
+	void solid(uint8_t h1, uint8_t h2, uint8_t s, uint8_t v, uint8_t percentage)
+	{
 		switchMode(Mode::Color);
 
-		if (percentage > random8()) {
+		if (percentage > random8())
+		{
 			_color[0].setHSV(h2, s, v);
 			_color[1] = CRGB::HTMLColorCode::Black;
 		}
-		else {
+		else
+		{
 			_color[0].setHSV(h1, s, v);
 			_color[1] = CRGB::HTMLColorCode::Black;
 		}
@@ -149,13 +163,16 @@ public:
 		output();
 	}
 
-	void intensity(uint8_t intensity) {
+	void intensity(uint8_t intensity)
+	{
 		switchMode(Mode::Color);
-		
-		if (intensity == 0) {
+
+		if (intensity == 0)
+		{
 			_color[0] = CRGB::HTMLColorCode::Black;
 		}
-		else {
+		else
+		{
 			_color[0].setHSV(85 - (intensity / 2.5), 255, intensity);
 		}
 
@@ -164,22 +181,40 @@ public:
 		output();
 	}
 
-	void fade(uint8_t fade, FadeMode mode = FadeMode::FadeToBlack) {
-		//_fade = fade;
-		//_fadeMode = mode;
+	void fade(uint8_t fade, FadeMode mode = FadeMode::FadeToBlack)
+	{
+		_fade = fade;
+		_fadeMode = mode;
 	}
 
-	void disableFade() {
+	void disableFade()
+	{
 		_fade = 255;
 	}
 
-	void strobo(uint8_t h, uint8_t intensity) {
-		switchMode(Mode::Strobo);
+	void strobo(uint8_t h, uint8_t intensity)
+	{
+		if (intensity == 0)
+		{
+			switchMode(Mode::Color);
+			
+			_color[0] = CRGB::HTMLColorCode::Black;
+			_color[1] = CRGB::HTMLColorCode::Black;
+		}
+		else
+		{
+			switchMode(Mode::Strobo);
 
-		// strobo range is 135 - 239
+			// strobo range is 135 - 239
+			uint8_t stroboSpeed = ((239 - 135) * ((double)intensity) / 255.0) + 135;
 
-		uint8_t stroboSpeed = ((239 - 135) * ((double)intensity) / 255.0) + 135;
+			_color[0].setHSV(h, 255, 255);
+			// cheat to get brighter flashes
+			_color[1].setHSV(0, 255, h);
 
-		DMXSerial.write(_address, stroboSpeed);
+			DMXSerial.write(_address, stroboSpeed);
+		}
+
+		output();
 	}
 };

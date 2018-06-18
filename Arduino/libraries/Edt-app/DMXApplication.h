@@ -1,7 +1,5 @@
 #pragma once
 
-//#define USB
-
 #include "AbstractApplication.h"
 
 #include "Definitions.h"
@@ -17,23 +15,22 @@
 #include "EdtDMX.h"
 #include "DMXSlave.h"
 #include "DMXLedSpot.h"
+#include "DMXSlaveConfig.h"
 
 #include "FadeMode.h"
 #include "SparkFun_Tlc5940.h"
-
-//auto slave1 = ;
-//auto slave2 = new DMXLedSpot();
-
-DMXSlave ** slaves = new DMXSlave*[2];
 
 class DMXApplication : public AbstractApplication
 {
   public:
 	OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>> osc;
 
-	OSC::Device::EdtDMX dmx = 
-		OSC::Device::EdtDMX(OSC_FL1, slaves, 2)
-	;
+#ifdef ETHERNET
+	OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_FL1);
+#endif
+#ifdef USB
+	OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_FL2);
+#endif
 
 #ifndef USB
 	EthernetUDP udp;
@@ -51,7 +48,7 @@ class DMXApplication : public AbstractApplication
 		Serial.begin(57600);
 
 #else
-		Ethernet.begin(MAC_LED, IPAddress(169, 254, 219, 81));
+		Ethernet.begin(MAC_DOSMCX, IP_DOSMCX);
 
 		udp.begin(PORT_BROADCAST);
 
@@ -71,7 +68,7 @@ class DMXApplication : public AbstractApplication
 		osc.addConsumer(&dmx);
 
 		// make a test blink
-		dmx.test();
+		dmx.initialize();
 	}
 
 	void applicationLoop()

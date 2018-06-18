@@ -98,5 +98,15 @@ namespace Dispedter.Common.Factories
         {
             return _addresses.Select((a, i) => new OscMessage(a, (int)Command.SingleSolid, 0, 127, (int)(i * (255.0 / _addresses.Count())), 255, 254));
         }
+
+        public IEnumerable<OscMessage> ClearDMX()
+        {
+            return _addresses.Select((a, i) => new OscMessage(a, 254, 1, 0, 0, 0));
+        }
+
+        public IEnumerable<OscMessage> ProgramDmxSlave(int type, int address)
+        {
+            return _addresses.Select((a, i) => new OscMessage(a, 254, 0, 1, type, address));
+        }
     }
 }

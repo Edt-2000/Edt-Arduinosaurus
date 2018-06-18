@@ -1,7 +1,7 @@
 #pragma once
 
-#include "DMXSlave.h"
 #include "..\DMX\DMXSerial.h"
+#include <DMXSlave.h>
 #include "FadeMode.h"
 
 #ifdef _MSC_VER
@@ -10,7 +10,11 @@
 #include "FastLED.h"
 #endif
 
-class DMXLedSpot : public DMXSlave
+namespace OSC
+{
+namespace DMX
+{
+class LedSpot : public Slave
 {
   private:
 	int _address;
@@ -197,7 +201,7 @@ class DMXLedSpot : public DMXSlave
 		if (intensity == 0)
 		{
 			switchMode(Mode::Color);
-			
+
 			_color[0] = CRGB::HTMLColorCode::Black;
 			_color[1] = CRGB::HTMLColorCode::Black;
 		}
@@ -218,3 +222,5 @@ class DMXLedSpot : public DMXSlave
 		output();
 	}
 };
+} // namespace Device
+} // namespace OSC

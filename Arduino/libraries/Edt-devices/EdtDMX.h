@@ -11,6 +11,7 @@
 #endif
 
 #include "DMXSlave.h"
+#include "DMXSlaveConfig.h"
 #include "DMXLedSpot.h"
 
 namespace OSC
@@ -21,23 +22,13 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 {
   private:
 	const char *_pattern;
-	DMXSlave ** _slave = new DMXSlave*[2];
-	uint8_t _slaves;
+	OSC::DMX::Slave **_slaves;
+	uint8_t _slaveCount = 0;
 
   public:
-	// TODO: create own slaves from setup
-	EdtDMX(const char *pattern, DMXSlave ** slave, uint8_t slaves) : MessageConsumer()
+	EdtDMX(const char *pattern) : MessageConsumer()
 	{
 		_pattern = pattern;
-		//_slave = slave;
-		_slaves = slaves;
-		
-		_slave[0] = new DMXLedSpot();
-		_slave[1] = new DMXLedSpot();
-
-		// TODO
-		_slave[0]->initialize(4);
-		_slave[1]->initialize(10);
 	}
 
 	const char *pattern()
@@ -45,18 +36,44 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 		return _pattern;
 	}
 
-	void test()
+	void initialize()
 	{
-		for (uint8_t i = 0; i < _slaves; ++i)
+		if (_slaveCount > 0)
 		{
-			_slave[i]->solid(120, 255, 255);
-			_slave[i]->fade(2);
+			delete[] _slaves;
+		}
+
+		_slaveCount = OSC::DMX::Slave::getSlaveCount();
+
+		if (_slaveCount > 0)
+		{
+			_slaves = new OSC::DMX::Slave *[_slaveCount];
+			for (uint8_t i = 0; i < _slaveCount; ++i)
+			{
+				OSC::DMX::SlaveConfig config = OSC::DMX::Slave::getSlaveConfig(i);
+
+				switch (config.type)
+				{
+				case OSC::DMX::SlaveType::DefaultLedSpot:
+					_slaves[i] = (OSC::DMX::Slave *)new OSC::DMX::LedSpot();
+					break;
+
+				case OSC::DMX::SlaveType::Unknown:
+				default:
+					continue;
+				};
+
+				_slaves[i]->initialize(config.address);
+
+				_slaves[i]->solid(120, 255, 255);
+				_slaves[i]->fade(2);
+			}
 		}
 	}
 
 	void callbackMessage(OSC::StructMessage<OSC::EdtMessage, uint8_t> *message)
 	{
-		for (uint8_t i = 0; i < _slaves; ++i)
+		for (uint8_t i = 0; i < _slaveCount; ++i)
 		{
 			// todo: remove these variables
 			auto command = message->messageStruct.command;
@@ -76,20 +93,20 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 
 				if (singleColor.value > 0)
 				{
-					_slave[i]->solid(singleColor.hue, singleColor.saturation, singleColor.value);
+					_slaves[i]->solid(singleColor.hue, singleColor.saturation, singleColor.value);
 				}
 
 				if (command == OSC::ColorCommands::SinglePulse || singleColor.value == 0)
 				{
-					_slave[i]->fade(singleColor.duration, FadeMode::FadeToBlack);
+					_slaves[i]->fade(singleColor.duration, FadeMode::FadeToBlack);
 				}
 				else if (command == OSC::ColorCommands::SingleSpark)
 				{
-					_slave[i]->fade(singleColor.duration, FadeMode::FadeOneByOne);
+					_slaves[i]->fade(singleColor.duration, FadeMode::FadeOneByOne);
 				}
 				else
 				{
-					_slave[i]->disableFade();
+					_slaves[i]->disableFade();
 				}
 
 				break;
@@ -98,28 +115,20 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 			case OSC::ColorCommands::DualSolid:
 			case OSC::ColorCommands::DualSparkle:
 
-				_slave[i]->solid(dualColor.hue1, dualColor.hue2, 255, 254, dualColor.percentage);
+				_slaves[i]->solid(dualColor.hue1, dualColor.hue2, 255, 254, dualColor.percentage);
 
 				if (command == OSC::ColorCommands::DualPulse)
 				{
-					_slave[i]->fade(dualColor.duration, FadeMode::FadeToBlack);
+					_slaves[i]->fade(dualColor.duration, FadeMode::FadeToBlack);
 				}
 				else if (command == OSC::ColorCommands::DualSparkle)
 				{
-					_slave[i]->fade(dualColor.duration, FadeMode::FadeOneByOne);
+					_slaves[i]->fade(dualColor.duration, FadeMode::FadeOneByOne);
 				}
 				else
 				{
-					_slave[i]->disableFade();
+					_slaves[i]->disableFade();
 				}
-
-				break;
-
-			case OSC::ColorCommands::RainbowPulse:
-			case OSC::ColorCommands::RainbowSolid:
-			case OSC::ColorCommands::RainbowSpark:
-
-				// No implementation
 
 				break;
 
@@ -127,51 +136,78 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 
 				if (vuMeter.intensity > 0)
 				{
-					_slave[i]->intensity(vuMeter.intensity);
+					_slaves[i]->intensity(vuMeter.intensity);
 				}
 				else
 				{
-					_slave[i]->fade(127);
+					_slaves[i]->fade(127);
 				}
 
 				break;
 
 			case OSC::ColorCommands::Twinkle:
 
-				_slave[i]->disableFade();
+				_slaves[i]->disableFade();
 
 				if (twinkle.intensity > 0)
 				{
-					_slave[i]->solid(twinkle.hue, 255, twinkle.intensity - 1);
+					_slaves[i]->solid(twinkle.hue, 255, twinkle.intensity - 1);
 				}
 				else
 				{
-					_slave[i]->fade(127);
+					_slaves[i]->fade(127);
 				}
 
 				break;
 
 			case OSC::ColorCommands::Strobo:
 
-				_slave[i]->strobo(strobo.hue, strobo.intensity);
+				_slaves[i]->strobo(strobo.hue, strobo.intensity);
 
 				break;
 
 			case OSC::ColorCommands::Chase:
 			case OSC::ColorCommands::Bash:
+			case OSC::ColorCommands::RainbowPulse:
+			case OSC::ColorCommands::RainbowSolid:
+			case OSC::ColorCommands::RainbowSpark:
 
 				// No implementation
 
 				break;
 			}
 		}
+
+		if (message->messageStruct.command == OSC::ColorCommands::DMXConfig)
+		{
+
+			auto dmxConfigCommand = message->messageStruct.commands.dmxConfig;
+			if (dmxConfigCommand.clear > 0)
+			{
+				OSC::DMX::Slave::clearSlaveConfig();
+			}
+
+			if (dmxConfigCommand.slaveAddress > 0)
+			{
+				auto config = OSC::DMX::SlaveConfig();
+				config.type = (OSC::DMX::SlaveType)dmxConfigCommand.slaveType;
+				config.address = dmxConfigCommand.slaveAddress;
+
+				OSC::DMX::Slave::setSlaveConfig(config);
+			}
+
+			if (dmxConfigCommand.reset > 0)
+			{
+				initialize();
+			}
+		}
 	}
 
 	void animationLoop()
 	{
-		for (uint8_t i = 0; i < _slaves; ++i)
+		for (uint8_t i = 0; i < _slaveCount; ++i)
 		{
-			_slave[i]->loop();
+			_slaves[i]->loop();
 		}
 	}
 };

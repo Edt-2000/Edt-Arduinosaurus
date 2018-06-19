@@ -1,6 +1,7 @@
 ﻿using Dispedter.Common.OSC;
 using Dispedter.Common.OSCArduino;
 using Dispedter.Common.Factories;
+using Dispedter.Common.DMX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ using Dispedter.Common.Managers;
 using Windows.UI;
 using System.Collections.ObjectModel;
 using System.Net;
+using Windows.Storage;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -40,6 +42,12 @@ namespace Dispedter.Tester
         private Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>> _commandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>>();
         private Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>> _proceduralCommandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>>();
 
+        private bool _configuringDmx = true;
+        private ObservableCollection<DmxSlave> _dmxSlaves;
+        private ObservableCollection<DmxType> _dmxTypes;
+        private ObservableCollection<int> _dmxAddresses;
+        private DmxConfig _dmxConfig;
+
         private Mode _mode;
         private enum Mode
         {
@@ -56,6 +64,7 @@ namespace Dispedter.Tester
         private DateTime _previousIn = DateTime.UtcNow;
         private List<string> _inHistory = new List<string>();
 
+
         enum CommandDirection
         {
             In,
@@ -64,6 +73,15 @@ namespace Dispedter.Tester
 
         public MainPage()
         {
+            _dmxSlaves = new ObservableCollection<DmxSlave>();
+            _dmxConfig = new DmxConfig(_dmxSlaves);
+            _dmxTypes = new ObservableCollection<DmxType>(_dmxConfig.Types);
+            _dmxAddresses = new ObservableCollection<int>(Enumerable.Range(1, 512));
+
+
+            _dmxConfig.AddSlave(1, 4);
+            _dmxConfig.AddSlave(1, 10);
+
             InitializeComponent();
             InitializeListeners();
 
@@ -104,6 +122,7 @@ namespace Dispedter.Tester
             });
         }
 
+        #region LED
         private async Task SendCommandAsync(VirtualKey key)
         {
             if (!_senderManager.Senders?.Any() ?? false)
@@ -145,7 +164,6 @@ namespace Dispedter.Tester
                 ;
             }
         }
-
 
         private async Task LogCommandAsync(CommandDirection commandDirection, IEnumerable<OscMessage> messages)
         {
@@ -325,11 +343,7 @@ namespace Dispedter.Tester
 
                 { (VirtualKey)219, () => _commandFactory.CreateBash((ColorPreset)Random(), 16) },
                 { (VirtualKey)221, () => _commandFactory.CreateBash((ColorPreset)Random(), 127) },
-                { (VirtualKey)220, () => _commandFactory.CreateBash((ColorPreset)Random(), 255) },
-
-                { VirtualKey.Home, () => _commandFactory.ClearDMX() },
-                { VirtualKey.PageUp, () => _commandFactory.ProgramDmxSlave(1, 4) },
-                { VirtualKey.PageDown, () => _commandFactory.ProgramDmxSlave(1, 10) }
+                { (VirtualKey)220, () => _commandFactory.CreateBash((ColorPreset)Random(), 255) }
             });
         }
 
@@ -453,5 +467,52 @@ namespace Dispedter.Tester
                 return Color.FromArgb(255, v, p, q);
             }
         }
+
+        #endregion
+
+        #region DMX
+
+        private void DmxButton_Click(object sender, RoutedEventArgs e)
+        {
+            _configuringDmx = !_configuringDmx;
+
+            InCommandHistory.Visibility = _configuringDmx ? Visibility.Collapsed : Visibility.Visible;
+            Slaves.Visibility = _configuringDmx ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void DmxSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void AddSlaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            var slaveType = SlaveType.SelectedValue as int?;
+            var slaveAddress = SlaveAddress.SelectedValue as int?;
+
+            if (slaveType.HasValue && slaveAddress.HasValue)
+            {
+                _dmxConfig.AddSlave(slaveType.Value, slaveAddress.Value);
+            }
+        }
+
+        private async void DmxDownloadButton_Click(object s, RoutedEventArgs e)
+        {
+            var command = _dmxConfig.GenerateOscConfig((s as Button).Tag as string);
+
+            foreach (var sender in _senderManager.Senders)
+            {
+                await sender.SendAsync(command);
+            }
+
+            await LogCommandAsync(CommandDirection.Out, command);
+        }
+
+        private void DeleteSlaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            _dmxConfig.RemoveSlave(((sender as Button).Tag as int?) ?? -1);
+        }
+
+        #endregion
     }
 }

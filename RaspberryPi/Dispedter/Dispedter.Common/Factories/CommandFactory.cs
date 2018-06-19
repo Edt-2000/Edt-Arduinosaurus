@@ -104,9 +104,14 @@ namespace Dispedter.Common.Factories
             return _addresses.Select((a, i) => new OscMessage(a, 254, 1, 0, 0, 0));
         }
 
+        public IEnumerable<OscMessage> RestartDMX()
+        {
+            return _addresses.Select((a, i) => new OscMessage(a, 254, 0, 1, 0, 0));
+        }
+
         public IEnumerable<OscMessage> ProgramDmxSlave(int type, int address)
         {
-            return _addresses.Select((a, i) => new OscMessage(a, 254, 0, 1, type, address));
+            return _addresses.Select((a, i) => new OscMessage(a, 254, 0, 0, type, address));
         }
     }
 }

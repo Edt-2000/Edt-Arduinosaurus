@@ -26,10 +26,10 @@ class DMXApplication : public AbstractApplication
 	OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>> osc;
 
 #ifdef ETHERNET
-	OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_FL1);
+	OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_DMX1);
 #endif
 #ifdef USB
-	OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_FL2);
+	OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_DMX2);
 #endif
 
 #ifndef USB

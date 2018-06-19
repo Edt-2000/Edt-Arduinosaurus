@@ -11,10 +11,43 @@
     </Page.Resources>
 
     <Grid Background="Black">
-        <TextBlock x:Name="ColorIndex"  HorizontalAlignment="Left"  Margin="214,214,0,0" Foreground="White" Text="" VerticalAlignment="Top"/>
-        <TextBlock x:Name="KeyCode"  HorizontalAlignment="Left"  Margin="10,10,0,0" Foreground="DarkSlateGray" Text="123" VerticalAlignment="Top"/>
-        <TextBlock x:Name="CommandMode"  HorizontalAlignment="Left"  Margin="280,160,0,0" Foreground="White" Text="" VerticalAlignment="Top"/>
+        <TextBlock x:Name="ColorIndex" HorizontalAlignment="Left"  Margin="214,214,0,0" Foreground="White" Text="" VerticalAlignment="Top"/>
+        <TextBlock x:Name="KeyCode" HorizontalAlignment="Left"  Margin="10,10,0,0" Foreground="DarkSlateGray" Text="123" VerticalAlignment="Top"/>
+        <TextBlock x:Name="CommandMode" HorizontalAlignment="Left"  Margin="280,160,0,0" Foreground="White" Text="" VerticalAlignment="Top"/>
         <TextBlock x:Name="OutCommandHistory" HorizontalAlignment="Stretch" Margin="280,214,600,20" Foreground="#00FF00" Text="Out" VerticalAlignment="Stretch" />
-        <TextBlock x:Name="InCommandHistory" HorizontalAlignment="Stretch" Margin="700,214,20,20" Foreground="#FF00FF" Text="{StaticResource InHistory}" VerticalAlignment="Stretch" />
+        <TextBlock x:Name="InCommandHistory" HorizontalAlignment="Stretch" Margin="700,214,20,20" Foreground="#FF00FF" Text="{StaticResource InHistory}" VerticalAlignment="Stretch" Visibility="Collapsed" />
+        <Button Content="DMX" HorizontalAlignment="Left" Margin="1217,10,0,0" VerticalAlignment="Top" Click="DmxButton_Click" Width="53" RequestedTheme="Dark"/>
+        <Grid Margin="700,80,0,10">
+            <ListView x:Name="Slaves" Margin="0,0,0,49" ItemsSource="{x:Bind Path=_dmxSlaves}" HorizontalAlignment="Left" Width="570">
+                <ListView.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Button Content="Download to /R3" HorizontalAlignment="Left" VerticalAlignment="Top" Click="DmxDownloadButton_Click" Tag="/R3" RequestedTheme="Dark" Width="200"/>
+                            <Button Content="Download to /R4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="205,0,0,0" Click="DmxDownloadButton_Click" Tag="/R4" RequestedTheme="Dark" Width="200"/>
+                            <Button Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="410,0,0,0" Click="DmxSaveButton_Click" RequestedTheme="Dark" Width="100"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.HeaderTemplate>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding FullName}" Foreground="#00FF00" Grid.Column="0" Margin="0,5,0,0" Width="500" />
+                            <Button Content="Delete" Click="DeleteSlaveButton_Click" Grid.Column="1" RequestedTheme="Dark" Tag="{Binding Address}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Grid Margin="0,0,10,0" Visibility="{x:Bind Mode=OneWay, Path=Slaves.Visibility}" Height="33" VerticalAlignment="Bottom">
+                <ComboBox x:Name="SlaveType" ItemsSource="{x:Bind _dmxTypes}" Width="100" SelectedValuePath="TypeNr" DisplayMemberPath="Name" />
+                <ComboBox x:Name="SlaveAddress" ItemsSource="{x:Bind _dmxAddresses}" Margin="105,0,0,0" Width="100" />
+                <Button Content="Add" Click="AddSlaveButton_Click" RequestedTheme="Dark" Margin="210,0,0,0" HorizontalAlignment="Left" Width="100" />
+            </Grid>
+
+        </Grid>
+
     </Grid>
 </Page>

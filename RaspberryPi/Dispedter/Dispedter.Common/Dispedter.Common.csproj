@@ -106,6 +106,9 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DMX\DmxConfig.cs" />
+    <Compile Include="DMX\DmxSlave.cs" />
+    <Compile Include="DMX\DmxType.cs" />
     <Compile Include="Managers\ListenerManager.cs" />
     <Compile Include="Managers\SenderManager.cs" />
     <Compile Include="OSCArduino\ColorPreset.cs" />
@@ -133,6 +136,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.0.6</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>11.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

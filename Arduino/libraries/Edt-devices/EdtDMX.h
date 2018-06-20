@@ -73,6 +73,7 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 
 	void callbackMessage(OSC::StructMessage<OSC::EdtMessage, uint8_t> *message)
 	{
+		// TODO: put loop in switch
 		for (uint8_t i = 0; i < _slaveCount; ++i)
 		{
 			// todo: remove these variables

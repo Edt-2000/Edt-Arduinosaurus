@@ -20,6 +20,8 @@
 #include "FadeMode.h"
 #include "SparkFun_Tlc5940.h"
 
+// TODO: 9 bit address support
+
 class DMXApplication : public AbstractApplication
 {
   public:
@@ -27,13 +29,10 @@ class DMXApplication : public AbstractApplication
 
 #ifdef ETHERNET
 	OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_DMX1);
-#endif
-#ifdef USB
-	OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_DMX2);
-#endif
 
-#ifndef USB
 	EthernetUDP udp;
+#else
+	//OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_DMX2);
 #endif
 
 	void setupStatus()
@@ -43,7 +42,7 @@ class DMXApplication : public AbstractApplication
 
 	void setupNetwork()
 	{
-#ifdef USB
+#ifndef ETHERNET
 
 		Serial.begin(57600);
 
@@ -57,18 +56,18 @@ class DMXApplication : public AbstractApplication
 
 	void setupOsc()
 	{
-		DMXSerial.init(DMXController);
+		//DMXSerial.init(DMXController);
 
-		osc = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(1, 0);
-#ifdef USB
+		osc = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(0, 0);
+#ifndef ETHERNET
 		osc.bindStream(&Serial);
 #else
 		osc.bindUDP(&udp, IP_BROADCAST, PORT_BROADCAST);
 #endif
-		osc.addConsumer(&dmx);
+		//osc.addConsumer(&dmx);
 
 		// make a test blink
-		dmx.initialize();
+		//dmx.initialize();
 	}
 
 	void applicationLoop()
@@ -77,7 +76,7 @@ class DMXApplication : public AbstractApplication
 
 		if (time.tVISUAL)
 		{
-			dmx.animationLoop();
+			//dmx.animationLoop();
 		}
 	}
 };

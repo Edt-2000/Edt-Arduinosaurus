@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Storage.Streams;
 
 namespace Dispedter.Common.DMX
 {
@@ -23,29 +24,19 @@ namespace Dispedter.Common.DMX
         };
 
 
-        public async Task ReadConfigAsync(Stream configStream)
+        public void ReadConfig(string configString)
         {
-            using (var reader = new StreamReader(configStream))
-            {
-                var configString = await reader.ReadToEndAsync();
-                var config = JsonConvert.DeserializeObject<List<DmxSlave>>(configString);
+            var config = JsonConvert.DeserializeObject<List<DmxSlave>>(configString);
 
-                if (config != null)
-                {
-                    _dmxSlaves = config;
-                }
-            }
+            RemoveAllSlaves();
+            
+            config?.OrderBy(s => s.Address).ToList().ForEach(slave => _dmxSlaves.Add(slave));
         }
 
-        public async Task<Stream> WriteConfigAsync()
+        public string WriteConfig()
         {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
             var configString = JsonConvert.SerializeObject(_dmxSlaves);
-
-            await writer.WriteAsync(configString);
-
-            return stream;
+            return configString;
         }
 
         public IEnumerable<OscMessage> GenerateOscConfig(string target)

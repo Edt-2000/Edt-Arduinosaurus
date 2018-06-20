@@ -24,6 +24,7 @@ using Windows.UI;
 using System.Collections.ObjectModel;
 using System.Net;
 using Windows.Storage;
+using Windows.Storage.Streams;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -35,14 +36,13 @@ namespace Dispedter.Tester
     public sealed partial class MainPage : Page
     {
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/F?", "/R?" });
-        private readonly CommandFactory _specialCommandFactory = new CommandFactory(new[] { "/F1", "/F2", "/F3", "/F4", "/F5", "/F6", "/F7", "/F8" });
+        private readonly CommandFactory _specialCommandFactory = new CommandFactory(new[] { "/?1", "/?2", "/?3", "/?4", "/?5", "/?6", "/?7", "/?8" });
         private readonly ListenerManager _listenerManager = new ListenerManager(detectUsb: false);
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: false, udpDestinations: new[] { IPAddress.Parse("169.254.219.81")/*, IPAddress.Parse("169.254.219.93")*/ });
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { IPAddress.Parse("169.254.219.81")/*, IPAddress.Parse("169.254.219.93")*/ });
 
         private Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>> _commandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>>();
         private Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>> _proceduralCommandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>>();
 
-        private bool _configuringDmx = true;
         private ObservableCollection<DmxSlave> _dmxSlaves;
         private ObservableCollection<DmxType> _dmxTypes;
         private ObservableCollection<int> _dmxAddresses;
@@ -78,9 +78,8 @@ namespace Dispedter.Tester
             _dmxTypes = new ObservableCollection<DmxType>(_dmxConfig.Types);
             _dmxAddresses = new ObservableCollection<int>(Enumerable.Range(1, 512));
 
-
-            _dmxConfig.AddSlave(1, 4);
-            _dmxConfig.AddSlave(1, 10);
+            //_dmxConfig.AddSlave(1, 4);
+            //_dmxConfig.AddSlave(1, 10);
 
             InitializeComponent();
             InitializeListeners();
@@ -174,7 +173,7 @@ namespace Dispedter.Tester
                     var delta = DateTime.UtcNow - _previousOut;
                     _previousOut = DateTime.UtcNow;
 
-                    if (_outHistory.Count > 30)
+                    if (_outHistory.Count > 40)
                     {
                         _outHistory.RemoveAt(0);
                     }
@@ -192,7 +191,7 @@ namespace Dispedter.Tester
                     _previousIn = DateTime.UtcNow;
                     var deltaOutIn = _previousIn - _previousOut;
 
-                    if (_inHistory.Count > 30)
+                    if (_inHistory.Count > 40)
                     {
                         _inHistory.RemoveAt(0);
                     }
@@ -332,7 +331,7 @@ namespace Dispedter.Tester
 
                 { VirtualKey.Z, () => _commandFactory.CreateTwinkle((ColorPreset)Random(), Random()) },
                 { VirtualKey.X, () => _commandFactory.CreateRainbowSolid() },
-                { VirtualKey.Tab, () => _specialCommandFactory.CreateRainbowUsingAddresses() },
+                { VirtualKey.CapitalLock, () => _specialCommandFactory.CreateRainbowUsingAddresses() },
 
                 { VirtualKey.C, () => _commandFactory.CreateChase((ColorPreset)Random(), 1, 1) },
                 { VirtualKey.V, () => _commandFactory.CreateChase((ColorPreset)Random(), Math.Max(1, Random() / 16), 0) },
@@ -472,18 +471,105 @@ namespace Dispedter.Tester
 
         #region DMX
 
-        private void DmxButton_Click(object sender, RoutedEventArgs e)
+        private async void DmxLoadButton_Click(object sender, RoutedEventArgs e)
         {
-            _configuringDmx = !_configuringDmx;
+            var tag = (sender as Button).Tag as string;
 
-            InCommandHistory.Visibility = _configuringDmx ? Visibility.Collapsed : Visibility.Visible;
-            Slaves.Visibility = _configuringDmx ? Visibility.Visible : Visibility.Collapsed;
+            try
+            {
+                var fileName = GetFileName(tag);
+
+                var folder = await GetStorageFolderAsync();
+
+                if (folder == null)
+                {
+                    return;
+                }
+
+                var fileContents = await GetReadFileContentsAsync(fileName, folder);
+
+                _dmxConfig.ReadConfig(fileContents);
+            }
+            catch
+            {
+                _dmxConfig.RemoveAllSlaves();
+            }
         }
 
-        private void DmxSaveButton_Click(object sender, RoutedEventArgs e)
+        private async void DmxDownloadSaveButton_Click(object s, RoutedEventArgs e)
         {
+            var tag = (s as Button).Tag as string;
+            try
+            {
+                var fileName = GetFileName(tag);
 
+                var folder = await GetStorageFolderAsync();
+
+                if (folder != null)
+                {
+                    var fileContents = _dmxConfig.WriteConfig();
+
+                    await WriteStreamToFileAsync(fileName, folder, fileContents);
+                }
+            }
+            catch
+            {
+
+            }
+
+            var command = _dmxConfig.GenerateOscConfig(tag);
+
+            foreach (var sender in _senderManager.Senders)
+            {
+                await sender.SendAsync(command);
+            }
+
+            await LogCommandAsync(CommandDirection.Out, command);
         }
+
+        private static string GetFileName(string tag)
+        {
+            return $"edt-{tag.Replace("/", "")}.edt";
+        }
+
+        private static async Task<StorageFolder> GetStorageFolderAsync()
+        {
+            StorageFolder folder = null;
+            try
+            {
+                folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Edt-2000").AsTask();
+            }
+            catch
+            {
+                folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Edt-2000").AsTask();
+            }
+
+            return folder;
+        }
+
+        private static async Task<string> GetReadFileContentsAsync(string fileName, StorageFolder folder)
+        {
+            var fileHandle = await folder.GetFileAsync(fileName).AsTask();
+
+            return await FileIO.ReadTextAsync(fileHandle).AsTask();
+        }
+
+        private static async Task WriteStreamToFileAsync(string fileName, StorageFolder folder, string fileContentString)
+        {
+            StorageFile fileHandle;
+            try
+            {
+                fileHandle = await folder.GetFileAsync(fileName).AsTask();
+            }
+            catch
+            {
+                fileHandle = await folder.CreateFileAsync(fileName).AsTask();
+            }
+
+            await FileIO.WriteTextAsync(fileHandle, fileContentString).AsTask();
+        }
+
+
 
         private void AddSlaveButton_Click(object sender, RoutedEventArgs e)
         {
@@ -496,17 +582,7 @@ namespace Dispedter.Tester
             }
         }
 
-        private async void DmxDownloadButton_Click(object s, RoutedEventArgs e)
-        {
-            var command = _dmxConfig.GenerateOscConfig((s as Button).Tag as string);
 
-            foreach (var sender in _senderManager.Senders)
-            {
-                await sender.SendAsync(command);
-            }
-
-            await LogCommandAsync(CommandDirection.Out, command);
-        }
 
         private void DeleteSlaveButton_Click(object sender, RoutedEventArgs e)
         {

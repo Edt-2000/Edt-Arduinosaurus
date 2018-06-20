@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
 
 namespace Dispedter.Common.DMX
 {
@@ -11,6 +7,7 @@ namespace Dispedter.Common.DMX
         public DmxType Type { get; set; }
         public int Address { get; set; }
 
+        [JsonIgnore]
         public string FullName => $"{Address}-{(Address + Type.Width - 1)}: {Type.Name}";
     }
 }

@@ -5,8 +5,10 @@
 #include "Definitions.h"
 
 #include "Arduino.h"
+#ifdef ETHERNET
 #include "Ethernet.h"
 #include "EthernetUDP.h"
+#endif
 #include "HardwareSerial.h"
 #include "OSCArduino.h"
 #include "Statemachine.h"
@@ -32,7 +34,7 @@ class DMXApplication : public AbstractApplication
 
 	EthernetUDP udp;
 #else
-	//OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_DMX2);
+	OSC::Device::EdtDMX dmx = OSC::Device::EdtDMX(OSC_DMX2);
 #endif
 
 	void setupStatus()
@@ -49,25 +51,25 @@ class DMXApplication : public AbstractApplication
 #else
 		Ethernet.begin(MAC_DOSMCX, IP_DOSMCX);
 
-		udp.begin(PORT_BROADCAST);
+ 		udp.begin(PORT_BROADCAST);
 
-#endif
+ #endif
 	}
 
 	void setupOsc()
 	{
-		//DMXSerial.init(DMXController);
+		DMXSerial.init(DMXController);
 
 		osc = OSC::Arduino<OSC::StructMessage<OSC::EdtMessage, uint8_t>>(0, 0);
-#ifndef ETHERNET
-		osc.bindStream(&Serial);
-#else
-		osc.bindUDP(&udp, IP_BROADCAST, PORT_BROADCAST);
-#endif
-		//osc.addConsumer(&dmx);
+ #ifndef ETHERNET
+ 		osc.bindStream(&Serial);
+ #else
+ 		osc.bindUDP(&udp, IP_BROADCAST, PORT_BROADCAST);
+ #endif
+		osc.addConsumer(&dmx);
 
 		// make a test blink
-		//dmx.initialize();
+		dmx.initialize();
 	}
 
 	void applicationLoop()
@@ -76,7 +78,7 @@ class DMXApplication : public AbstractApplication
 
 		if (time.tVISUAL)
 		{
-			//dmx.animationLoop();
+			dmx.animationLoop();
 		}
 	}
 };

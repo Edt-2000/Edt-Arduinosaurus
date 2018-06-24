@@ -21,11 +21,19 @@
                 <ListView.HeaderTemplate>
                     <DataTemplate>
                         <Grid>
-                            <Button Content="O /R3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0" Click="DmxLoadButton_Click" Tag="/R3" RequestedTheme="Dark" Width="75" Background="#80FF00FF"/>
-                            <Button Content="D /R3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,0,0,0" Click="DmxDownloadSaveButton_Click" Tag="/R3" RequestedTheme="Dark" Width="75" Background="#8000FF00"/>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="155"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0">
+                                <Button Content="O /R3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0" Click="DmxLoadButton_Click" Tag="/R3" RequestedTheme="Dark" Width="75" Background="#80FF00FF"/>
+                                <Button Content="D /R3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,0,0,0" Click="DmxDownloadSaveButton_Click" Tag="/R3" RequestedTheme="Dark" Width="75" Background="#8000FF00"/>
+                            </Grid>
 
-                            <Button Content="O /R4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="300,0,0,0" Click="DmxLoadButton_Click" Tag="/R4" RequestedTheme="Dark" Width="75" Background="#80FF00FF"/>
-                            <Button Content="D /R4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="380,0,0,0" Click="DmxDownloadSaveButton_Click" Tag="/R4" RequestedTheme="Dark" Width="75" Background="#8000FF00"/>
+                            <Grid Grid.Column="1">
+                                <Button Content="O /R4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0" Click="DmxLoadButton_Click" Tag="/R4" RequestedTheme="Dark" Width="75" Background="#80FF00FF"/>
+                                <Button Content="D /R4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,0,0,0" Click="DmxDownloadSaveButton_Click" Tag="/R4" RequestedTheme="Dark" Width="75" Background="#8000FF00"/>
+                            </Grid>
                         </Grid>
                     </DataTemplate>
                 </ListView.HeaderTemplate>
@@ -42,10 +50,27 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Grid Margin="0,0,10,59" Visibility="{x:Bind Mode=OneWay, Path=Slaves.Visibility}" Height="33" VerticalAlignment="Bottom">
-                <ComboBox x:Name="SlaveType" ItemsSource="{x:Bind _dmxTypes}" Width="100" SelectedValuePath="TypeNr" DisplayMemberPath="Name" />
-                <ComboBox x:Name="SlaveAddress" ItemsSource="{x:Bind _dmxAddresses}" Margin="105,0,0,0" Width="100" />
-                <Button Content="Add" Click="AddSlaveButton_Click" RequestedTheme="Dark" Margin="210,0,0,0" HorizontalAlignment="Left" Width="100" />
+            <Grid Margin="0,0,0,59" Height="33" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="540">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="100"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <ComboBox x:Name="SlaveType" ItemsSource="{x:Bind _dmxTypes}" Width="100" SelectedValuePath="TypeNr" DisplayMemberPath="Name" />
+                    <ComboBox x:Name="SlaveAddress" ItemsSource="{x:Bind _dmxAddresses}" Margin="105,0,0,0" Width="100" SelectedValue="1" />
+                </Grid>
+                <Grid Grid.Column="1" >
+                    <Slider x:Name="MinimumBrightness" Minimum="0" Maximum="1" TickFrequency="0.1" StepFrequency="0.05" Value="0" />
+                </Grid>
+                <Grid Grid.Column="2" >
+                    <Slider x:Name="MaximumBrightness" Minimum="0" Maximum="1" TickFrequency="0.1" StepFrequency="0.05" Value="1" />
+                </Grid>
+                <Grid Grid.Column="4">
+                    <Button Content="Add" Click="AddSlaveButton_Click" RequestedTheme="Dark" HorizontalAlignment="Left" Width="100" />
+                </Grid>
             </Grid>
 
         </Grid>

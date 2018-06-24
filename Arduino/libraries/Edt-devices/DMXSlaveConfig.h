@@ -13,10 +13,13 @@ namespace OSC
 {
 namespace DMX
 {
-enum SlaveType : uint8_t
+enum class SlaveType : uint8_t
 {
 	Unknown = 0,
-	DefaultLedSpot = 1
+	LedSpot = 1,
+	ThreeChannelLed = 2,
+	ShowTecCompactPar = 3,
+	FixedSingleChannel = 4
 };
 
 struct SlaveConfig
@@ -24,6 +27,8 @@ struct SlaveConfig
   public:
 	SlaveType type;
 	uint8_t address;
+	uint8_t maximumBrightness;
+	uint8_t minimumBrightness;
 };
 } // namespace DMX
 } // namespace OSC

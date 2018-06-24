@@ -16,8 +16,11 @@
 
 #include "EdtDMX.h"
 #include "DMXSlave.h"
-#include "DMXLedSpot.h"
 #include "DMXSlaveConfig.h"
+#include "DMXLedSpot.h"
+#include "DMXThreeChannelLed.h"
+#include "DMXShowTecCompactPar.h"
+#include "DMXFixedSingleChannel.h"
 
 #include "FadeMode.h"
 #include "SparkFun_Tlc5940.h"

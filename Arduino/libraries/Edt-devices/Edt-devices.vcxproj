@@ -124,6 +124,9 @@
   <ItemGroup>
     <ClInclude Include="Animations.h" />
     <ClInclude Include="AnimationType.h" />
+    <ClInclude Include="DMXFixedSingleChannel.h" />
+    <ClInclude Include="DMXShowTecCompactPar.h" />
+    <ClInclude Include="DMXThreeChannelLed.h" />
     <ClInclude Include="DMXSlave.h" />
     <ClInclude Include="DMXSlaveConfig.h" />
     <ClInclude Include="EdtDMX.h" />

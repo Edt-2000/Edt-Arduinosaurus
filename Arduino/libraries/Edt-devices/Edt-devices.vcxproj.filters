@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\DMX">
+      <UniqueIdentifier>{2c16d518-d50b-4d18-afeb-43e6c3675fc8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FastLEDColorScheduler.h">
@@ -42,14 +45,23 @@
     <ClInclude Include="Animations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DMXSlave.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EdtDMX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DMXFixedSingleChannel.h">
+      <Filter>Header Files\DMX</Filter>
+    </ClInclude>
+    <ClInclude Include="DMXShowTecCompactPar.h">
+      <Filter>Header Files\DMX</Filter>
+    </ClInclude>
+    <ClInclude Include="DMXSlave.h">
+      <Filter>Header Files\DMX</Filter>
+    </ClInclude>
     <ClInclude Include="DMXSlaveConfig.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DMX</Filter>
+    </ClInclude>
+    <ClInclude Include="DMXThreeChannelLed.h">
+      <Filter>Header Files\DMX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -60,7 +72,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DMXLedSpot.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DMX</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

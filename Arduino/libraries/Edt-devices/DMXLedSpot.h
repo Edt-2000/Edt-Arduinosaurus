@@ -17,8 +17,6 @@ namespace DMX
 class LedSpot : public Slave
 {
   private:
-	int _address;
-
 	enum Mode
 	{
 		Uninitialized = 0,
@@ -64,9 +62,11 @@ class LedSpot : public Slave
 	}
 
   public:
-	void initialize(int address)
+	void initialize(int address, int maximumBrightness, int minimumBrightness)
 	{
 		_address = address;
+		_maximumBrightness = maximumBrightness;
+		_minimumBrightness = minimumBrightness;
 
 		DMXSerial.write(address, 0);
 	}
@@ -75,7 +75,6 @@ class LedSpot : public Slave
 	{
 		if (_mode == Mode::Color)
 		{
-
 			switch (_fadeMode)
 			{
 			case FadeMode::FadeToBlack:
@@ -138,11 +137,11 @@ class LedSpot : public Slave
 		if (h == 0 && s == 0)
 		{
 			_color[0] = CRGB::HTMLColorCode::Black;
-			_color[1].r = v;
+			_color[1].r = clampValue(v);
 		}
 		else
 		{
-			_color[0].setHSV(h, s, v);
+			_color[0].setHSV(h, s, clampValue(v));
 			_color[1] = CRGB::HTMLColorCode::Black;
 		}
 
@@ -155,12 +154,12 @@ class LedSpot : public Slave
 
 		if (percentage > random8())
 		{
-			_color[0].setHSV(h2, s, v);
+			_color[0].setHSV(h2, s, clampValue(v));
 			_color[1] = CRGB::HTMLColorCode::Black;
 		}
 		else
 		{
-			_color[0].setHSV(h1, s, v);
+			_color[0].setHSV(h1, s, clampValue(v));
 			_color[1] = CRGB::HTMLColorCode::Black;
 		}
 
@@ -177,7 +176,7 @@ class LedSpot : public Slave
 		}
 		else
 		{
-			_color[0].setHSV(85 - (intensity / 2.5), 255, intensity);
+			_color[0].setHSV(85 - (intensity / 2.5), 255, clampValue(intensity));
 		}
 
 		_color[1] = CRGB::HTMLColorCode::Black;
@@ -212,6 +211,7 @@ class LedSpot : public Slave
 			// strobo range is 135 - 239
 			uint8_t stroboSpeed = ((239 - 135) * ((double)intensity) / 255.0) + 135;
 
+			// no value clamping since strobo should be FULL POWAH
 			_color[0].setHSV(h, 255, 255);
 			// cheat to get brighter flashes
 			_color[1].setHSV(0, 255, h);

@@ -19,8 +19,16 @@ namespace DMX
 class Slave
 {
   protected:
+	  int _address;
+	  int _minimumBrightness;
+	  int _maximumBrightness;
+
+	  inline uint8_t clampValue(uint8_t value) {
+		  return _minimumBrightness + ((value / 255.0) * ((double)(_maximumBrightness - _minimumBrightness)));
+	  }
+
   public:
-	void virtual initialize(int address) = 0;
+	void virtual initialize(int address, int maximumBrightness, int minimumBrightness) = 0;
 	void virtual loop() = 0;
 
 	void virtual solid(uint8_t h, uint8_t s, uint8_t v) = 0;

@@ -38,7 +38,7 @@ namespace Dispedter.Tester
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/F?", "/R?" });
         private readonly CommandFactory _specialCommandFactory = new CommandFactory(new[] { "/?1", "/?2", "/?3", "/?4", "/?5", "/?6", "/?7", "/?8" });
         private readonly ListenerManager _listenerManager = new ListenerManager(detectUsb: false);
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { IPAddress.Parse("169.254.219.81")/*, IPAddress.Parse("169.254.219.93")*/ });
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: false, udpDestinations: new[] { IPAddress.Parse("169.254.219.81")/*, IPAddress.Parse("169.254.219.93")*/ });
 
         private Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>> _commandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>>();
         private Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>> _proceduralCommandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>>();
@@ -77,10 +77,7 @@ namespace Dispedter.Tester
             _dmxConfig = new DmxConfig(_dmxSlaves);
             _dmxTypes = new ObservableCollection<DmxType>(_dmxConfig.Types);
             _dmxAddresses = new ObservableCollection<int>(Enumerable.Range(1, 512));
-
-            //_dmxConfig.AddSlave(1, 4);
-            //_dmxConfig.AddSlave(1, 10);
-
+            
             InitializeComponent();
             InitializeListeners();
 
@@ -496,9 +493,9 @@ namespace Dispedter.Tester
             }
         }
 
-        private async void DmxDownloadSaveButton_Click(object s, RoutedEventArgs e)
+        private async void DmxDownloadSaveButton_Click(object sender, RoutedEventArgs e)
         {
-            var tag = (s as Button).Tag as string;
+            var tag = (sender as Button).Tag as string;
             try
             {
                 var fileName = GetFileName(tag);
@@ -519,9 +516,9 @@ namespace Dispedter.Tester
 
             var command = _dmxConfig.GenerateOscConfig(tag);
 
-            foreach (var sender in _senderManager.Senders)
+            foreach (var oscSender in _senderManager.Senders)
             {
-                await sender.SendAsync(command);
+                await oscSender.SendAsync(command);
             }
 
             await LogCommandAsync(CommandDirection.Out, command);
@@ -568,22 +565,20 @@ namespace Dispedter.Tester
 
             await FileIO.WriteTextAsync(fileHandle, fileContentString).AsTask();
         }
-
-
-
+        
         private void AddSlaveButton_Click(object sender, RoutedEventArgs e)
         {
             var slaveType = SlaveType.SelectedValue as int?;
             var slaveAddress = SlaveAddress.SelectedValue as int?;
+            var minimumBrightness = MinimumBrightness.Value;
+            var maximumBrightness = MaximumBrightness.Value;
 
             if (slaveType.HasValue && slaveAddress.HasValue)
             {
-                _dmxConfig.AddSlave(slaveType.Value, slaveAddress.Value);
+                _dmxConfig.AddSlave(slaveType.Value, slaveAddress.Value, maximumBrightness, minimumBrightness);
             }
         }
-
-
-
+        
         private void DeleteSlaveButton_Click(object sender, RoutedEventArgs e)
         {
             _dmxConfig.RemoveSlave(((sender as Button).Tag as int?) ?? -1);

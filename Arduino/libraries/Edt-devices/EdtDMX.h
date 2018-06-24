@@ -13,6 +13,9 @@
 #include "DMXSlave.h"
 #include "DMXSlaveConfig.h"
 #include "DMXLedSpot.h"
+#include "DMXThreeChannelLed.h"
+#include "DMXShowTecCompactPar.h"
+#include "DMXFixedSingleChannel.h"
 
 namespace OSC
 {
@@ -54,8 +57,20 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 
 				switch (config.type)
 				{
-				case OSC::DMX::SlaveType::DefaultLedSpot:
+				case OSC::DMX::SlaveType::LedSpot:
 					_slaves[i] = (OSC::DMX::Slave *)new OSC::DMX::LedSpot();
+					break;
+
+				case OSC::DMX::SlaveType::ShowTecCompactPar:
+					_slaves[i] = (OSC::DMX::Slave *)new OSC::DMX::ShowTecCompactPar();
+					break;
+				
+				case OSC::DMX::SlaveType::ThreeChannelLed:
+					_slaves[i] = (OSC::DMX::Slave *)new OSC::DMX::ThreeChannelLed();
+					break;
+
+				case OSC::DMX::SlaveType::FixedSingleChannel:
+					_slaves[i] = (OSC::DMX::Slave *)new OSC::DMX::FixedSingleChannel();
 					break;
 
 				case OSC::DMX::SlaveType::Unknown:
@@ -63,7 +78,7 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 					continue;
 				};
 
-				_slaves[i]->initialize(config.address);
+				_slaves[i]->initialize(config.address, config.maximumBrightness, config.minimumBrightness);
 
 				_slaves[i]->solid(120, 255, 255);
 				_slaves[i]->fade(2);
@@ -193,6 +208,8 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 				auto config = OSC::DMX::SlaveConfig();
 				config.type = (OSC::DMX::SlaveType)dmxConfigCommand.slaveType;
 				config.address = dmxConfigCommand.slaveAddress;
+				config.maximumBrightness = dmxConfigCommand.maximumBrightness;
+				config.minimumBrightness = dmxConfigCommand.minimumBrightness;
 
 				OSC::DMX::Slave::setSlaveConfig(config);
 			}

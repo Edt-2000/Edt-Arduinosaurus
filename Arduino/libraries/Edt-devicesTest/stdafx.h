@@ -15,6 +15,7 @@
 // TODO: reference additional headers your program requires here
 
 typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
 struct CRGB {
 	uint8_t r;
 	uint8_t g;

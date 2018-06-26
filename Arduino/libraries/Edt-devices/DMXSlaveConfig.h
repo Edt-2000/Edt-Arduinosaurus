@@ -26,7 +26,7 @@ struct SlaveConfig
 {
   public:
 	SlaveType type;
-	uint8_t address;
+	uint16_t address;
 	uint8_t maximumBrightness;
 	uint8_t minimumBrightness;
 };

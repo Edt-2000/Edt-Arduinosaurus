@@ -1,6 +1,7 @@
 ﻿using Dispedter.Common.Factories;
 using Dispedter.Common.OSC;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -60,11 +61,12 @@ namespace Dispedter.Common.DMX
         public void AddSlave(int typeNr, int address, double maximumBrightness, double minimumBrightness)
         {
             var newType = Types.First(t => t.TypeNr == typeNr);
-            
-            // TODO: check for all collisions
-            if (_dmxSlaves.Any(s => address >= s.Address && address <= (s.Address + s.Type.Width - 1)))
+
+            var requiredAddressSpace = Enumerable.Range(address, newType.Width);
+
+            if (_dmxSlaves.SelectMany(s => Enumerable.Range(s.Address, s.Type.Width)).Intersect(requiredAddressSpace).Any())
             {
-                return;
+                throw new DataMisalignedException();
             }
 
             _dmxSlaves.Add(new DmxSlave

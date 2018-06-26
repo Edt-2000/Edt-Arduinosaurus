@@ -23,7 +23,7 @@ namespace OSC
 			}
 
 		public:
-			void initialize(int address, int maximumBrightness, int minimumBrightness)
+			void initialize(uint16_t address, uint8_t maximumBrightness, uint8_t minimumBrightness)
 			{
 				_address = address;
 				_maximumBrightness = maximumBrightness;

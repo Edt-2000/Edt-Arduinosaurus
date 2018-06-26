@@ -101,17 +101,49 @@ namespace Dispedter.Common.Factories
 
         public IEnumerable<OscMessage> ClearDMX()
         {
-            return _addresses.Select((a, i) => new OscMessage(a, 254, 1, 0, 0, 0));
+            return _addresses.Select((a, i) => DmxMessageStub(a, 0, 0, false, true)); // new OscMessage(a, 254, 1, 0, 0, 0));
         }
 
         public IEnumerable<OscMessage> RestartDMX()
         {
-            return _addresses.Select((a, i) => new OscMessage(a, 254, 0, 1, 0, 0));
+            return _addresses.Select((a, i) => DmxMessageStub(a, 0, 0, true, false)); // new OscMessage(a, 254, 0, 1, 0, 0));
         }
 
         public IEnumerable<OscMessage> ProgramDmxSlave(int type, int address, double maximumBrightness, double minimumBrightness)
         {
-            return _addresses.Select((a, i) => new OscMessage(a, 254, 0, 0, type, address, (int)(maximumBrightness * 255), (int)(minimumBrightness * 255)));
+            return _addresses.Select((a, i) =>
+            {
+                var msg = DmxMessageStub(a, type, address, false, false);
+
+                msg.Arguments.Add((int)(maximumBrightness * 255));
+                msg.Arguments.Add((int)(minimumBrightness * 255));
+
+                return msg;
+            });
+        }
+
+        private OscMessage DmxMessageStub(string address, int dmxType, int dmxAddress, bool reset, bool clear)
+        {
+            var address256 = dmxAddress >= 256;
+
+            var firstInt = 0;
+
+            if (clear)
+            {
+                firstInt |= 0b0000_0100;
+            }
+
+            if (reset)
+            {
+                firstInt |= 0b0000_0010;
+            }
+
+            if (address256)
+            {
+                firstInt |= 0b0000_0001;
+            }
+
+            return new OscMessage(address, 254, firstInt, dmxAddress, dmxType);
         }
     }
 }

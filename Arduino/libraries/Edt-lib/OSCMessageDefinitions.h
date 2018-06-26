@@ -114,10 +114,10 @@ struct StroboCommand
 struct DMXConfigCommand 
 {
 	// 0 - 255
-	uint8_t clear : 8;
-	uint8_t reset : 8;
-	uint8_t slaveType : 8;
+	
+	uint8_t config : 8;
 	uint8_t slaveAddress : 8;
+	uint8_t slaveType : 8;
 	uint8_t maximumBrightness: 8;
 	uint8_t minimumBrightness: 8;
 };

@@ -79,7 +79,7 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 				};
 
 				_slaves[i]->initialize(config.address, config.maximumBrightness, config.minimumBrightness);
-
+				
 				_slaves[i]->solid(120, 255, 255);
 				_slaves[i]->fade(2);
 			}
@@ -198,7 +198,12 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 		{
 
 			auto dmxConfigCommand = message->messageStruct.commands.dmxConfig;
-			if (dmxConfigCommand.clear > 0)
+
+			bool clear = dmxConfigCommand.config & 0x04;
+			bool reset = dmxConfigCommand.config & 0x02;
+			bool address256 = dmxConfigCommand.config & 0x01;
+
+			if (clear)
 			{
 				OSC::DMX::Slave::clearSlaveConfig();
 			}
@@ -206,15 +211,19 @@ class EdtDMX : public OSC::MessageConsumer<OSC::StructMessage<OSC::EdtMessage, u
 			if (dmxConfigCommand.slaveAddress > 0)
 			{
 				auto config = OSC::DMX::SlaveConfig();
+				config.address = (uint16_t)dmxConfigCommand.slaveAddress;
+				if (address256) 
+				{
+					config.address += (uint16_t)256U;
+				}
 				config.type = (OSC::DMX::SlaveType)dmxConfigCommand.slaveType;
-				config.address = dmxConfigCommand.slaveAddress;
 				config.maximumBrightness = dmxConfigCommand.maximumBrightness;
 				config.minimumBrightness = dmxConfigCommand.minimumBrightness;
 
 				OSC::DMX::Slave::setSlaveConfig(config);
 			}
 
-			if (dmxConfigCommand.reset > 0)
+			if (reset)
 			{
 				initialize();
 			}

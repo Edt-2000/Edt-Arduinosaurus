@@ -38,7 +38,7 @@ namespace Dispedter.Tester
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/F?", "/R?" });
         private readonly CommandFactory _specialCommandFactory = new CommandFactory(new[] { "/?1", "/?2", "/?3", "/?4", "/?5", "/?6", "/?7", "/?8" });
         private readonly ListenerManager _listenerManager = new ListenerManager(detectUsb: false);
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { IPAddress.Parse("169.254.219.81")/*, IPAddress.Parse("169.254.219.93")*/ });
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: false, udpDestinations: new[] { IPAddress.Parse("169.254.219.81")/*, IPAddress.Parse("169.254.219.93")*/ });
 
         private Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>> _commandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>>();
         private Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>> _proceduralCommandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>>();
@@ -575,7 +575,16 @@ namespace Dispedter.Tester
 
             if (slaveType.HasValue && slaveAddress.HasValue)
             {
-                _dmxConfig.AddSlave(slaveType.Value, slaveAddress.Value, maximumBrightness, minimumBrightness);
+                try
+                {
+                    _dmxConfig.AddSlave(slaveType.Value, slaveAddress.Value, maximumBrightness, minimumBrightness);
+
+                    AddressError.Visibility = Visibility.Collapsed;
+                }
+                catch (DataMisalignedException)
+                {
+                    AddressError.Visibility = Visibility.Visible;
+                }
             }
         }
         

@@ -290,8 +290,8 @@ void DMXSerialClass::write(int channel, uint8_t value)
   // adjust parameters
   if (channel < 1) channel = 1;
   if (channel > DMXSERIAL_MAX) channel = DMXSERIAL_MAX;
-  if (value < 0)   value = 0;
-  if (value > 255) value = 255;
+  //if (value < 0)   value = 0;
+  //if (value > 255) value = 255;
 
   // store value for later sending
   _dmxData[channel] = value;

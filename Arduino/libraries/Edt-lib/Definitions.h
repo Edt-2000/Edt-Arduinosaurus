@@ -2,7 +2,7 @@
 
 //#define ENVEDT
 //#define ENVTEST
-#define ENVDEV
+//#define ENVDEV
 
 #include "Arduino.h"
 

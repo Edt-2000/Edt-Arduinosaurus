@@ -28,7 +28,6 @@ namespace OSC
 			CRGB _colorBackup;
 
 			uint8_t _fade;
-			FadeMode _fadeMode;
 
 			uint8_t _stroboIntensity = 0;
 			bool _stroboOn = false;
@@ -67,7 +66,7 @@ namespace OSC
 						_stroboOn = false;
 					}
 					else {
-						if (_stroboIntensity / 8 > random8()) 
+						if (_stroboIntensity / 8 > random8())
 						{
 							_stroboOn = true;
 							_color = _colorBackup;
@@ -78,52 +77,18 @@ namespace OSC
 				}
 				else if (_mode == Mode::Color)
 				{
-					switch (_fadeMode)
+					if (_fade < 255)
 					{
-					case FadeMode::FadeToBlack:
-						if (_fade < 255)
+						if (_fade > 255 - 62)
 						{
-							if (_fade > 255 - 62)
-							{
-								_fade = 255;
-							}
-							else
-							{
-								_fade += ((_fade) / 4) + 1;
-							}
-
-							fadeToBlackBy(&_color, 1, _fade);
+							_fade = 255;
 						}
-						break;
-
-					case FadeMode::FadeOneByOne:
-						if (_fade < 255)
+						else
 						{
-							if (_fade > random8())
-							{
-								_colorBackup = _color;
-
-								_color = CRGB::HTMLColorCode::Black;
-							}
-							else
-							{
-								if (_fade > 255 - 17)
-								{
-									_fade = 255;
-
-									_color = CRGB::HTMLColorCode::Black;
-								}
-								else
-								{
-									_fade += ((_fade) / 16) + 1;
-
-									_color = _colorBackup;
-
-									fadeToBlackBy(&_color, 1, _fade);
-								}
-							}
+							_fade += ((_fade) / 4) + 1;
 						}
-						break;
+
+						fadeToBlackBy(&_color, 1, _fade);
 					}
 
 					output();
@@ -135,7 +100,7 @@ namespace OSC
 				switchMode(Mode::Color);
 
 				_color.setHSV(h, s, clampValue(v));
-				
+
 				output();
 			}
 
@@ -174,7 +139,6 @@ namespace OSC
 			void fade(uint8_t fade, FadeMode mode = FadeMode::FadeToBlack)
 			{
 				_fade = fade;
-				_fadeMode = mode;
 			}
 
 			void disableFade()

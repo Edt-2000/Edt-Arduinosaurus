@@ -18,10 +18,7 @@ namespace OSC {
 		private:
 			CRGB *_leds;
 			LedState _ledState;
-			FadeMode _fadeMode;
-
-			CRGB *_fadeBackup;
-
+			
 			Tlc5940 * _tlc;
 			struct tlcAddress {
 				unsigned address : 4;

@@ -19,8 +19,6 @@ OSC::Device::RGBColorScheduler::RGBColorScheduler(CRGB * leds, uint8_t nrOfLeds,
 	_leds = leds;
 	this->nrOfLeds = nrOfLeds;
 
-	_fadeBackup = new CRGB[nrOfLeds];
-
 	fill_solid(_leds, nrOfLeds, CRGB::HTMLColorCode::Black);
 
 	_ledState.fade = 255;
@@ -31,14 +29,6 @@ OSC::Device::RGBColorScheduler::RGBColorScheduler(CRGB * leds, uint8_t nrOfLeds,
 void OSC::Device::RGBColorScheduler::fade(uint8_t speed, FadeMode fadeMode)
 {
 	_ledState.fade = speed;
-	_fadeMode = fadeMode;
-
-	if (_fadeMode == FadeMode::FadeOneByOne)
-	{
-		for (int i = 0; i < nrOfLeds; i++) {
-			_fadeBackup[i] = _leds[i];
-		}
-	}
 }
 
 void OSC::Device::RGBColorScheduler::disableFade()
@@ -132,57 +122,20 @@ void OSC::Device::RGBColorScheduler::loop()
 		i++;
 	}
 
-	switch (_fadeMode)
+	if (_ledState.fade < 255)
 	{
-	case FadeMode::FadeToBlack:
-		if (_ledState.fade < 255)
+		if (_ledState.fade > 255 - 62)
 		{
-			if (_ledState.fade > 255 - 62)
-			{
-				_ledState.fade = 255;
-			}
-			else
-			{
-				_ledState.fade += ((_ledState.fade) / 4) + 1;
-			}
-
-			fadeToBlackBy(_leds, nrOfLeds, _ledState.fade);
+			_ledState.fade = 255;
 		}
-		break;
-	case FadeMode::FadeOneByOne:
-		if (_ledState.fade < 255)
+		else
 		{
-			if (_ledState.fade > random8())
-			{
-				for (int i = 0; i < nrOfLeds; i++) {
-					_fadeBackup[i] = _leds[i];
-				}
-				fill_solid(_leds, nrOfLeds, CRGB::HTMLColorCode::Black);
-			}
-			else
-			{
-				if (_ledState.fade > 255 - 17)
-				{
-					_ledState.fade = 255;
-
-					fill_solid(_leds, nrOfLeds, CRGB::HTMLColorCode::Black);
-				}
-				else
-				{
-					_ledState.fade += ((_ledState.fade) / 16) + 1;
-
-					for (int i = 0; i < nrOfLeds; i++) {
-						_leds[i] = _fadeBackup[i];
-					}
-					fadeToBlackBy(_leds, nrOfLeds, _ledState.fade);
-				}
-			}
+			_ledState.fade += ((_ledState.fade) / 4) + 1;
 		}
 
-		break;
-
+		fadeToBlackBy(_leds, nrOfLeds, _ledState.fade);
 	}
-
+	
 	output();
 }
 

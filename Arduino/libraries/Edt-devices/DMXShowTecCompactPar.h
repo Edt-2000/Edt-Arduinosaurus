@@ -32,7 +32,6 @@ namespace OSC
 			CRGB _fadeBackup;
 
 			uint8_t _fade;
-			FadeMode _fadeMode;
 
 			inline void switchMode(Mode mode)
 			{
@@ -81,53 +80,18 @@ namespace OSC
 			{
 				if (_mode == Mode::Color)
 				{
-
-					switch (_fadeMode)
+					if (_fade < 255)
 					{
-					case FadeMode::FadeToBlack:
-						if (_fade < 255)
+						if (_fade > 255 - 62)
 						{
-							if (_fade > 255 - 62)
-							{
-								_fade = 255;
-							}
-							else
-							{
-								_fade += ((_fade) / 4) + 1;
-							}
-
-							fadeToBlackBy(&_color, 1, _fade);
+							_fade = 255;
 						}
-						break;
-
-					case FadeMode::FadeOneByOne:
-						if (_fade < 255)
+						else
 						{
-							if (_fade > random8())
-							{
-								_fadeBackup = _color;
-
-								_color = CRGB::HTMLColorCode::Black;
-							}
-							else
-							{
-								if (_fade > 255 - 17)
-								{
-									_fade = 255;
-
-									_color = CRGB::HTMLColorCode::Black;
-								}
-								else
-								{
-									_fade += ((_fade) / 16) + 1;
-
-									_color = _fadeBackup;
-
-									fadeToBlackBy(&_color, 1, _fade);
-								}
-							}
+							_fade += ((_fade) / 4) + 1;
 						}
-						break;
+
+						fadeToBlackBy(&_color, 1, _fade);
 					}
 
 					output();
@@ -178,7 +142,6 @@ namespace OSC
 			void fade(uint8_t fade, FadeMode mode = FadeMode::FadeToBlack)
 			{
 				_fade = fade;
-				_fadeMode = mode;
 			}
 
 			void disableFade()

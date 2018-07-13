@@ -17,7 +17,9 @@ enum ColorCommands : uint8_t
 	DualPulse = 10,
 	DualSparkle = 11,
 	Chase = 12,
-	Bash = 13
+	Bash = 13,
+
+	DMXConfig = 254
 };
 
 struct SingleColorCommand
@@ -109,6 +111,17 @@ struct StroboCommand
 	uint8_t intensity : 8;
 };
 
+struct DMXConfigCommand 
+{
+	// 0 - 255
+	
+	uint8_t config : 8;
+	uint8_t slaveAddress : 8;
+	uint8_t slaveType : 8;
+	uint8_t maximumBrightness: 8;
+	uint8_t minimumBrightness: 8;
+};
+
 struct EdtMessage
 {
 	ColorCommands command : 8;
@@ -121,6 +134,8 @@ struct EdtMessage
 		ChaseCommand chase;
 		BashCommand bash;
 		StroboCommand strobo;
+
+		DMXConfigCommand dmxConfig;
 	};
 
 	Commands commands;

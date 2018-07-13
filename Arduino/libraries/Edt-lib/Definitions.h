@@ -1,6 +1,6 @@
 #pragma once
 
-#define ENVEDT
+//#define ENVEDT
 //#define ENVTEST
 //#define ENVDEV
 
@@ -10,14 +10,17 @@
 
 #ifdef ENVEDT
 #define IP_BROADCAST IPAddress(10, 0, 0, 10)
+#define IP_DOSMCX IPAddress(10, 0, 0, 30)
 #endif
 
 #ifdef ENVTEST
 #define IP_BROADCAST IPAddress(192, 168, 0, 255)
+#define IP_DOSMCX IPAddress(192, 168, 0, 30)
 #endif
 
 #ifdef ENVDEV
 #define IP_BROADCAST IPAddress(192, 168, 137, 255)
+#define IP_DOSMCX IPAddress(169, 254, 219, 81)
 #endif
 
 #define IP_TRAK IPAddress(10, 0, 0, 12)
@@ -77,3 +80,6 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 
 #define RGB1_NR_OF_LEDS 5
 #define RGB2_NR_OF_LEDS 5
+
+#define OSC_DMX1 "/R3"
+#define OSC_DMX2 "/R4"

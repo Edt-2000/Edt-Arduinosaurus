@@ -1,6 +1,7 @@
 ﻿using Dispedter.Common.OSC;
 using Dispedter.Common.OSCArduino;
 using Dispedter.Common.Factories;
+using Dispedter.Common.DMX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,8 @@ using Dispedter.Common.Managers;
 using Windows.UI;
 using System.Collections.ObjectModel;
 using System.Net;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -33,12 +36,17 @@ namespace Dispedter.Tester
     public sealed partial class MainPage : Page
     {
         private readonly CommandFactory _commandFactory = new CommandFactory(new[] { "/F?", "/R?" });
-        private readonly CommandFactory _specialCommandFactory = new CommandFactory(new[] { "/F1", "/F2", "/F3", "/F4", "/F5", "/F6", "/F7", "/F8" });
+        private readonly CommandFactory _specialCommandFactory = new CommandFactory(new[] { "/?1", "/?2", "/?3", "/?4", "/?5", "/?6", "/?7", "/?8" });
         private readonly ListenerManager _listenerManager = new ListenerManager(detectUsb: false);
-        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { IPAddress.Parse("169.254.219.93") });
+        private readonly SenderManager _senderManager = new SenderManager(detectUsb: true, udpDestinations: new[] { IPAddress.Parse("10.0.0.30"), IPAddress.Parse("10.0.0.202") });
 
         private Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>> _commandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<IEnumerable<OscMessage>>>>();
         private Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>> _proceduralCommandMapping = new Dictionary<Mode, Dictionary<VirtualKey, Func<int, (int delay, IEnumerable<OscMessage> command)>>>();
+
+        private ObservableCollection<DmxSlave> _dmxSlaves;
+        private ObservableCollection<DmxType> _dmxTypes;
+        private ObservableCollection<int> _dmxAddresses;
+        private DmxConfig _dmxConfig;
 
         private Mode _mode;
         private enum Mode
@@ -56,6 +64,7 @@ namespace Dispedter.Tester
         private DateTime _previousIn = DateTime.UtcNow;
         private List<string> _inHistory = new List<string>();
 
+
         enum CommandDirection
         {
             In,
@@ -64,6 +73,11 @@ namespace Dispedter.Tester
 
         public MainPage()
         {
+            _dmxSlaves = new ObservableCollection<DmxSlave>();
+            _dmxConfig = new DmxConfig(_dmxSlaves);
+            _dmxTypes = new ObservableCollection<DmxType>(_dmxConfig.Types);
+            _dmxAddresses = new ObservableCollection<int>(Enumerable.Range(1, 512));
+            
             InitializeComponent();
             InitializeListeners();
 
@@ -104,6 +118,7 @@ namespace Dispedter.Tester
             });
         }
 
+        #region LED
         private async Task SendCommandAsync(VirtualKey key)
         {
             if (!_senderManager.Senders?.Any() ?? false)
@@ -146,7 +161,6 @@ namespace Dispedter.Tester
             }
         }
 
-
         private async Task LogCommandAsync(CommandDirection commandDirection, IEnumerable<OscMessage> messages)
         {
             if (commandDirection == CommandDirection.Out)
@@ -156,7 +170,7 @@ namespace Dispedter.Tester
                     var delta = DateTime.UtcNow - _previousOut;
                     _previousOut = DateTime.UtcNow;
 
-                    if (_outHistory.Count > 30)
+                    if (_outHistory.Count > 40)
                     {
                         _outHistory.RemoveAt(0);
                     }
@@ -174,7 +188,7 @@ namespace Dispedter.Tester
                     _previousIn = DateTime.UtcNow;
                     var deltaOutIn = _previousIn - _previousOut;
 
-                    if (_inHistory.Count > 30)
+                    if (_inHistory.Count > 40)
                     {
                         _inHistory.RemoveAt(0);
                     }
@@ -314,7 +328,7 @@ namespace Dispedter.Tester
 
                 { VirtualKey.Z, () => _commandFactory.CreateTwinkle((ColorPreset)Random(), Random()) },
                 { VirtualKey.X, () => _commandFactory.CreateRainbowSolid() },
-                { VirtualKey.Tab, () => _specialCommandFactory.CreateRainbowUsingAddresses() },
+                { VirtualKey.CapitalLock, () => _specialCommandFactory.CreateRainbowUsingAddresses() },
 
                 { VirtualKey.C, () => _commandFactory.CreateChase((ColorPreset)Random(), 1, 1) },
                 { VirtualKey.V, () => _commandFactory.CreateChase((ColorPreset)Random(), Math.Max(1, Random() / 16), 0) },
@@ -325,7 +339,7 @@ namespace Dispedter.Tester
 
                 { (VirtualKey)219, () => _commandFactory.CreateBash((ColorPreset)Random(), 16) },
                 { (VirtualKey)221, () => _commandFactory.CreateBash((ColorPreset)Random(), 127) },
-                { (VirtualKey)220, () => _commandFactory.CreateBash((ColorPreset)Random(), 255) },
+                { (VirtualKey)220, () => _commandFactory.CreateBash((ColorPreset)Random(), 255) }
             });
         }
 
@@ -449,5 +463,136 @@ namespace Dispedter.Tester
                 return Color.FromArgb(255, v, p, q);
             }
         }
+
+        #endregion
+
+        #region DMX
+
+        private async void DmxLoadButton_Click(object sender, RoutedEventArgs e)
+        {
+            var tag = (sender as Button).Tag as string;
+
+            try
+            {
+                var fileName = GetFileName(tag);
+
+                var folder = await GetStorageFolderAsync();
+
+                if (folder == null)
+                {
+                    return;
+                }
+
+                var fileContents = await GetReadFileContentsAsync(fileName, folder);
+
+                _dmxConfig.ReadConfig(fileContents);
+            }
+            catch
+            {
+                _dmxConfig.RemoveAllSlaves();
+            }
+        }
+
+        private async void DmxDownloadSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            var tag = (sender as Button).Tag as string;
+            try
+            {
+                var fileName = GetFileName(tag);
+
+                var folder = await GetStorageFolderAsync();
+
+                if (folder != null)
+                {
+                    var fileContents = _dmxConfig.WriteConfig();
+
+                    await WriteStreamToFileAsync(fileName, folder, fileContents);
+                }
+            }
+            catch
+            {
+
+            }
+
+            var command = _dmxConfig.GenerateOscConfig(tag);
+
+            foreach (var oscSender in _senderManager.Senders)
+            {
+                await oscSender.SendAsync(command);
+            }
+
+            await LogCommandAsync(CommandDirection.Out, command);
+        }
+
+        private static string GetFileName(string tag)
+        {
+            return $"edt-{tag.Replace("/", "")}.edt";
+        }
+
+        private static async Task<StorageFolder> GetStorageFolderAsync()
+        {
+            StorageFolder folder = null;
+            try
+            {
+                folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Edt-2000").AsTask();
+            }
+            catch
+            {
+                folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Edt-2000").AsTask();
+            }
+
+            return folder;
+        }
+
+        private static async Task<string> GetReadFileContentsAsync(string fileName, StorageFolder folder)
+        {
+            var fileHandle = await folder.GetFileAsync(fileName).AsTask();
+
+            return await FileIO.ReadTextAsync(fileHandle).AsTask();
+        }
+
+        private static async Task WriteStreamToFileAsync(string fileName, StorageFolder folder, string fileContentString)
+        {
+            StorageFile fileHandle;
+            try
+            {
+                fileHandle = await folder.GetFileAsync(fileName).AsTask();
+            }
+            catch
+            {
+                fileHandle = await folder.CreateFileAsync(fileName).AsTask();
+            }
+
+            await FileIO.WriteTextAsync(fileHandle, fileContentString).AsTask();
+        }
+        
+        private void AddSlaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            var slaveType = SlaveType.SelectedValue as int?;
+            var slaveAddress = SlaveAddress.SelectedValue as int?;
+            var minimumBrightness = MinimumBrightness.Value;
+            var maximumBrightness = MaximumBrightness.Value;
+
+            if (slaveType.HasValue && slaveAddress.HasValue)
+            {
+                try
+                {
+                    _dmxConfig.AddSlave(slaveType.Value, slaveAddress.Value, maximumBrightness, minimumBrightness);
+
+                    AddressError.Visibility = Visibility.Collapsed;
+                }
+                catch (DataMisalignedException)
+                {
+                    AddressError.Visibility = Visibility.Visible;
+                }
+            }
+        }
+        
+        private void DeleteSlaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            _dmxConfig.RemoveSlave(((sender as Button).Tag as int?) ?? -1);
+        }
+
+        #endregion
     }
 }

@@ -107,9 +107,9 @@ class LEDApplication : public AbstractApplication
 		fls[2].test();
 		fls[3].test();
 
-		rgb.test();
-
 		tlc.clear();
+
+		rgb.test();
 	}
 
 	void applicationLoop()

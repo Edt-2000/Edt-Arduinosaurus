@@ -5,9 +5,9 @@ Arduino &amp; GameTrak based expressive midi controller
 
 ## TODO:
 
-- Optimization: Producers take a OSCMessage they modify instead of yield a message
-- Naming: Rename RGBLED, RGB, LED
-- LED: implement new effects
+- Edt-DOSCMX addresses to /DP and /DZ
+- Watchdog on OSC slaves
+- Disable stacking of animations in Dispedter
 
 ## Pinout
 

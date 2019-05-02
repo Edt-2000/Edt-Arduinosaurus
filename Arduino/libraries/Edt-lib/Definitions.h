@@ -11,16 +11,19 @@
 #ifdef ENVEDT
 #define IP_BROADCAST IPAddress(10, 0, 0, 10)
 #define IP_DOSMCX IPAddress(10, 0, 0, 30)
+#define IP_DIMOSCI IPAddress(10, 0, 0, 40)
 #endif
 
 #ifdef ENVTEST
 #define IP_BROADCAST IPAddress(192, 168, 0, 255)
 #define IP_DOSMCX IPAddress(192, 168, 0, 30)
+#define IP_DIMOSCI IPAddress(192, 168, 0, 40)
 #endif
 
 #ifdef ENVDEV
 #define IP_BROADCAST IPAddress(192, 168, 137, 255)
 #define IP_DOSMCX IPAddress(169, 254, 219, 81)
+#define IP_DIMOSCI IPAddress(169, 254, 219, 82)
 #endif
 
 #define IP_TRAK IPAddress(10, 0, 0, 12)
@@ -29,7 +32,7 @@
 uint8_t MAC_TRAK[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xA0 };
 uint8_t MAC_LED[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xB0 };
 uint8_t MAC_PONG[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xC0 };
-uint8_t MAC_MOSCIDI[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xA1 };
+uint8_t MAC_DIMOSCI[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xA1 };
 uint8_t MAC_DOSMCX[] = { 0x00, 0x00, 0x12, 0x34, 0x56, 0xA2 };
 
 /*
@@ -83,3 +86,5 @@ Thing Dev: 5C-CF-7F-8C-8F-CC
 
 #define OSC_DMX1 "/R3"
 #define OSC_DMX2 "/R4"
+
+#define OSC_MIDI1 "/M"

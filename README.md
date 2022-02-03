@@ -16,7 +16,7 @@ FastLED:
 - VCC = BR = 1
 - CI = GR = 2
 - DI = OR = 3
-- GR = GL = 4
+- GR = BL = 4
 
 RGBLED:
 
